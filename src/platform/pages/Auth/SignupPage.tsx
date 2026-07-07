@@ -1,0 +1,272 @@
+'use client';
+
+import { useState } from 'react';
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { motion } from 'framer-motion';
+import { Eye, EyeOff, Mail, Lock, User } from 'lucide-react';
+import { useAuth } from '../../../core/hooks/useAuth';
+import { useLanguage } from '../../../core/context/LanguageContext';
+
+// ─── Password strength helpers ────────────────────────────────────────────────
+
+const getStrength = (p: string): 0 | 1 | 2 | 3 => {
+  if (p.length === 0) return 0;
+  if (p.length < 6) return 1;
+  if (p.length < 10) return 2;
+  return 3;
+};
+
+const strengthColor = ['', 'bg-red-500', 'bg-yellow-500', 'bg-green-500'] as const;
+
+// ─── Component ────────────────────────────────────────────────────────────────
+
+export default function SignupPage() {
+  const { signUp, signInWithGoogle, signInWithGithub, error, clearError } = useAuth();
+  const { t, isRTL } = useLanguage();
+  const navigate = useRouter();
+
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [confirm, setConfirm] = useState('');
+  const [showPass, setShowPass] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [formError, setFormError] = useState('');
+
+  const strength = getStrength(password);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    clearError();
+    setFormError('');
+
+    if (password !== confirm) {
+      setFormError(t('auth.passwordsDoNotMatch'));
+      return;
+    }
+    if (strength < 2) {
+      setFormError(t('auth.passwordTooWeak'));
+      return;
+    }
+
+    setLoading(true);
+    try {
+      await signUp(email, password, name);
+      navigate.push('/app');
+    } catch {
+      // error surfaced via auth context
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleGoogle = async () => {
+    clearError();
+    setLoading(true);
+    try {
+      await signInWithGoogle();
+      navigate.push('/app');
+    } catch {
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleGithub = async () => {
+    clearError();
+    setLoading(true);
+    try {
+      await signInWithGithub();
+      navigate.push('/app');
+    } catch {
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const displayError = formError || error;
+
+  const getStrengthLabel = (s: number) => {
+    if (s === 1) return t('auth.strengthWeak');
+    if (s === 2) return t('auth.strengthGood');
+    if (s === 3) return t('auth.strengthStrong');
+    return '';
+  };
+
+  return (
+    <div className="space-y-6">
+      {/* Error banner */}
+      {displayError && (
+        <motion.div
+          initial={{ opacity: 0, y: -8 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="p-4 rounded-2xl bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-400 text-sm font-bold"
+        >
+          <div className="flex items-center gap-3">
+            <div className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse" />
+            <span className="flex-1">{displayError}</span>
+          </div>
+        </motion.div>
+      )}
+
+      {/* Social sign-up */}
+      <div className={`grid grid-cols-2 gap-4 ${isRTL ? 'flex-row-reverse' : ''}`}>
+        <button
+          onClick={handleGoogle}
+          disabled={loading}
+          className="btn-secondary justify-center gap-3 py-3 rounded-2xl hover:border-brand-500 transition-all font-bold text-xs"
+        >
+          <svg className="w-5 h-5" viewBox="0 0 24 24">
+            <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
+            <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
+            <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" />
+            <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" />
+          </svg>
+          Google
+        </button>
+        <button
+          onClick={handleGithub}
+          disabled={loading}
+          className="btn-secondary justify-center gap-3 py-3 rounded-2xl hover:border-brand-500 transition-all font-bold text-xs"
+        >
+          <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z" />
+          </svg>
+          GitHub
+        </button>
+      </div>
+
+      {/* Divider */}
+      <div className="relative">
+        <div className="absolute inset-0 flex items-center">
+          <div className="w-full border-t border-gray-100 dark:border-gray-800" />
+        </div>
+        <div className="relative flex justify-center">
+          <span className="px-4 text-[10px] font-black uppercase tracking-widest text-gray-400 bg-white dark:bg-gray-950">
+            {t('auth.orCreateAccount')}
+          </span>
+        </div>
+      </div>
+
+      {/* Registration form */}
+      <form onSubmit={handleSubmit} className="space-y-4">
+        {/* Display name */}
+        <div className="relative group">
+          <div className={`absolute inset-y-0 ${isRTL ? 'right-0 pr-4' : 'left-0 pl-4'} flex items-center pointer-events-none`}>
+            <User className="h-5 w-5 text-gray-400 group-focus-within:text-brand-500 transition-colors" />
+          </div>
+          <input
+            type="text"
+            placeholder={t('auth.displayName')}
+            value={name}
+            onChange={e => setName(e.target.value)}
+            required
+            autoComplete="name"
+            className={`input py-3.5 rounded-2xl bg-gray-50 dark:bg-gray-900 border-gray-100 dark:border-gray-800 focus:bg-white dark:focus:bg-gray-950 ${isRTL ? 'pr-12 pl-4' : 'pl-12 pr-4'}`}
+          />
+        </div>
+
+        {/* Email */}
+        <div className="relative group">
+          <div className={`absolute inset-y-0 ${isRTL ? 'right-0 pr-4' : 'left-0 pl-4'} flex items-center pointer-events-none`}>
+            <Mail className="h-5 w-5 text-gray-400 group-focus-within:text-brand-500 transition-colors" />
+          </div>
+          <input
+            type="email"
+            placeholder={t('auth.emailAddress')}
+            value={email}
+            onChange={e => setEmail(e.target.value)}
+            required
+            autoComplete="email"
+            className={`input py-3.5 rounded-2xl bg-gray-50 dark:bg-gray-900 border-gray-100 dark:border-gray-800 focus:bg-white dark:focus:bg-gray-950 ${isRTL ? 'pr-12 pl-4' : 'pl-12 pr-4'}`}
+          />
+        </div>
+
+        {/* Password + strength bar */}
+        <div className="space-y-2">
+          <div className="relative group">
+            <div className={`absolute inset-y-0 ${isRTL ? 'right-0 pr-4' : 'left-0 pl-4'} flex items-center pointer-events-none`}>
+              <Lock className="h-5 w-5 text-gray-400 group-focus-within:text-brand-500 transition-colors" />
+            </div>
+            <input
+              type={showPass ? 'text' : 'password'}
+              placeholder={t('auth.password')}
+              value={password}
+              onChange={e => setPassword(e.target.value)}
+              required
+              autoComplete="new-password"
+              className={`input py-3.5 rounded-2xl bg-gray-50 dark:bg-gray-900 border-gray-100 dark:border-gray-800 focus:bg-white dark:focus:bg-gray-950 ${isRTL ? 'pr-12 pl-12' : 'pl-12 pr-12'}`}
+            />
+            <button
+              type="button"
+              onClick={() => setShowPass(!showPass)}
+              className={`absolute top-1/2 -translate-y-1/2 text-gray-400 hover:text-brand-500 transition-colors ${isRTL ? 'left-4' : 'right-4'}`}
+              aria-label={showPass ? 'Hide password' : 'Show password'}
+            >
+              {showPass ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+            </button>
+          </div>
+
+          {/* Strength indicator */}
+          {password.length > 0 && (
+            <div className="space-y-1.5 px-1">
+              <div className={`flex gap-1.5 ${isRTL ? 'flex-row-reverse' : ''}`}>
+                {([1, 2, 3] as const).map(i => (
+                  <div
+                    key={i}
+                    className={`h-1.5 flex-1 rounded-full transition-all duration-300 ${strength >= i
+                        ? strengthColor[strength]
+                        : 'bg-gray-100 dark:bg-gray-800'
+                      }`}
+                  />
+                ))}
+              </div>
+              <p className={`text-[10px] font-bold uppercase tracking-wider text-gray-400 ${isRTL ? 'text-right' : 'text-left'}`}>
+                {getStrengthLabel(strength)}
+              </p>
+            </div>
+          )}
+        </div>
+
+        {/* Confirm password */}
+        <div className="relative group">
+          <div className={`absolute inset-y-0 ${isRTL ? 'right-0 pr-4' : 'left-0 pl-4'} flex items-center pointer-events-none`}>
+            <Lock className="h-5 w-5 text-gray-400 group-focus-within:text-brand-500 transition-colors" />
+          </div>
+          <input
+            type={showPass ? 'text' : 'password'}
+            placeholder={t('auth.confirmPassword')}
+            value={confirm}
+            onChange={e => setConfirm(e.target.value)}
+            required
+            autoComplete="new-password"
+            className={`input py-3.5 rounded-2xl bg-gray-50 dark:bg-gray-900 border-gray-100 dark:border-gray-800 focus:bg-white dark:focus:bg-gray-950 ${isRTL ? 'pr-12 pl-4' : 'pl-12 pr-4'}`}
+          />
+        </div>
+
+        <button
+          type="submit"
+          disabled={loading}
+          className="btn-primary w-full py-4 rounded-2xl justify-center font-black text-sm uppercase tracking-widest shadow-lg shadow-brand-500/20 active:scale-[0.98] transition-all"
+        >
+          {loading
+            ? <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+            : t('auth.signUp')}
+        </button>
+      </form>
+
+      <div className="pt-4 text-center">
+        <p className="text-sm font-bold text-gray-500 dark:text-gray-400">
+          {t('auth.alreadyHaveAccount')}{' '}
+          <Link
+            href="/login"
+            className="text-brand-600 dark:text-brand-400 hover:text-brand-700 transition-colors underline underline-offset-4"
+          >
+            {t('auth.loginLink')}
+          </Link>
+        </p>
+      </div>
+    </div>
+  );
+}
