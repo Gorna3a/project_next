@@ -1,0 +1,368 @@
+/* ═══════════════════════════════════════════════════════════════════
+   neo-brutalism.css  —  PixelCode V2 Theme
+   Fully isolated styles for Neo-Brutalism page.
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* ── Root container — only affects the nb page wrapper ─────────── */
+.nb-root {
+  font-family: 'Space Mono', 'Courier New', monospace;
+  background-color: #f5f0e8 !important;
+  color: #0d0d0d !important;
+  min-height: 100vh;
+  width: 100%;
+  overflow-x: hidden;
+  position: relative;
+  z-index: 1;
+}
+
+/* Force light styling within nb-root even if global html has .dark class */
+.nb-root * {
+  border-color: #0d0d0d;
+}
+
+/* ── Typography helpers ─────────────────────────────────────────── */
+.nb-pixel {
+  font-family: 'Press Start 2P', cursive, monospace;
+  line-height: 1.6;
+  letter-spacing: 0.02em;
+}
+
+.nb-silkscreen {
+  font-family: 'Silkscreen', cursive, monospace;
+}
+
+.nb-mono {
+  font-family: 'Space Mono', monospace;
+}
+
+/* ── Noise texture overlay ──────────────────────────────────────── */
+.nb-root::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 9999;
+  opacity: 0.025;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23noise)' opacity='1'/%3E%3C/svg%3E");
+  background-repeat: repeat;
+}
+
+/* ── Grid background pattern ────────────────────────────────────── */
+.nb-grid-bg {
+  background-image:
+    linear-gradient(rgba(13,13,13,0.07) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(13,13,13,0.07) 1px, transparent 1px);
+  background-size: 40px 40px;
+}
+
+/* ── Scanline effect ─────────────────────────────────────────────── */
+.nb-scanlines::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    rgba(0,0,0,0.03) 2px,
+    rgba(0,0,0,0.03) 4px
+  );
+  z-index: 1;
+}
+
+/* ── Buttons ────────────────────────────────────────────────────── */
+.nb-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  border: 3px solid #0d0d0d !important;
+  font-family: 'Press Start 2P', monospace;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: transform 0.1s, box-shadow 0.1s;
+  text-decoration: none;
+  position: relative;
+  white-space: nowrap;
+  border-radius: 0px !important;
+}
+
+.nb-btn:hover {
+  transform: translate(-2px, -2px);
+}
+
+.nb-btn:active {
+  transform: translate(2px, 2px);
+  box-shadow: none !important;
+}
+
+.nb-btn-yellow {
+  background: #ffe600 !important;
+  color: #0d0d0d !important;
+  box-shadow: 5px 5px 0 #0d0d0d !important;
+}
+.nb-btn-yellow:hover { box-shadow: 7px 7px 0 #0d0d0d !important; background: #ffe600 !important; color: #0d0d0d !important; }
+
+.nb-btn-black {
+  background: #0d0d0d !important;
+  color: #ffe600 !important;
+  box-shadow: 5px 5px 0 #ffe600 !important;
+}
+.nb-btn-black:hover { box-shadow: 7px 7px 0 #ffe600 !important; background: #0d0d0d !important; color: #ffe600 !important; }
+
+.nb-btn-red {
+  background: #ff2d55 !important;
+  color: #fffef7 !important;
+  box-shadow: 5px 5px 0 #0d0d0d !important;
+}
+.nb-btn-red:hover { box-shadow: 7px 7px 0 #0d0d0d !important; }
+
+.nb-btn-blue {
+  background: #0055ff !important;
+  color: #fffef7 !important;
+  box-shadow: 5px 5px 0 #0d0d0d !important;
+}
+.nb-btn-blue:hover { box-shadow: 7px 7px 0 #0d0d0d !important; }
+
+.nb-btn-outline {
+  background: #fffef7 !important;
+  color: #0d0d0d !important;
+  box-shadow: 4px 4px 0 #0d0d0d !important;
+}
+.nb-btn-outline:hover {
+  box-shadow: 6px 6px 0 #0d0d0d !important;
+  background: #ffe600 !important;
+  color: #0d0d0d !important;
+}
+
+/* ── Cards ──────────────────────────────────────────────────────── */
+.nb-card {
+  border: 3px solid #0d0d0d !important;
+  background: #fffef7;
+  box-shadow: 6px 6px 0 #0d0d0d;
+  transition: transform 0.15s, box-shadow 0.15s;
+  border-radius: 0px !important;
+}
+
+.nb-card:hover {
+  transform: translate(-3px, -3px);
+  box-shadow: 9px 9px 0 #0d0d0d;
+}
+
+/* ── Badge / Tag ────────────────────────────────────────────────── */
+.nb-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.4rem 0.8rem;
+  border: 2px solid #0d0d0d !important;
+  font-family: 'Press Start 2P', monospace;
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  box-shadow: 3px 3px 0 #0d0d0d;
+  border-radius: 0px !important;
+}
+
+/* ── Language pill ──────────────────────────────────────────────── */
+.nb-lang-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  border: 2px solid #0d0d0d !important;
+  font-family: 'Space Mono', monospace;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  cursor: default;
+  box-shadow: 3px 3px 0 #0d0d0d;
+  transition: transform 0.1s, box-shadow 0.1s;
+  white-space: nowrap;
+  border-radius: 0px !important;
+}
+
+.nb-lang-pill:hover {
+  transform: translate(-2px, -2px);
+  box-shadow: 5px 5px 0 #0d0d0d;
+}
+
+/* ── Navbar ─────────────────────────────────────────────────────── */
+.nb-nav {
+  border-bottom: 3px solid #0d0d0d !important;
+  background: #ffe600 !important;
+  position: sticky;
+  top: 0;
+  z-index: 50;
+}
+
+/* ── Marquee ────────────────────────────────────────────────────── */
+.nb-marquee-track {
+  display: flex;
+  gap: 0;
+  animation: nb-marquee 28s linear infinite;
+  width: max-content;
+}
+
+@keyframes nb-marquee {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+
+/* ── Pixel cursor blink ─────────────────────────────────────────── */
+@keyframes nb-blink {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0; }
+}
+.nb-cursor {
+  display: inline-block;
+  width: 10px;
+  height: 1.2em;
+  background: #0d0d0d;
+  animation: nb-blink 1s step-start infinite;
+  vertical-align: middle;
+  margin-left: 2px;
+}
+
+/* ── Glitch effect ──────────────────────────────────────────────── */
+@keyframes nb-glitch {
+  0%   { clip-path: inset(40% 0 61% 0); transform: translate(-4px, 2px); }
+  20%  { clip-path: inset(92% 0 1% 0);  transform: translate(4px, -2px); }
+  40%  { clip-path: inset(43% 0 1% 0);  transform: translate(-4px, 0);   }
+  60%  { clip-path: inset(25% 0 58% 0); transform: translate(3px, 2px);  }
+  80%  { clip-path: inset(54% 0 7% 0);  transform: translate(-2px, -1px);}
+  100% { clip-path: inset(58% 0 43% 0); transform: translate(3px, 1px);  }
+}
+
+.nb-glitch {
+  position: relative;
+}
+.nb-glitch::before,
+.nb-glitch::after {
+  content: attr(data-text);
+  position: absolute;
+  inset: 0;
+  font: inherit;
+}
+.nb-glitch::before {
+  color: #ff2d55;
+  animation: nb-glitch 3.5s infinite linear;
+  animation-delay: 0.3s;
+}
+.nb-glitch::after {
+  color: #0055ff;
+  animation: nb-glitch 3.5s infinite linear;
+  animation-delay: 0.6s;
+}
+
+/* ── Sparkle ────────────────────────────────────────────────────── */
+@keyframes nb-sparkle-pop {
+  0%   { transform: scale(0) rotate(0deg);   opacity: 1; }
+  60%  { transform: scale(1.4) rotate(200deg); opacity: 1; }
+  100% { transform: scale(0) rotate(360deg); opacity: 0; }
+}
+
+.nb-sparkle {
+  display: inline-block;
+  animation: nb-sparkle-pop 1.6s ease-in-out infinite;
+}
+
+/* ── Floating pixel squares ─────────────────────────────────────── */
+@keyframes nb-float {
+  0%   { transform: translateY(0)   rotate(0deg); }
+  50%  { transform: translateY(-18px) rotate(10deg); }
+  100% { transform: translateY(0)   rotate(0deg); }
+}
+
+.nb-pixel-sq {
+  position: absolute;
+  image-rendering: pixelated;
+  animation: nb-float var(--dur, 4s) ease-in-out infinite;
+  animation-delay: var(--delay, 0s);
+  border: 2px solid #0d0d0d;
+}
+
+/* ── CTA section ────────────────────────────────────────────────── */
+.nb-cta-section {
+  border-top: 3px solid #0d0d0d !important;
+  border-bottom: 3px solid #0d0d0d !important;
+}
+
+/* ── Footer ─────────────────────────────────────────────────────── */
+.nb-footer {
+  border-top: 4px solid #0d0d0d !important;
+  background: #0d0d0d !important;
+  color: #ffe600 !important;
+}
+
+/* ── Input ──────────────────────────────────────────────────────── */
+.nb-input {
+  border: 3px solid #0d0d0d !important;
+  background: #fffef7 !important;
+  box-shadow: 4px 4px 0 #0d0d0d;
+  padding: 0.6rem 1rem;
+  font-family: 'Space Mono', monospace;
+  font-size: 0.85rem;
+  outline: none;
+  transition: box-shadow 0.1s, transform 0.1s;
+}
+.nb-input:focus {
+  box-shadow: 8px 8px 0 #0d0d0d;
+  transform: translate(-1px, -1px);
+}
+
+/* ── Code window ─────────────────────────────────────────────────── */
+.nb-code-window {
+  border: 4px solid #0d0d0d !important;
+  background: #0d0d0d !important;
+  box-shadow: 8px 8px 0 #0d0d0d;
+  font-family: 'Space Mono', monospace;
+  font-size: 0.8rem;
+  overflow: hidden;
+  border-radius: 0px !important;
+}
+
+.nb-code-titlebar {
+  background: #ffe600 !important;
+  border-bottom: 3px solid #0d0d0d !important;
+  padding: 0.5rem 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.nb-code-titlebar-dot {
+  width: 12px;
+  height: 12px;
+  border: 2px solid #0d0d0d;
+  border-radius: 0px !important;
+}
+
+/* ── Marquee bar ─────────────────────────────────────────────────── */
+.nb-marquee-bar {
+  border-top: 3px solid #0d0d0d !important;
+  border-bottom: 3px solid #0d0d0d !important;
+  background: #0d0d0d !important;
+  color: #ffe600 !important;
+  overflow: hidden;
+  padding: 0.75rem 0;
+  font-family: 'Press Start 2P', monospace;
+  font-size: 0.65rem;
+  letter-spacing: 0.08em;
+}
+
+/* ── Stat block ─────────────────────────────────────────────────── */
+.nb-stat {
+  border: 3px solid #0d0d0d !important;
+  background: #fffef7 !important;
+  box-shadow: 6px 6px 0 #0d0d0d;
+  padding: 1.5rem 2rem;
+  text-align: center;
+}

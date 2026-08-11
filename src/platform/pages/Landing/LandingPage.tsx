@@ -359,6 +359,18 @@ export default function LandingPage() {
           </nav>
 
           <div className={`${isRTL ? 'mr-auto' : 'ml-auto'} flex items-center gap-3`}>
+            <Link
+              href="/v3"
+              className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold text-brand-600 dark:text-brand-400 border border-brand-200 dark:border-brand-800 hover:bg-brand-50 dark:hover:bg-brand-950 transition-colors"
+            >
+              ✦ Minimal
+            </Link>
+            <Link
+              href="/"
+              className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold text-brand-600 dark:text-brand-400 border border-brand-200 dark:border-brand-800 hover:bg-brand-50 dark:hover:bg-brand-950 transition-colors"
+            >
+              ✦ Neo-Brutalist
+            </Link>
             <LandingLanguageSwitcher />
             <NavThemePicker />
             <UserMenu variant="landing" />
@@ -611,6 +623,18 @@ export default function LandingPage() {
             © {new Date().getFullYear()} PixelCode. All rights reserved.
           </p>
           <div className="flex items-center gap-4">
+            <Link
+              href="/v3"
+              className="text-xs text-gray-400 hover:text-brand-500 dark:hover:text-brand-400 transition-colors font-medium"
+            >
+              ✦ Minimal
+            </Link>
+            <Link
+              href="/"
+              className="text-xs text-gray-400 hover:text-brand-500 dark:hover:text-brand-400 transition-colors font-medium"
+            >
+              ✦ Neo-Brutalist
+            </Link>
             <Link
               href="/kids"
               className="text-xs text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors"

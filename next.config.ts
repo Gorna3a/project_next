@@ -8,6 +8,19 @@ const nextConfig: NextConfig = {
   typescript: {
     ignoreBuildErrors: false,
   },
+  async headers() {
+    return [
+      {
+        // The in-browser IDE (WebContainer) needs cross-origin isolation so the
+        // shared-memory Node.js runtime can boot. Applied only to the IDE route.
+        source: "/app/ide/:path*",
+        headers: [
+          { key: "Cross-Origin-Opener-Policy", value: "same-origin" },
+          { key: "Cross-Origin-Embedder-Policy", value: "credentialless" },
+        ],
+      },
+    ];
+  },
   async rewrites() {
     return [
       {

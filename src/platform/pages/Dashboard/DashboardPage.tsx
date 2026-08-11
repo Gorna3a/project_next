@@ -83,9 +83,9 @@ export default function DashboardPage() {
       color: "bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-900/40",
     },
     {
-      to: "/app/playground",
+      to: "/app/ide",
       icon: Terminal,
-      label: t('nav.playground'),
+      label: t('nav.ide'),
       color: "bg-green-50 dark:bg-green-900/20 text-green-600 dark:text-green-400 hover:bg-green-100 dark:hover:bg-green-900/40",
     },
     {
@@ -275,7 +275,7 @@ export default function DashboardPage() {
                   icon: "⚡",
                   text: t('dashboard.playgroundPromo'),
                   sub: t('dashboard.openPlayground'),
-                  to: "/app/playground",
+                  to: "/app/ide",
                 },
                 {
                   icon: "🏆",

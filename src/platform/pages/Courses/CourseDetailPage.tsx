@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useRouter, useParams } from "next/navigation";
 import { motion, type Variants } from 'framer-motion';
 import { ArrowLeft, ArrowRight, BookOpen, CheckCircle2, Clock, Lock, PlayCircle, Tag } from 'lucide-react';
-import { getCourse, type SanityCourse } from '../../../core/services/sanity';
+import { getCourse, getLessonsForCourse, type SanityCourse, type SanityLesson } from '../../../core/services/sanity';
 import { getCourseProgress, startCourse, type CourseProgressData } from '../../../core/services/progress';
 import { useAuth } from '../../../core/context/AuthContext';
 import { useLanguage } from '../../../core/context/LanguageContext';
@@ -40,6 +40,7 @@ export default function CourseDetailPage() {
 
   const [course, setCourse] = useState<SanityCourse | null>(null);
   const [progress, setProgress] = useState<CourseProgressData | null>(null);
+  const [lessons, setLessons] = useState<SanityLesson[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -50,6 +51,16 @@ export default function CourseDetailPage() {
       try {
         const courseData = await getCourse(slug);
         setCourse(courseData);
+
+        if (courseData) {
+          try {
+            const courseLessons = await getLessonsForCourse(courseData._id);
+            setLessons(courseLessons);
+          } catch (err) {
+            console.error('Failed to load course lessons:', err);
+            setLessons([]);
+          }
+        }
 
         if (courseData && user) {
           try {
@@ -71,8 +82,8 @@ export default function CourseDetailPage() {
   }, [slug, user]);
 
   const sortedLessons = useMemo(
-    () => [...(course?.lessons ?? [])].sort((a, b) => a.order - b.order),
-    [course],
+    () => [...lessons].sort((a, b) => a.order - b.order),
+    [lessons],
   );
 
   const handleStart = async () => {
