@@ -15,6 +15,20 @@ let serverReadyHandler: ((port: number, url: string) => void) | null = null;
 const absolutePath = (file: ProjectFile) =>
   `${WORKDIR}/${file.parent ? `${file.parent}/` : ""}${file.name}`;
 
+// Ensures the Nodepod service worker is active and controlling this page
+// before we point the preview iframe at a /__virtual__ URL. Without this, the
+// first preview navigation can race ahead of the SW and fall through to Next
+// (404 / blocked by COEP on refresh or first load).
+const ensureServiceWorkerReady = async () => {
+  if (typeof navigator !== "undefined" && "serviceWorker" in navigator) {
+    try {
+      await navigator.serviceWorker.ready;
+    } catch {
+      // SW unavailable — the preview falls back to the static srcDoc.
+    }
+  }
+};
+
 // One runtime per page. Nodepod is reused across project switches; files are
 // re-synced before every run so the latest editor contents are live.
 export function ensurePod(): Promise<Nodepod> {
@@ -99,7 +113,8 @@ export function useNodepod(files: ProjectFile[], options: UseNodepodOptions = {}
   }, [appendLog, enabled]);
 
   useEffect(() => {
-    serverReadyHandler = (_port, url) => {
+    serverReadyHandler = async (_port, url) => {
+      await ensureServiceWorkerReady();
       setPreviewUrl(url);
       setState("running");
       appendLog(`✓ Preview ready at ${url}`);

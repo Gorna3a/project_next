@@ -44,12 +44,8 @@ export function IDEHomePage() {
             <span className={`shrink-0 rounded px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider ${project.projectType === "python" ? "bg-emerald-400/10 text-emerald-300" : "bg-[var(--accent-subtle)] text-[var(--accent-text)]"}`}>{project.projectType === "python" ? "python" : "starter"}</span>
           </div>
         </div>
-        <div className="flex items-center gap-2 sm:gap-4">
-          <div className="hidden items-center gap-1 rounded-lg bg-[var(--bg-base)] p-0.5 text-[11px] sm:flex">
-            <button onClick={() => project.switchProjectType("web")} className={`rounded px-2.5 py-1 font-bold ${project.projectType === "web" ? "bg-[var(--accent-subtle)] text-[var(--accent-text)]" : "text-[var(--text-muted)] hover:text-[var(--text-secondary)]"}`}>Web</button>
-            <button onClick={() => project.switchProjectType("python")} className={`rounded px-2.5 py-1 font-bold ${project.projectType === "python" ? "bg-emerald-400/10 text-emerald-300" : "text-[var(--text-muted)] hover:text-[var(--text-secondary)]"}`}>Python</button>
-          </div>
-          <div className={`hidden items-center gap-2 text-[11px] sm:flex ${project.saveStatus === "error" ? "text-rose-400" : "text-[var(--text-muted)]"}`}>
+          <div className="flex items-center gap-2 sm:gap-4">
+            <div className={`hidden items-center gap-2 text-[11px] sm:flex ${project.saveStatus === "error" ? "text-rose-400" : "text-[var(--text-muted)]"}`}>
             {project.saveStatus === "error" ? <CloudOff size={14} className="text-rose-400" /> : <Cloud size={14} className={user ? "text-emerald-400" : "text-[var(--text-muted)]"} />}
             {saveLabel(project.saveStatus, !!user)}
           </div>
