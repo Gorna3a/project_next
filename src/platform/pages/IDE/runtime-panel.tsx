@@ -29,8 +29,13 @@ export function RuntimePanel({ files, projectType }: Props) {
   const css = files.find(file => file.name === "style.css")?.content ?? "";
   const js = files.find(file => file.name === "script.js")?.content ?? "";
   const fallbackSrcDoc = useMemo(() => {
-    const withoutLinks = html.replace(/<link[^>]+href=["']style\.css["'][^>]*>/i, "");
-    return withoutLinks
+    // Self-contained preview: strip external <link>/<script src> references
+    // (there is no script.js/style.css route to fetch) and inline the editor
+    // contents instead. Otherwise the iframe 503s on the missing assets.
+    const cleaned = html
+      .replace(/<link[^>]+rel=["']?stylesheet["']?[^>]*>/gi, "")
+      .replace(/<script[^>]+src=["'][^"']*["'][^>]*>\s*<\/script>/gi, "");
+    return cleaned
       .replace("</head>", `<style>${css}</style></head>`)
       .replace("</body>", `<script>${js}<\/script></body>`);
   }, [html, css, js]);
@@ -143,7 +148,7 @@ export function RuntimePanel({ files, projectType }: Props) {
           <span><strong className="text-rose-200">Browser runtime unavailable.</strong> Showing local preview instead.</span>
           <button onClick={runProject} className="shrink-0 rounded bg-[var(--accent)] px-2.5 py-1 font-bold text-white" data-testid="button-retry-runtime">Retry</button>
         </div>}
-        <iframe title="Project preview" src={previewUrl || undefined} srcDoc={previewUrl ? undefined : fallbackSrcDoc} className="h-full w-full rounded-lg border border-[var(--border)] bg-[#f3eadb] shadow-[0_12px_32px_rgba(0,0,0,.35)]" sandbox="allow-scripts allow-forms allow-same-origin" data-testid="iframe-live-preview" />
+        <iframe title="Project preview" src={previewUrl || undefined} srcDoc={previewUrl ? undefined : fallbackSrcDoc} className="h-full w-full rounded-lg border border-[var(--border)] bg-[#f3eadb] shadow-[0_12px_32px_rgba(0,0,0,.35)]" data-testid="iframe-live-preview" />
       </div> : <div className="thin-scroll min-h-0 flex-1 overflow-y-auto bg-[var(--bg-elevated)] p-4" data-testid="terminal-output">
         <div className="mb-3 flex items-center justify-between border-b border-[var(--border)] pb-3 text-[10px] uppercase tracking-[.14em] text-[var(--text-muted)]"><span>node · workspace</span><button onClick={clearLogs} title="Clear terminal" data-testid="button-clear-terminal"><X size={13} /></button></div>
         <div ref={terminalRef} className="h-[calc(100%-32px)] min-h-[260px] w-full overflow-hidden" />
