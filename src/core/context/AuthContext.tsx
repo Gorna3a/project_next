@@ -9,9 +9,12 @@ import {
 } from "react";
 import {
   type User,
+  type AuthProvider as FirebaseAuthProvider,
   onAuthStateChanged,
   signInWithEmailAndPassword,
   signInWithPopup,
+  signInWithRedirect,
+  getRedirectResult,
   signOut,
   createUserWithEmailAndPassword,
   updateProfile,
@@ -35,8 +38,8 @@ interface AuthContextValue {
     displayName: string,
   ) => Promise<void>;
   signIn: (email: string, password: string) => Promise<void>;
-  signInWithGoogle: () => Promise<void>;
-  signInWithGithub: () => Promise<void>;
+  signInWithGoogle: () => Promise<boolean>;
+  signInWithGithub: () => Promise<boolean>;
   logOut: () => Promise<void>;
 }
 
@@ -70,6 +73,25 @@ const getFriendlyError = (error: AuthError): string => {
     default:
       return "Something went wrong. Please try again.";
   }
+};
+
+/**
+ * signInWithPopup reads `popup.closed` to detect cancellation, which
+ * Cross-Origin-Opener-Policy: same-origin (set on /app/ide for the Nodepod SW)
+ * blocks. When the document is cross-origin isolated we fall back to the
+ * redirect flow, which performs a full navigation instead of opening a popup.
+ */
+const isCrossOriginIsolatedDoc = (): boolean =>
+  typeof window !== "undefined" &&
+  (window as unknown as { crossOriginIsolated?: boolean }).crossOriginIsolated ===
+    true;
+
+const oauthSignIn = async (provider: FirebaseAuthProvider) => {
+  if (isCrossOriginIsolatedDoc()) {
+    await signInWithRedirect(auth, provider);
+    return null; // result is finalized by getRedirectResult on the return navigation
+  }
+  return signInWithPopup(auth, provider);
 };
 
 /** Creates or updates the user document in Firestore on first login */
@@ -131,6 +153,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const unsub = onAuthStateChanged(auth, async (firebaseUser) => {
       setUser(firebaseUser);
       if (firebaseUser) {
+        // Ensures the Firestore user doc exists for redirect-based sign-ins
+        // (popup/email paths create it themselves in their handlers).
+        await ensureUserDocument(firebaseUser);
         const prof = await fetchProfile(firebaseUser.uid);
         setProfile(prof);
       } else {
@@ -139,6 +164,20 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       setLoading(false);
     });
     return unsub;
+  }, []);
+
+  // Consume an OAuth redirect result (used when cross-origin isolated) and
+  // surface any errors from the redirect flow.
+  useEffect(() => {
+    getRedirectResult(auth)
+      .then(async (result) => {
+        if (result?.user) {
+          await ensureUserDocument(result.user);
+          const prof = await fetchProfile(result.user.uid);
+          setProfile(prof);
+        }
+      })
+      .catch((e) => showError(getFriendlyError(e as AuthError)));
   }, []);
 
   const signUp = async (
@@ -179,10 +218,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const signInWithGoogle = async () => {
     setLoading(true);
     try {
-      const cred = await signInWithPopup(auth, googleProvider);
+      const cred = await oauthSignIn(googleProvider);
+      if (!cred) return false; // redirect flow: browser navigated to provider
       await ensureUserDocument(cred.user);
       const prof = await fetchProfile(cred.user.uid);
       setProfile(prof);
+      return true;
     } catch (e) {
       showError(getFriendlyError(e as AuthError));
       throw e;
@@ -194,10 +235,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const signInWithGithub = async () => {
     setLoading(true);
     try {
-      const cred = await signInWithPopup(auth, githubProvider);
+      const cred = await oauthSignIn(githubProvider);
+      if (!cred) return false; // redirect flow: browser navigated to provider
       await ensureUserDocument(cred.user);
       const prof = await fetchProfile(cred.user.uid);
       setProfile(prof);
+      return true;
     } catch (e) {
       showError(getFriendlyError(e as AuthError));
       throw e;

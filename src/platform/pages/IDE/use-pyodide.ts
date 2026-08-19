@@ -19,7 +19,7 @@ interface PyodideWindow extends Window {
   loadPyodide: (opts: { indexURL: string }) => Promise<PyodideModule>;
 }
 
-export function usePyodide(files: ProjectFile[]) {
+export function usePyodide(files: ProjectFile[], enabled = true) {
   const [state, setState] = useState<PyState>("idle");
   const [logs, setLogs] = useState<string[]>([]);
   const pyRef = useRef<PyodideModule | null>(null);
@@ -53,8 +53,9 @@ export function usePyodide(files: ProjectFile[]) {
     return loadPromiseRef.current;
   }, []);
 
-  // Warm up the runtime as soon as the panel mounts.
+  // Warm up the runtime as soon as the panel mounts (Python projects only).
   useEffect(() => {
+    if (!enabled) return;
     setState("loading");
     ensurePyodide()
       .then(() => setState("ready"))
@@ -62,7 +63,7 @@ export function usePyodide(files: ProjectFile[]) {
         setState("error");
         setLogs([`! Pyodide could not load: ${error instanceof Error ? error.message : "network unavailable"}`]);
       });
-  }, [ensurePyodide]);
+  }, [enabled, ensurePyodide]);
 
   const run = useCallback(async () => {
     if (runningRef.current) return;

@@ -69,17 +69,27 @@ export function useProject() {
         const local = readLocal();
         let nextFiles = starterFiles;
         if (uid) {
-          const cloud = await getProject(uid);
-          if (cloud?.files?.length) {
-            nextFiles = cloud.files;
-            setProjectType(cloud.projectType ?? detectProjectType(cloud.files));
-            setName(cloud.name ?? "first-light");
-            setActiveId(cloud.activeId ?? firstEditableId(cloud.files));
-          } else if (local?.length) {
-            // First login: migrate the anonymous localStorage project to the cloud.
-            nextFiles = local;
-            setProjectType(detectProjectType(local));
-            setActiveId(firstEditableId(local));
+          try {
+            const cloud = await getProject(uid);
+            if (cloud?.files?.length) {
+              nextFiles = cloud.files;
+              setProjectType(cloud.projectType ?? detectProjectType(cloud.files));
+              setName(cloud.name ?? "first-light");
+              setActiveId(cloud.activeId ?? firstEditableId(cloud.files));
+            } else if (local?.length) {
+              // First login: migrate the anonymous localStorage project to the cloud.
+              nextFiles = local;
+              setProjectType(detectProjectType(local));
+              setActiveId(firstEditableId(local));
+            }
+          } catch {
+            // Cloud read failed (network, auth, or Firestore rules). Fall back to
+            // the local copy so the editor stays usable.
+            if (local?.length) {
+              nextFiles = local;
+              setProjectType(detectProjectType(local));
+              setActiveId(firstEditableId(local));
+            }
           }
         } else if (local?.length) {
           nextFiles = local;

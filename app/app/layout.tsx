@@ -5,7 +5,7 @@ import { Sidebar } from "@/platform/layout/Sidebar";
 import { Header } from "@/platform/layout/Header";
 import { useAuth } from "@/core/context/AuthContext";
 import { useLanguage } from "@/core/context/LanguageContext";
-import { useRouter, usePathname } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
@@ -13,10 +13,6 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   const { user, loading } = useAuth();
   const { isRTL } = useLanguage();
   const router = useRouter();
-  const pathname = usePathname();
-
-  // The in-browser IDE is a full-screen workspace: no sidebar/header/padding.
-  const isIde = pathname.startsWith("/app/ide");
 
   useEffect(() => {
     if (!loading && !user) {
@@ -36,14 +32,6 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   }
 
   if (!user) return null;
-
-  if (isIde) {
-    return (
-      <div className="min-h-screen" style={{ backgroundColor: "var(--bg-base)" }}>
-        {children}
-      </div>
-    );
-  }
 
   const marginValue = collapsed ? 64 : 240;
 

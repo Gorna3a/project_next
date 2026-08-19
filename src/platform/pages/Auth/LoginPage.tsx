@@ -36,8 +36,8 @@ export default function LoginPage() {
     clearError();
     setLoading(true);
     try {
-      await signInWithGoogle();
-      navigate.push('/app');
+      const signedIn = await signInWithGoogle();
+      if (signedIn) navigate.push('/app');
     } catch {
     } finally {
       setLoading(false);
@@ -48,8 +48,8 @@ export default function LoginPage() {
     clearError();
     setLoading(true);
     try {
-      await signInWithGithub();
-      navigate.push('/app');
+      const signedIn = await signInWithGithub();
+      if (signedIn) navigate.push('/app');
     } catch {
     } finally {
       setLoading(false);
