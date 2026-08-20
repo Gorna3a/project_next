@@ -10,6 +10,8 @@ import {
 import {
   type User,
   type AuthProvider as FirebaseAuthProvider,
+  type AuthCredential,
+  type OAuthCredential,
   onAuthStateChanged,
   signInWithEmailAndPassword,
   signInWithPopup,
@@ -18,11 +20,15 @@ import {
   signOut,
   createUserWithEmailAndPassword,
   updateProfile,
+  fetchSignInMethodsForEmail,
+  linkWithCredential,
   type AuthError,
 } from "firebase/auth";
 import { doc, setDoc, getDoc, serverTimestamp } from "firebase/firestore";
 import { auth, db, googleProvider, githubProvider } from "../firebase";
 import type { UserProfile, UserRole } from "../types";
+
+const GH_TOKEN_KEY = "pixelcode_gh_token";
 
 // ─── Context shape ────────────────────────────────────────────────────────────
 
@@ -38,8 +44,14 @@ interface AuthContextValue {
     displayName: string,
   ) => Promise<void>;
   signIn: (email: string, password: string) => Promise<void>;
-  signInWithGoogle: () => Promise<boolean>;
-  signInWithGithub: () => Promise<boolean>;
+  signInWithGoogle: (password?: string) => Promise<boolean>;
+  signInWithGithub: (password?: string) => Promise<boolean>;
+  /** GitHub OAuth access token (for repo import). Null when not signed in via GitHub. */
+  githubToken: string | null;
+  /** Set when an OAuth sign-in collides with an existing password account. */
+  linkEmail: string | null;
+  linkProvider: "github" | "google" | null;
+  clearLink: () => void;
   logOut: () => Promise<void>;
 }
 
@@ -67,9 +79,11 @@ const getFriendlyError = (error: AuthError): string => {
     case "auth/popup-closed-by-user":
       return "The sign-in popup was closed before completion.";
     case "auth/account-exists-with-different-credential":
-      return "An account already exists with this email. Please sign in using your original method.";
+      return "An account already exists with this email. Sign in with your original method to link this one.";
     case "auth/operation-not-allowed":
       return "GitHub sign-in is not enabled in the Firebase console.";
+    case "auth/credential-already-in-use":
+      return "This credential is already linked to another account.";
     default:
       return "Something went wrong. Please try again.";
   }
@@ -86,12 +100,13 @@ const isCrossOriginIsolatedDoc = (): boolean =>
   (window as unknown as { crossOriginIsolated?: boolean }).crossOriginIsolated ===
     true;
 
-const oauthSignIn = async (provider: FirebaseAuthProvider) => {
-  if (isCrossOriginIsolatedDoc()) {
-    await signInWithRedirect(auth, provider);
-    return null; // result is finalized by getRedirectResult on the return navigation
+const readGithubToken = (): string | null => {
+  if (typeof window === "undefined") return null;
+  try {
+    return window.localStorage.getItem(GH_TOKEN_KEY);
+  } catch {
+    return null;
   }
-  return signInWithPopup(auth, provider);
 };
 
 /** Creates or updates the user document in Firestore on first login */
@@ -117,7 +132,6 @@ const ensureUserDocument = async (user: User, role: UserRole = "student") => {
       },
     });
   } else {
-    // Update last active
     await setDoc(ref, { lastActive: serverTimestamp() }, { merge: true });
   }
 };
@@ -140,6 +154,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [githubToken, setGithubToken] = useState<string | null>(readGithubToken);
+  const [linkEmail, setLinkEmail] = useState<string | null>(null);
+  const [linkProvider, setLinkProvider] = useState<"github" | "google" | null>(null);
 
   const showError = (msg: string) => {
     setError(msg);
@@ -147,14 +164,90 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const clearError = () => setError(null);
+  const clearLink = () => {
+    setLinkEmail(null);
+    setLinkProvider(null);
+  };
+
+  const captureGithubToken = (result: { credential: AuthCredential | null } | null) => {
+    const cred = result?.credential as OAuthCredential | undefined | null;
+    const token = cred?.accessToken;
+    if (token) {
+      try {
+        window.localStorage.setItem(GH_TOKEN_KEY, token);
+      } catch {
+        /* ignore */
+      }
+      setGithubToken(token);
+    }
+  };
+
+  const finalizeAuth = async (result: { user: User }) => {
+    captureGithubToken(result as unknown as { credential: AuthCredential | null });
+    await ensureUserDocument(result.user);
+    const prof = await fetchProfile(result.user.uid);
+    setProfile(prof);
+  };
+
+  /**
+   * Signs in with an OAuth provider and transparently links the account when it
+   * collides with an existing credential for the same email. Returns the
+   * UserCredential, or null when the redirect flow was used.
+   */
+  const oauthSignInAndLink = async (
+    provider: FirebaseAuthProvider,
+    opts?: { password?: string },
+  ): Promise<{ user: User } | null> => {
+    if (isCrossOriginIsolatedDoc()) {
+      await signInWithRedirect(auth, provider);
+      return null;
+    }
+    try {
+      return await signInWithPopup(auth, provider);
+    } catch (e) {
+      const err = e as AuthError & {
+        credential?: AuthCredential;
+        email?: string;
+      };
+      if (
+        err.code !== "auth/account-exists-with-different-credential" ||
+        !err.credential ||
+        !err.email
+      ) {
+        throw e;
+      }
+      const pendingCred = err.credential as AuthCredential;
+      const email = err.email!;
+      // If the caller already supplied the password (modal retry), sign in and link.
+      if (opts?.password) {
+        const cred = await signInWithEmailAndPassword(auth, email, opts.password);
+        await linkWithCredential(cred.user, pendingCred);
+        return cred;
+      }
+      // Otherwise try linking via an existing OAuth provider (no password needed).
+      const methods = await fetchSignInMethodsForEmail(auth, email);
+      if (methods.includes("google.com")) {
+        const res = await signInWithPopup(auth, googleProvider);
+        await linkWithCredential(res.user, pendingCred);
+        return res;
+      }
+      if (methods.includes("github.com")) {
+        const res = await signInWithPopup(auth, githubProvider);
+        await linkWithCredential(res.user, pendingCred);
+        return res;
+      }
+      // Only a password account exists — ask the user for the password.
+      setLinkEmail(email);
+      setLinkProvider(provider === githubProvider ? "github" : "google");
+      throw Object.assign(new Error("needs-password"), { code: "auth/needs-password" });
+    }
+  };
 
   // Listen to auth state changes
   useEffect(() => {
     const unsub = onAuthStateChanged(auth, async (firebaseUser) => {
       setUser(firebaseUser);
       if (firebaseUser) {
-        // Ensures the Firestore user doc exists for redirect-based sign-ins
-        // (popup/email paths create it themselves in their handlers).
         await ensureUserDocument(firebaseUser);
         const prof = await fetchProfile(firebaseUser.uid);
         setProfile(prof);
@@ -172,9 +265,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     getRedirectResult(auth)
       .then(async (result) => {
         if (result?.user) {
-          await ensureUserDocument(result.user);
-          const prof = await fetchProfile(result.user.uid);
-          setProfile(prof);
+          await finalizeAuth(result);
         }
       })
       .catch((e) => showError(getFriendlyError(e as AuthError)));
@@ -215,34 +306,34 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
-  const signInWithGoogle = async () => {
+  const signInWithGoogle = async (password?: string) => {
     setLoading(true);
     try {
-      const cred = await oauthSignIn(googleProvider);
-      if (!cred) return false; // redirect flow: browser navigated to provider
-      await ensureUserDocument(cred.user);
-      const prof = await fetchProfile(cred.user.uid);
-      setProfile(prof);
+      const result = await oauthSignInAndLink(googleProvider, { password });
+      if (!result) return false;
+      await finalizeAuth(result);
       return true;
     } catch (e) {
-      showError(getFriendlyError(e as AuthError));
+      if ((e as { code?: string })?.code !== "auth/needs-password") {
+        showError(getFriendlyError(e as AuthError));
+      }
       throw e;
     } finally {
       setLoading(false);
     }
   };
 
-  const signInWithGithub = async () => {
+  const signInWithGithub = async (password?: string) => {
     setLoading(true);
     try {
-      const cred = await oauthSignIn(githubProvider);
-      if (!cred) return false; // redirect flow: browser navigated to provider
-      await ensureUserDocument(cred.user);
-      const prof = await fetchProfile(cred.user.uid);
-      setProfile(prof);
+      const result = await oauthSignInAndLink(githubProvider, { password });
+      if (!result) return false;
+      await finalizeAuth(result);
       return true;
     } catch (e) {
-      showError(getFriendlyError(e as AuthError));
+      if ((e as { code?: string })?.code !== "auth/needs-password") {
+        showError(getFriendlyError(e as AuthError));
+      }
       throw e;
     } finally {
       setLoading(false);
@@ -253,6 +344,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     await signOut(auth);
     setUser(null);
     setProfile(null);
+    setGithubToken(null);
+    try {
+      window.localStorage.removeItem(GH_TOKEN_KEY);
+    } catch {
+      /* ignore */
+    }
   };
 
   return (
@@ -267,6 +364,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         signIn,
         signInWithGoogle,
         signInWithGithub,
+        githubToken,
+        linkEmail,
+        linkProvider,
+        clearLink,
         logOut,
       }}
     >

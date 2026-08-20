@@ -1,5 +1,5 @@
 export type FileKind = "html" | "css" | "js" | "ts" | "json" | "py" | "md" | "folder";
-export type ProjectType = "web" | "python";
+export type ProjectType = "web" | "python" | "react-ts" | "react-js";
 
 export type ProjectFile = {
   id: string;
@@ -389,10 +389,275 @@ A tiny Python workspace that runs in your browser with Pyodide.
 Edit **main.py** and press **Run** to see the output below.` },
 ];
 
-export const detectProjectType = (files: ProjectFile[]): ProjectType =>
-  files.some(file => file.name === "main.py") || files.some(file => file.name.endsWith(".py"))
-    ? "python"
-    : "web";
+export const reactTsStarterFiles: ProjectFile[] = [
+  {
+    id: "package.json",
+    name: "package.json",
+    kind: "json",
+    content: `{
+  "name": "react-ts-app",
+  "private": true,
+  "scripts": {
+    "dev": "vite --host 0.0.0.0"
+  },
+  "dependencies": {
+    "react": "latest",
+    "react-dom": "latest"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "latest",
+    "vite": "latest",
+    "typescript": "latest",
+    "@types/react": "latest",
+    "@types/react-dom": "latest"
+  }
+}`,
+  },
+  {
+    id: "vite.config.ts",
+    name: "vite.config.ts",
+    kind: "ts",
+    content: `import { defineConfig } from "vite";
+import react from "@vitejs/plugin-react";
+
+export default defineConfig({
+  plugins: [react()],
+});`,
+  },
+  {
+    id: "tsconfig.json",
+    name: "tsconfig.json",
+    kind: "json",
+    content: `{
+  "compilerOptions": {
+    "target": "ES2020",
+    "useDefineForClassFields": true,
+    "lib": ["ES2020", "DOM", "DOM.Iterable"],
+    "module": "ESNext",
+    "skipLibCheck": true,
+    "moduleResolution": "bundler",
+    "allowImportingTsExtensions": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "noEmit": true,
+    "jsx": "react-jsx",
+    "strict": true
+  },
+  "include": ["src"]
+}`,
+  },
+  {
+    id: "index.html",
+    name: "index.html",
+    kind: "html",
+    content: `<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>React + TypeScript</title>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>`,
+  },
+  {
+    id: "src/main.tsx",
+    name: "main.tsx",
+    kind: "ts",
+    parent: "src",
+    content: `import React from "react";
+import ReactDOM from "react-dom/client";
+import App from "./App";
+import "./index.css";
+
+ReactDOM.createRoot(document.getElementById("root")!).render(
+  <React.StrictMode>
+    <App />
+  </React.StrictMode>
+);`,
+  },
+  {
+    id: "src/App.tsx",
+    name: "App.tsx",
+    kind: "ts",
+    parent: "src",
+    content: `import { useState } from "react";
+
+export default function App() {
+  const [count, setCount] = useState(0);
+  return (
+    <main style={{ fontFamily: "system-ui, sans-serif", padding: "48px", textAlign: "center", color: "#eef0ff" }}>
+      <h1>React + TypeScript</h1>
+      <p>Edit <code>src/App.tsx</code> and save to see changes.</p>
+      <button
+        onClick={() => setCount((c) => c + 1)}
+        style={{ fontSize: 16, padding: "10px 18px", borderRadius: 12, border: "none", background: "#6272f5", color: "white", cursor: "pointer" }}
+      >
+        count is {count}
+      </button>
+    </main>
+  );
+}`,
+  },
+  {
+    id: "src/index.css",
+    name: "index.css",
+    kind: "css",
+    parent: "src",
+    content: `:root { color-scheme: light dark; }
+body { margin: 0; background: #0f1020; }`,
+  },
+  {
+    id: "src/vite-env.d.ts",
+    name: "vite-env.d.ts",
+    kind: "ts",
+    parent: "src",
+    content: `/// <reference types="vite/client" />`,
+  },
+  {
+    id: "README.md",
+    name: "README.md",
+    kind: "md",
+    content: `# React + TypeScript starter
+
+A Vite + React + TypeScript project that runs entirely in your browser.
+
+Press **Run**, then edit \`src/App.tsx\` and watch the preview update.`,
+  },
+];
+
+export const reactJsStarterFiles: ProjectFile[] = [
+  {
+    id: "package.json",
+    name: "package.json",
+    kind: "json",
+    content: `{
+  "name": "react-js-app",
+  "private": true,
+  "scripts": {
+    "dev": "vite --host 0.0.0.0"
+  },
+  "dependencies": {
+    "react": "latest",
+    "react-dom": "latest"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "latest",
+    "vite": "latest"
+  }
+}`,
+  },
+  {
+    id: "vite.config.js",
+    name: "vite.config.js",
+    kind: "js",
+    content: `import { defineConfig } from "vite";
+import react from "@vitejs/plugin-react";
+
+export default defineConfig({
+  plugins: [react()],
+});`,
+  },
+  {
+    id: "index.html",
+    name: "index.html",
+    kind: "html",
+    content: `<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>React + JavaScript</title>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
+</html>`,
+  },
+  {
+    id: "src/main.jsx",
+    name: "main.jsx",
+    kind: "js",
+    parent: "src",
+    content: `import React from "react";
+import ReactDOM from "react-dom/client";
+import App from "./App";
+import "./index.css";
+
+ReactDOM.createRoot(document.getElementById("root")).render(
+  <React.StrictMode>
+    <App />
+  </React.StrictMode>
+);`,
+  },
+  {
+    id: "src/App.jsx",
+    name: "App.jsx",
+    kind: "js",
+    parent: "src",
+    content: `import { useState } from "react";
+
+export default function App() {
+  const [count, setCount] = useState(0);
+  return (
+    <main style={{ fontFamily: "system-ui, sans-serif", padding: "48px", textAlign: "center", color: "#eef0ff" }}>
+      <h1>React + JavaScript</h1>
+      <p>Edit <code>src/App.jsx</code> and save to see changes.</p>
+      <button
+        onClick={() => setCount((c) => c + 1)}
+        style={{ fontSize: 16, padding: "10px 18px", borderRadius: 12, border: "none", background: "#6272f5", color: "white", cursor: "pointer" }}
+      >
+        count is {count}
+      </button>
+    </main>
+  );
+}`,
+  },
+  {
+    id: "src/index.css",
+    name: "index.css",
+    kind: "css",
+    parent: "src",
+    content: `:root { color-scheme: light dark; }
+body { margin: 0; background: #0f1020; }`,
+  },
+  {
+    id: "README.md",
+    name: "README.md",
+    kind: "md",
+    content: `# React + JavaScript starter
+
+A Vite + React + JavaScript project that runs entirely in your browser.
+
+Press **Run**, then edit \`src/App.jsx\` and watch the preview update.`,
+  },
+];
+
+export const detectProjectType = (files: ProjectFile[]): ProjectType => {
+  if (
+    files.some((file) => file.name === "main.py") ||
+    files.some((file) => file.name.endsWith(".py"))
+  ) {
+    return "python";
+  }
+  const pkg = files.find((file) => file.name === "package.json");
+  const hasReact = pkg ? /"react"\s*:\s*"[^"]*"/.test(pkg.content ?? "") : false;
+  const hasTs =
+    files.some((file) => file.name.endsWith(".ts") || file.name.endsWith(".tsx")) ||
+    files.some((file) => file.name === "tsconfig.json");
+  if (hasReact) return hasTs ? "react-ts" : "react-js";
+  return "web";
+};
 
 export const projectLabel = (type: ProjectType): string =>
-  type === "python" ? "python" : "starter";
+  type === "python"
+    ? "python"
+    : type === "react-ts"
+      ? "react · ts"
+      : type === "react-js"
+        ? "react · js"
+        : "web";

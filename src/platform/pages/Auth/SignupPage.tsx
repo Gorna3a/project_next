@@ -22,7 +22,7 @@ const strengthColor = ['', 'bg-red-500', 'bg-yellow-500', 'bg-green-500'] as con
 // ─── Component ────────────────────────────────────────────────────────────────
 
 export default function SignupPage() {
-  const { signUp, signInWithGoogle, signInWithGithub, error, clearError } = useAuth();
+  const { signUp, signInWithGoogle, signInWithGithub, error, clearError, linkEmail, linkProvider, clearLink } = useAuth();
   const { t, isRTL } = useLanguage();
   const navigate = useRouter();
 
@@ -33,6 +33,8 @@ export default function SignupPage() {
   const [showPass, setShowPass] = useState(false);
   const [loading, setLoading] = useState(false);
   const [formError, setFormError] = useState('');
+  const [linkPassword, setLinkPassword] = useState('');
+  const [linkLoading, setLinkLoading] = useState(false);
 
   const strength = getStrength(password);
 
@@ -53,7 +55,7 @@ export default function SignupPage() {
     setLoading(true);
     try {
       await signUp(email, password, name);
-      navigate.push('/app');
+      navigate.push('/app/ide');
     } catch {
       // error surfaced via auth context
     } finally {
@@ -61,27 +63,39 @@ export default function SignupPage() {
     }
   };
 
-  const handleGoogle = async () => {
+  const handleGoogle = async (linkPass?: string) => {
     clearError();
     setLoading(true);
     try {
-      const signedIn = await signInWithGoogle();
-      if (signedIn) navigate.push('/app');
+      const signedIn = await signInWithGoogle(linkPass);
+      if (signedIn) navigate.push('/app/ide');
     } catch {
     } finally {
       setLoading(false);
     }
   };
 
-  const handleGithub = async () => {
+  const handleGithub = async (linkPass?: string) => {
     clearError();
     setLoading(true);
     try {
-      const signedIn = await signInWithGithub();
-      if (signedIn) navigate.push('/app');
+      const signedIn = await signInWithGithub(linkPass);
+      if (signedIn) navigate.push('/app/ide');
     } catch {
     } finally {
       setLoading(false);
+    }
+  };
+
+  const submitLink = async () => {
+    setLinkLoading(true);
+    try {
+      if (linkProvider === 'github') await handleGithub(linkPassword);
+      else await handleGoogle(linkPassword);
+      setLinkPassword('');
+    } catch {
+    } finally {
+      setLinkLoading(false);
     }
   };
 
@@ -110,10 +124,46 @@ export default function SignupPage() {
         </motion.div>
       )}
 
+      {/* Link-account prompt (OAuth collided with an existing password account) */}
+      {linkEmail && (
+        <motion.div
+          initial={{ opacity: 0, y: -8 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="p-4 rounded-2xl bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 text-sm font-bold flex flex-col gap-3"
+        >
+          <p className="text-amber-700 dark:text-amber-300">
+            An account with <span className="font-black">{linkEmail}</span> already exists. Enter its password to connect your {linkProvider === 'github' ? 'GitHub' : 'Google'} account.
+          </p>
+          <div className="flex gap-2">
+            <input
+              type="password"
+              value={linkPassword}
+              onChange={(e) => setLinkPassword(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && submitLink()}
+              placeholder={t('auth.password')}
+              className="input flex-1 py-2.5 rounded-xl bg-gray-50 dark:bg-gray-900 border-gray-100 dark:border-gray-800"
+            />
+            <button
+              onClick={submitLink}
+              disabled={linkLoading || !linkPassword}
+              className="btn-primary px-4 rounded-xl font-bold text-xs disabled:opacity-50"
+            >
+              {linkLoading ? 'Connecting…' : 'Connect'}
+            </button>
+            <button
+              onClick={() => { clearLink(); setLinkPassword(''); }}
+              className="px-3 rounded-xl font-bold text-xs text-gray-500 hover:text-gray-700"
+            >
+              Cancel
+            </button>
+          </div>
+        </motion.div>
+      )}
+
       {/* Social sign-up */}
       <div className={`grid grid-cols-2 gap-4 ${isRTL ? 'flex-row-reverse' : ''}`}>
         <button
-          onClick={handleGoogle}
+          onClick={() => handleGoogle()}
           disabled={loading}
           className="btn-secondary justify-center gap-3 py-3 rounded-2xl hover:border-brand-500 transition-all font-bold text-xs"
         >
@@ -126,7 +176,7 @@ export default function SignupPage() {
           Google
         </button>
         <button
-          onClick={handleGithub}
+          onClick={() => handleGithub()}
           disabled={loading}
           className="btn-secondary justify-center gap-3 py-3 rounded-2xl hover:border-brand-500 transition-all font-bold text-xs"
         >

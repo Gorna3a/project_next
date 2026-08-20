@@ -26,7 +26,10 @@ isSupported().then((yes) => {
 
 // Auth providers
 export const googleProvider = new GoogleAuthProvider();
+googleProvider.addScope("https://www.googleapis.com/auth/userinfo.email");
 export const githubProvider = new GithubAuthProvider();
-githubProvider.setCustomParameters({ allow_signup: 'true' });
+// `repo` scope lets the app import the user's private repositories later.
+githubProvider.addScope("repo");
+githubProvider.setCustomParameters({ allow_signup: "true" });
 
 export default app;

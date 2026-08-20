@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Check, ChevronDown, CircleStop, ExternalLink, LoaderCircle, Play, RefreshCw, TerminalSquare, X } from "lucide-react";
+import { Check, ChevronDown, CircleStop, ExternalLink, LoaderCircle, Play, RefreshCw, TerminalSquare, X, PanelRightClose, PanelRightOpen } from "lucide-react";
 import { Terminal } from "@xterm/xterm";
 import { FitAddon } from "@xterm/addon-fit";
 import "@xterm/xterm/css/xterm.css";
@@ -10,10 +10,37 @@ import type { ProjectFile, ProjectType } from "./types";
 import { ensurePod, useNodepod } from "./use-nodepod";
 import { usePyodide } from "./use-pyodide";
 
-type Props = { files: ProjectFile[]; projectType: ProjectType };
+type Props = {
+  files: ProjectFile[];
+  projectType: ProjectType;
+  collapsed?: boolean;
+  onToggleCollapse?: () => void;
+};
 
-export function RuntimePanel({ files, projectType }: Props) {
+export function RuntimePanel({
+  files,
+  projectType,
+  collapsed = false,
+  onToggleCollapse,
+}: Props) {
   const isPython = projectType === "python";
+
+  if (collapsed) {
+    return (
+      <section className="runtime-panel flex min-h-0 shrink-0 flex-col items-center border-l border-[var(--border)] bg-[var(--bg-surface)] py-3">
+        <button
+          onClick={onToggleCollapse}
+          title="Expand preview"
+          className="rounded-md p-2 text-[var(--text-muted)] hover:bg-[var(--bg-subtle)] hover:text-[var(--accent-text)]"
+        >
+          <PanelRightOpen size={16} />
+        </button>
+        <span className="mt-3 text-[10px] uppercase tracking-widest text-[var(--text-muted)] [writing-mode:vertical-rl]">
+          Preview
+        </span>
+      </section>
+    );
+  }
   const [view, setView] = useState<"preview" | "terminal">("preview");
   const terminalRef = useRef<HTMLDivElement>(null);
   const terminalInstance = useRef<NodepodTerminal | null>(null);
@@ -125,6 +152,7 @@ export function RuntimePanel({ files, projectType }: Props) {
       <div className="flex items-center gap-1">
         {isRunning ? <button onClick={stop} disabled={isPython} className="rounded-md p-2 text-rose-400 hover:bg-[var(--bg-subtle)] disabled:cursor-not-allowed disabled:opacity-40" title="Stop runtime" data-testid="button-stop-runtime"><CircleStop size={15} /></button> : <button onClick={runProject} disabled={isPythonLoading || isBooting} className="rounded-md bg-[var(--accent)] p-2 text-white shadow-[0_0_16px_rgba(98,114,245,.2)] hover:bg-[var(--accent-hover)] disabled:cursor-wait disabled:opacity-50" title="Run project" data-testid="button-run-project"><Play size={14} fill="currentColor" /></button>}
         {!isPython && <button onClick={refresh} disabled={!previewUrl} className="rounded-md p-2 text-[var(--text-muted)] hover:bg-[var(--bg-subtle)] hover:text-[var(--accent-text)] disabled:opacity-40" title="Refresh preview" data-testid="button-refresh-preview"><RefreshCw size={14} /></button>}
+        {onToggleCollapse && <button onClick={onToggleCollapse} className="rounded-md p-2 text-[var(--text-muted)] hover:bg-[var(--bg-subtle)] hover:text-[var(--accent-text)]" title="Collapse preview"><PanelRightClose size={15} /></button>}
       </div>
     </div>
     <div className="flex min-h-0 flex-1 flex-col">
