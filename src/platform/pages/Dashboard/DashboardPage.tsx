@@ -15,34 +15,25 @@ import {
   TrendingUp,
   Users,
   UserPlus,
-  ChevronRight
+  ChevronRight,
 } from "lucide-react";
 import { useAuth } from "../../../core/hooks/useAuth";
 import { useLanguage } from "../../../core/context/LanguageContext";
 import { AvatarPicker } from "../../../shared/ui/AvatarPicker";
 import { socialService } from "../../../core/services/socialService";
 
-// ─── Animation variants ───────────────────────────────────────────────────────
-
+// ─── Animation ──────────────────────────────────────────────────────────────
 const fadeUp: Variants = {
-  hidden: { opacity: 0, y: 16 },
-  show: {
-    opacity: 1,
-    y: 0,
-    transition: { duration: 0.4, ease: "easeOut" as const },
-  },
+  hidden: { opacity: 0, y: 10 },
+  show: { opacity: 1, y: 0, transition: { duration: 0.32, ease: [0.25, 0.1, 0.25, 1] as const } },
 };
 
 const stagger: Variants = {
   hidden: {},
-  show: { transition: { staggerChildren: 0.08 } },
+  show: { transition: { staggerChildren: 0.07 } },
 };
 
-// ─── Constants ────────────────────────────────────────────────────────────────
-
 const XP_PER_LEVEL = 1000;
-
-// ─── Component ────────────────────────────────────────────────────────────────
 
 export default function DashboardPage() {
   const { profile, user } = useAuth();
@@ -62,7 +53,6 @@ export default function DashboardPage() {
   const xpToNextLevel = XP_PER_LEVEL - xpIntoLevel;
 
   useEffect(() => {
-    // Show avatar picker if user is logged in but has no photo
     if (profile && !profile.photoURL) {
       const timer = setTimeout(() => setShowAvatarPicker(true), 1500);
       return () => clearTimeout(timer);
@@ -71,313 +61,315 @@ export default function DashboardPage() {
 
   useEffect(() => {
     if (!user) return;
-    socialService.getFriends(user.uid).then(f => setFriends(f.slice(0, 5)));
+    socialService.getFriends(user.uid).then((f) => setFriends(f.slice(0, 5)));
     socialService.getFriendRequests(user.uid).then(setRequests);
   }, [user]);
 
-  const quickActionsFixed = [
+  const greeting = t("dashboard.welcome");
+
+  // Quick actions — each gets a distinct flat fill per neubrutalism.com palette
+  const quickActions = [
     {
       to: "/app/courses",
       icon: BookOpen,
-      label: t('nav.courses'),
-      color: "bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-900/40",
+      label: t("nav.courses"),
+      bg: "bg-[#FFD23F]",
+      accent: "Courses",
     },
     {
       to: "/app/ide",
       icon: Terminal,
-      label: t('nav.ide'),
-      color: "bg-green-50 dark:bg-green-900/20 text-green-600 dark:text-green-400 hover:bg-green-100 dark:hover:bg-green-900/40",
+      label: t("nav.ide"),
+      bg: "bg-[#88D498]",
+      accent: "Code Studio",
     },
     {
       to: "/app/arena/training",
       icon: Trophy,
-      label: t('nav.arena'),
-      color: "bg-orange-50 dark:bg-orange-900/20 text-orange-600 dark:text-orange-400 hover:bg-orange-100 dark:hover:bg-orange-900/40",
+      label: t("nav.arena"),
+      bg: "bg-[#FF6B6B]",
+      accent: "Arena",
     },
     {
       to: "/app/chat",
       icon: Bot,
-      label: t('nav.chat'),
-      color: "bg-violet-50 dark:bg-violet-900/20 text-violet-600 dark:text-violet-400 hover:bg-violet-100 dark:hover:bg-violet-900/40",
+      label: t("nav.chat"),
+      bg: "bg-[#B8A9FA]",
+      accent: "Smart Chat",
     },
   ] as const;
-
-  const greeting = t('dashboard.welcome');
 
   return (
     <>
       <AnimatePresence>
         {showAvatarPicker && (
           <div className="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-black/60 backdrop-blur-sm">
-            <motion.div
-              initial={{ opacity: 0, scale: 0.9, y: 20 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.9, y: 20 }}
-            >
-              <AvatarPicker uid={user!.uid} onComplete={() => setShowAvatarPicker(false)} />
+            <motion.div initial={{ opacity: 0, scale: 0.96, y: 12 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.96, y: 12 }}>
+              <div className="border-[3px] border-black shadow-[8px_8px_0_0_#000] bg-white">
+                <AvatarPicker uid={user!.uid} onComplete={() => setShowAvatarPicker(false)} />
+              </div>
             </motion.div>
           </div>
         )}
       </AnimatePresence>
 
-      <motion.div
-        variants={stagger}
-        initial="hidden"
-        animate="show"
-        className="space-y-8 max-w-6xl mx-auto pb-12"
-      >
-        {/* ── Welcome banner ───────────────────────────────────────────────── */}
+      <motion.div variants={stagger} initial="hidden" animate="show" className="space-y-6 max-w-6xl mx-auto pb-12">
+        {/* ── Page meta — exposed structure ─────────────────────────────────── */}
+        <motion.div variants={fadeUp} className="flex flex-wrap items-center gap-3">
+          <span className="inline-flex items-center gap-2 bg-black text-[#FFD23F] border-[3px] border-black px-3 py-1.5 font-mono text-[11px] font-black uppercase tracking-widest">
+            <span className="w-2 h-2 bg-[#FFD23F] border border-black" /> Dashboard // System Ready
+          </span>
+          <span className="hidden sm:inline-flex h-[3px] flex-1 bg-black" />
+          <span className="inline-flex bg-white border-[3px] border-black px-2.5 py-1 font-mono text-[10px] font-black uppercase tracking-widest shadow-[3px_3px_0_0_#000]">
+            Lvl {level} • {xp.toLocaleString()} XP
+          </span>
+        </motion.div>
+
+        {/* ── Welcome — hard yellow hero ────────────────────────────────────── */}
         <motion.div
           variants={fadeUp}
-          className="relative overflow-hidden rounded-[2.5rem] bg-gradient-to-r from-brand-600 to-brand-700 p-8 text-white shadow-xl shadow-brand-500/20"
+          className="relative bg-[#FFD23F] border-[3px] border-black shadow-[8px_8px_0_0_#000] p-7 md:p-9 overflow-hidden"
         >
-          {/* Decorative pixel grid */}
-          <div className={`absolute ${isRTL ? 'left-8' : 'right-8'} top-0 bottom-0 flex items-center opacity-20 pointer-events-none select-none`}>
-            {[...Array(4)].map((_, i) => (
-              <div key={i} className={`flex flex-col gap-2 ${isRTL ? 'ml-3' : 'mr-3'}`}>
-                {[...Array(4)].map((_, j) => (
-                  <div
-                    key={j}
-                    className={`rounded-sm bg-white ${(i + j) % 2 === 0 ? "w-4 h-4" : "w-3 h-3"}`}
-                  />
-                ))}
-              </div>
-            ))}
+          {/* subtle grid + noise handled globally, add local hard grid */}
+          <div
+            className="pointer-events-none absolute inset-0 opacity-[0.07]"
+            style={{
+              backgroundImage:
+                "linear-gradient(rgba(0,0,0,0.9) 1px, transparent 1px), linear-gradient(90deg, rgba(0,0,0,0.9) 1px, transparent 1px)",
+              backgroundSize: "24px 24px",
+            }}
+          />
+          {/* rotated level sticker */}
+          <div className="absolute right-4 top-4 hidden md:flex items-center gap-2 bg-[#FF6B6B] border-[3px] border-black px-3 py-1.5 shadow-[3px_3px_0_0_#000] rotate-[1.5deg]">
+            <span className="w-2.5 h-2.5 bg-black" />
+            <span className="font-mono text-[11px] font-black uppercase tracking-widest text-black">Level {level} • {streak}🔥</span>
+          </div>
+          {/* big watermark */}
+          <div className="pointer-events-none absolute -right-6 -bottom-8 hidden lg:block select-none">
+            <span className="font-black text-[92px] leading-none tracking-tighter text-black/[0.06]" style={{ fontFamily: "'Syne', sans-serif" }}>
+              PIXEL
+            </span>
           </div>
 
           <div className="relative">
-            <p className="text-brand-200 text-sm mb-1">{greeting},</p>
-            <h1 className="text-4xl font-black mb-4 tracking-tight">{name} 👋</h1>
+            <p className="font-mono text-[11px] font-black uppercase tracking-[0.2em] text-black/60">{greeting} —</p>
+            <h1 className="mt-1 font-black text-4xl md:text-[44px] leading-none tracking-tight text-black" style={{ fontFamily: "'Syne', sans-serif" }}>
+              {name}
+              <span className="ml-3 inline-flex items-center justify-center bg-black text-[#FFD23F] border-[3px] border-black px-3 py-1 text-3xl md:text-[34px] rotate-[-1deg] shadow-[3px_3px_0_0_#000]">
+                👋
+              </span>
+            </h1>
 
-          {/* XP progress */}
-          <div className="space-y-2 max-w-xs">
-            <div className="flex items-center justify-between text-[10px] font-black uppercase tracking-widest">
-              <span className="text-brand-200">
-                {t('dashboard.level')} {level}
-              </span>
-              <span className="text-brand-200">
-                {xpPercent.toFixed(0)}%
-              </span>
+            {/* XP — hard progress */}
+            <div className="mt-6 max-w-[420px] bg-white border-[3px] border-black shadow-[5px_5px_0_0_#000] p-4">
+              <div className="flex items-center justify-between font-mono text-[10px] font-black uppercase tracking-widest text-black">
+                <span>Level {level}</span>
+                <span>{xpPercent.toFixed(0)}% • {xp.toLocaleString()} XP</span>
+              </div>
+              <div className="mt-2 h-[18px] bg-white border-[3px] border-black p-1 flex">
+                <motion.div
+                  className="h-full bg-black"
+                  initial={{ width: 0 }}
+                  animate={{ width: `${xpPercent}%` }}
+                  transition={{ duration: 0.9, delay: 0.2, ease: "easeOut" }}
+                />
+              </div>
+              <p className="mt-2 font-mono text-[10px] font-black uppercase tracking-widest text-black">
+                {xpToNextLevel} XP TO NEXT LEVEL →
+              </p>
             </div>
-            <div className="h-2 bg-white/20 rounded-full overflow-hidden">
-              <motion.div
-                className="h-full bg-white rounded-full"
-                initial={{ width: 0 }}
-                animate={{ width: `${xpPercent}%` }}
-                transition={{ duration: 1, delay: 0.3, ease: "easeOut" }}
-              />
+          </div>
+          <div className="absolute bottom-0 left-0 right-0 h-[6px] bg-black" />
+        </motion.div>
+
+        {/* ── Requests — hard alert ─────────────────────────────────────────── */}
+        {requests.length > 0 && (
+          <motion.div variants={fadeUp} className="bg-white border-[3px] border-black shadow-[5px_5px_0_0_#000] p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 bg-[#FF6B6B] border-[3px] border-black flex items-center justify-center shrink-0">
+                <UserPlus className="w-5 h-5 text-black" />
+              </div>
+              <div>
+                <p className="font-mono text-xs font-black uppercase tracking-widest text-black">{t("profile.requests")} • {requests.length}</p>
+                <p className="font-mono text-[11px] font-bold text-black/60">{t("profile.pendingRequests").replace("{count}", requests.length.toString())}</p>
+              </div>
             </div>
-            <p className="text-[10px] font-bold text-brand-200 uppercase tracking-wide">
-              {xpToNextLevel} {t('dashboard.xpRemaining')}
-            </p>
+            <button
+              onClick={() => navigate.push("/app/profile?tab=friends")}
+              className="w-full sm:w-auto bg-black text-[#FFD23F] border-[3px] border-black px-6 py-2.5 font-mono text-xs font-black uppercase tracking-widest shadow-[3px_3px_0_0_#000] hover:translate-x-[-2px] hover:translate-y-[-2px] hover:shadow-[5px_5px_0_0_#000] active:translate-x-[2px] active:translate-y-[2px] active:shadow-none transition-all"
+            >
+              {t("common.review")} →
+            </button>
+          </motion.div>
+        )}
+
+        {/* ── Main grid ─────────────────────────────────────────────────────── */}
+        <div className="grid lg:grid-cols-3 gap-6">
+          <div className="lg:col-span-2 space-y-6">
+            {/* Stat cards — 4 flat fills, hard shadows */}
+            <motion.div variants={stagger} className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              {[
+                { icon: Star, label: t("dashboard.totalXP"), value: xp.toLocaleString(), bg: "bg-[#FFD23F]", border: "border-black" },
+                { icon: Zap, label: t("dashboard.level"), value: String(level), bg: "bg-[#FF6B6B]", border: "border-black" },
+                { icon: Flame, label: t("dashboard.dayStreak"), value: `${streak}🔥`, bg: "bg-[#74B9FF]", border: "border-black" },
+                { icon: TrendingUp, label: t("dashboard.rank"), value: "#12", bg: "bg-[#88D498]", border: "border-black" },
+              ].map(({ icon: Icon, label, value, bg }) => (
+                <motion.div
+                  key={label}
+                  variants={fadeUp}
+                  className={`${bg} border-[3px] border-black shadow-[5px_5px_0_0_#000] p-4 flex flex-col gap-3`}
+                >
+                  <span className="w-9 h-9 bg-black border-[2px] border-black flex items-center justify-center">
+                    <Icon className="w-4 h-4 text-white" />
+                  </span>
+                  <span className="font-black text-3xl leading-none tracking-tight text-black" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+                    {value}
+                  </span>
+                  <span className="font-mono text-[10px] font-black uppercase tracking-widest text-black/70 leading-none">{label}</span>
+                </motion.div>
+              ))}
+            </motion.div>
+
+            {/* Quick actions — big square brutalist buttons */}
+            <motion.div variants={fadeUp}>
+              <h2 className="flex items-center gap-3 font-black text-xs uppercase tracking-widest text-black mb-3" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+                <span className="w-2 h-6 bg-black" /> {t("dashboard.quickActions")}
+              </h2>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                {quickActions.map(({ to, icon: Icon, label, bg }) => (
+                  <Link
+                    key={to}
+                    href={to}
+                    className={`${bg} border-[3px] border-black shadow-[5px_5px_0_0_#000] p-5 flex flex-col items-center gap-3 hover:translate-x-[-2px] hover:translate-y-[-2px] hover:shadow-[7px_7px_0_0_#000] active:translate-x-[3px] active:translate-y-[3px] active:shadow-none transition-all text-center`}
+                  >
+                    <span className="w-12 h-12 bg-black border-[2px] border-black flex items-center justify-center">
+                      <Icon className="w-6 h-6 text-white" />
+                    </span>
+                    <span className="font-mono text-[11px] font-black uppercase tracking-widest text-black leading-tight">{label}</span>
+                  </Link>
+                ))}
+              </div>
+            </motion.div>
+
+            {/* Recent activity — hard list, not soft card */}
+            <motion.div variants={fadeUp}>
+              <h2 className="flex items-center gap-3 font-black text-xs uppercase tracking-widest text-black mb-3" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+                <span className="w-2 h-6 bg-black" /> {t("dashboard.recentActivity")}
+              </h2>
+              <div className="bg-white border-[3px] border-black shadow-[5px_5px_0_0_#000] divide-y-[3px] divide-black overflow-hidden">
+                {[
+                  { icon: "📚", text: t("dashboard.activityEmpty"), sub: t("dashboard.getStarted"), to: "/app/courses", bg: "bg-[#FFD23F]" },
+                  { icon: "⚡", text: t("dashboard.playgroundPromo"), sub: t("dashboard.openPlayground"), to: "/app/ide", bg: "bg-[#88D498]" },
+                  { icon: "🏆", text: t("dashboard.challengePromo"), sub: t("dashboard.browseChallenges"), to: "/app/arena/training", bg: "bg-[#FF6B6B]" },
+                ].map((item, i) => (
+                  <Link key={i} href={item.to} className="flex items-center gap-4 p-5 hover:bg-[#FFF4CC] transition-colors group">
+                    <span className={`w-12 h-12 ${item.bg} border-[3px] border-black flex items-center justify-center text-xl shrink-0 group-hover:rotate-[-2deg] transition-transform`}>
+                      {item.icon}
+                    </span>
+                    <span className="flex-1 min-w-0 text-left">
+                      <span className={`block font-bold text-sm text-black ${isRTL ? "text-right" : "text-left"}`} style={{ fontFamily: "'Inter', sans-serif" }}>
+                        {item.text}
+                      </span>
+                      <span className={`block font-mono text-[10px] font-black uppercase tracking-widest text-black/60 mt-1 ${isRTL ? "text-right" : "text-left"}`}>
+                        {item.sub} →
+                      </span>
+                    </span>
+                    <ChevronRight className={`w-5 h-5 text-black shrink-0 ${isRTL ? "rotate-180" : ""} group-hover:translate-x-1 transition-transform`} />
+                  </Link>
+                ))}
+              </div>
+            </motion.div>
+          </div>
+
+          {/* ── Sidebar ─────────────────────────────────────────────────────── */}
+          <div className="space-y-6">
+            {/* Coders Online */}
+            <motion.div variants={fadeUp} className="bg-white border-[3px] border-black shadow-[5px_5px_0_0_#000] p-6">
+              <div className="flex items-center justify-between gap-3 -mx-6 -mt-6 px-6 py-4 mb-6 bg-[#74B9FF] border-b-[3px] border-black">
+                <h3 className="font-mono text-[11px] font-black uppercase tracking-widest text-black">{t("dashboard.codersOnline")}</h3>
+                <Link
+                  href="/app/profile?tab=friends"
+                  className="bg-black text-white border-[2px] border-black px-2.5 py-1 font-mono text-[10px] font-black uppercase tracking-widest hover:bg-white hover:text-black transition-colors"
+                >
+                  {t("common.viewAll")} →
+                </Link>
+              </div>
+
+              <div className="space-y-4">
+                {friends.length === 0 ? (
+                  <div className="text-center py-8 space-y-3">
+                    <div className="w-14 h-14 bg-white border-[3px] border-black flex items-center justify-center mx-auto shadow-[3px_3px_0_0_#000]">
+                      <Users className="w-6 h-6 text-black" />
+                    </div>
+                    <p className="font-mono text-xs font-black uppercase tracking-widest text-black">{t("dashboard.noFriends")}</p>
+                    <Link href="/app/arena/rankings" className="inline-flex bg-[#FFD23F] border-[3px] border-black px-3 py-1.5 font-mono text-[10px] font-black uppercase tracking-widest shadow-[3px_3px_0_0_#000] hover:translate-x-[-1px] hover:translate-y-[-1px] hover:shadow-[5px_5px_0_0_#000] transition-all">
+                      {t("dashboard.findCoders")} →
+                    </Link>
+                  </div>
+                ) : (
+                  friends.map((friend) => (
+                    <div
+                      key={friend.uid}
+                      className="flex items-center gap-3 border-[2px] border-black p-2 pr-3 hover:bg-[#FFF4CC] cursor-pointer transition-colors group"
+                      onClick={() => navigate.push(`/app/profile/${friend.uid}`)}
+                    >
+                      <span className="w-10 h-10 border-[2px] border-black overflow-hidden bg-white shrink-0">
+                        <img src={friend.photoURL || `https://api.dicebear.com/7.x/avataaars/svg?seed=${friend.displayName}`} className="w-full h-full object-cover" alt="" />
+                      </span>
+                      <span className="flex-1 min-w-0 text-left">
+                        <span className="block font-mono text-xs font-black uppercase tracking-tight text-black truncate group-hover:underline">{friend.displayName}</span>
+                        <span className="block font-mono text-[10px] font-bold uppercase text-black/60">{t("dashboard.level")} {friend.level}</span>
+                      </span>
+                      <ChevronRight className={`w-4 h-4 text-black ${isRTL ? "rotate-180" : ""} group-hover:translate-x-0.5 transition-transform`} />
+                    </div>
+                  ))
+                )}
+              </div>
+
+              <Link
+                href="/app/arena/rankings"
+                className="mt-6 flex items-center justify-center gap-2 w-full bg-white border-[3px] border-black py-3 font-mono text-[11px] font-black uppercase tracking-widest shadow-[3px_3px_0_0_#000] hover:translate-x-[-2px] hover:translate-y-[-2px] hover:shadow-[5px_5px_0_0_#000] active:translate-x-[2px] active:translate-y-[2px] active:shadow-none transition-all"
+              >
+                <Users className="w-4 h-4" /> {t("dashboard.globalLeaderboard")}
+              </Link>
+            </motion.div>
+
+            {/* Next achievement */}
+            <motion.div variants={fadeUp} className="bg-[#FFD23F] border-[3px] border-black shadow-[5px_5px_0_0_#000] p-6">
+              <div className="flex items-center gap-3">
+                <span className="w-12 h-12 bg-black border-[2px] border-black flex items-center justify-center shrink-0">
+                  <Trophy className="w-6 h-6 text-[#FFD23F]" />
+                </span>
+                <span className="min-w-0">
+                  <span className="block font-mono text-[10px] font-black uppercase tracking-widest text-black/60">Next Achievement</span>
+                  <span className="block font-black text-sm leading-none tracking-tight text-black" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+                    {t("arena.arenaGladiator")}
+                  </span>
+                </span>
+              </div>
+              <div className="mt-5 bg-white border-[3px] border-black p-3 shadow-[3px_3px_0_0_#000]">
+                <div className="flex justify-between font-mono text-[10px] font-black uppercase tracking-widest text-black">
+                  <span>{t("arena.win3Duels")}</span>
+                  <span>1/3</span>
+                </div>
+                <div className="mt-2 h-4 bg-white border-[2px] border-black p-1">
+                  <div className="h-full bg-black w-[33%]" />
+                </div>
+              </div>
+            </motion.div>
           </div>
         </div>
+
+        {/* ── Marquee — visible structure ───────────────────────────────────── */}
+        <motion.div variants={fadeUp} className="bg-black border-[3px] border-black text-[#FFD23F] overflow-hidden py-2.5">
+          <div className="flex whitespace-nowrap font-mono text-[11px] font-black uppercase tracking-[0.18em] animate-[marquee_22s_linear_infinite]">
+            <span>HARD SHADOWS • THICK BORDERS • SQUARE CORNERS • FLAT COLOR • BOLD TYPE • ZERO BLUR • VISIBLE STRUCTURE •&nbsp;</span>
+            <span>HARD SHADOWS • THICK BORDERS • SQUARE CORNERS • FLAT COLOR • BOLD TYPE • ZERO BLUR • VISIBLE STRUCTURE •&nbsp;</span>
+          </div>
+        </motion.div>
       </motion.div>
 
-      {/* ── Pending Requests Alert ────────────────────────────────────────── */}
-      {requests.length > 0 && (
-        <motion.div 
-          variants={fadeUp}
-          className="bg-orange-50 border-2 border-orange-200 dark:bg-orange-950/20 dark:border-orange-800/40 rounded-3xl p-4 flex items-center justify-between gap-4"
-        >
-          <div className="flex items-center gap-4">
-            <div className="w-10 h-10 rounded-xl bg-orange-100 dark:bg-orange-900/40 flex items-center justify-center text-orange-600">
-              <UserPlus className="w-5 h-5" />
-            </div>
-            <div>
-              <p className="text-sm font-black text-orange-900 dark:text-orange-200 uppercase tracking-widest">{t('profile.requests')}</p>
-              <p className="text-xs text-orange-700 dark:text-orange-400 font-bold">{t('profile.pendingRequests').replace('{count}', requests.length.toString())}</p>
-            </div>
-          </div>
-          <button 
-            onClick={() => navigate.push('/app/profile?tab=friends')}
-            className="px-4 py-2 bg-orange-500 text-white rounded-xl text-xs font-black uppercase tracking-widest hover:bg-orange-600 transition-all active:scale-95 shadow-lg shadow-orange-500/20"
-          >
-            {t('common.review')}
-          </button>
-        </motion.div>
-      )}
-
-      {/* ── Content Grid ─────────────────────────────────────────────────── */}
-      <div className="grid lg:grid-cols-3 gap-8">
-        <div className="lg:col-span-2 space-y-8">
-          {/* Stat cards */}
-          <motion.div
-            variants={stagger}
-            className="grid grid-cols-2 md:grid-cols-4 gap-4"
-          >
-            {[
-              {
-                icon: Star,
-                label: t('dashboard.totalXP'),
-                value: xp.toLocaleString(),
-                color: "text-yellow-500",
-              },
-              { icon: Zap, label: t('dashboard.level'), value: level, color: "text-brand-500" },
-              {
-                icon: Flame,
-                label: t('dashboard.dayStreak'),
-                value: `${streak}🔥`,
-                color: "text-orange-500",
-              },
-              {
-                icon: TrendingUp,
-                label: t('dashboard.rank'),
-                value: "#12",
-                color: "text-green-500",
-              },
-            ].map(({ icon: Icon, label, value, color }) => (
-              <motion.div key={label} variants={fadeUp} className="card p-5">
-                <Icon className={`w-5 h-5 ${color} mb-3`} />
-                <p className="text-2xl font-bold text-gray-900 dark:text-white">
-                  {value}
-                </p>
-                <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mt-1">
-                  {label}
-                </p>
-              </motion.div>
-            ))}
-          </motion.div>
-
-          {/* Quick actions */}
-          <motion.div variants={fadeUp}>
-            <h2 className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mb-4">
-              {t('dashboard.quickActions')}
-            </h2>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-              {quickActionsFixed.map(({ to, icon: Icon, label, color }) => (
-                <Link
-                  key={to}
-                  href={to}
-                  className={`flex flex-col items-center gap-3 p-5 rounded-3xl font-black text-xs uppercase tracking-widest transition-all duration-200 active:scale-95 shadow-sm hover:shadow-md ${color}`}
-                >
-                  <Icon className="w-6 h-6" />
-                  {label}
-                </Link>
-              ))}
-            </div>
-          </motion.div>
-
-          {/* Recent activity */}
-          <motion.div variants={fadeUp}>
-            <h2 className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mb-4">
-              {t('dashboard.recentActivity')}
-            </h2>
-            <div className="card divide-y divide-gray-100 dark:divide-gray-800 overflow-hidden">
-              {[
-                {
-                  icon: "📚",
-                  text: t('dashboard.activityEmpty'),
-                  sub: t('dashboard.getStarted'),
-                  to: "/app/courses",
-                },
-                {
-                  icon: "⚡",
-                  text: t('dashboard.playgroundPromo'),
-                  sub: t('dashboard.openPlayground'),
-                  to: "/app/ide",
-                },
-                {
-                  icon: "🏆",
-                  text: t('dashboard.challengePromo'),
-                  sub: t('dashboard.browseChallenges'),
-                  to: "/app/arena/training",
-                },
-              ].map((item, i) => (
-                <Link
-                  key={i}
-                  href={item.to}
-                  className="flex items-center gap-4 p-5 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors group"
-                >
-                  <span className="text-2xl group-hover:scale-110 transition-transform">{item.icon}</span>
-                  <div className="flex-1 min-w-0">
-                    <p className={`text-sm font-bold text-gray-700 dark:text-gray-300 ${isRTL ? 'text-right' : 'text-left'}`}>
-                      {item.text}
-                    </p>
-                    <p className={`text-[10px] font-black text-brand-500 dark:text-brand-400 uppercase tracking-widest mt-1 ${isRTL ? 'text-right' : 'text-left'}`}>
-                      {item.sub}
-                    </p>
-                  </div>
-                </Link>
-              ))}
-            </div>
-          </motion.div>
-        </div>
-
-        {/* ── Sidebar Widgets ─────────────────────────────────────────────── */}
-        <div className="space-y-8">
-          {/* Friends Widget */}
-          <motion.div variants={fadeUp} className="card p-6 space-y-6">
-            <div className="flex items-center justify-between">
-              <h3 className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">{t('dashboard.codersOnline')}</h3>
-              <Link href="/app/profile?tab=friends" className="text-[10px] font-black text-brand-600 uppercase tracking-widest hover:underline">{t('common.viewAll')}</Link>
-            </div>
-            
-            <div className="space-y-4">
-              {friends.length === 0 ? (
-                <div className="text-center py-8 space-y-3">
-                  <div className="w-12 h-12 bg-gray-50 dark:bg-gray-900 rounded-2xl flex items-center justify-center mx-auto text-gray-300">
-                    <Users className="w-6 h-6" />
-                  </div>
-                  <p className="text-xs text-gray-400 font-bold">{t('dashboard.noFriends')}</p>
-                  <Link href="/app/arena/rankings" className="inline-block text-[10px] font-black text-brand-500 uppercase tracking-widest underline">{t('dashboard.findCoders')}</Link>
-                </div>
-              ) : (
-                friends.map((friend) => (
-                  <div 
-                    key={friend.uid} 
-                    className="flex items-center gap-3 cursor-pointer group"
-                    onClick={() => navigate.push(`/app/profile/${friend.uid}`)}
-                  >
-                    <div className="w-10 h-10 rounded-xl overflow-hidden border-2 border-transparent group-hover:border-brand-500 transition-all">
-                      <img 
-                        src={friend.photoURL || `https://api.dicebear.com/7.x/avataaars/svg?seed=${friend.displayName}`} 
-                        className="w-full h-full object-cover"
-                        alt=""
-                      />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-xs font-black text-gray-900 dark:text-white truncate group-hover:text-brand-600 transition-colors">{friend.displayName}</p>
-                      <p className="text-[10px] font-bold text-gray-400 uppercase tracking-tight">{t('dashboard.level')} {friend.level}</p>
-                    </div>
-                    <ChevronRight className={`w-4 h-4 text-gray-300 group-hover:text-brand-500 transition-all ${isRTL ? 'rotate-180' : ''}`} />
-                  </div>
-                ))
-              )}
-            </div>
-
-            <Link 
-              href="/app/arena/rankings" 
-              className="flex items-center justify-center gap-2 w-full py-3 rounded-2xl bg-gray-50 dark:bg-gray-900 text-[10px] font-black uppercase tracking-widest text-gray-500 hover:text-brand-600 transition-colors border border-dashed border-gray-200 dark:border-gray-800"
-            >
-              <Users className="w-4 h-4" /> {t('dashboard.globalLeaderboard')}
-            </Link>
-          </motion.div>
-
-          {/* Achievement Progress Widget */}
-          <motion.div variants={fadeUp} className="card p-6 bg-brand-50/30 dark:bg-brand-900/10 border-brand-100 dark:border-brand-800/40">
-             <div className="flex items-center gap-3 mb-6">
-                <div className="w-10 h-10 rounded-xl bg-brand-500 flex items-center justify-center text-white shadow-lg shadow-brand-500/30">
-                   <Trophy className="w-5 h-5" />
-                </div>
-                <div>
-                   <h3 className="text-[10px] font-black text-brand-900 dark:text-brand-200 uppercase tracking-widest">{t('dashboard.nextAchievement')}</h3>
-                   <p className="text-xs text-brand-600 dark:text-brand-400 font-bold">{t('arena.arenaGladiator')}</p>
-                </div>
-             </div>
-             <div className="space-y-2">
-                <div className="flex justify-between text-[10px] font-black text-brand-600 dark:text-brand-400">
-                   <span>{t('arena.win3Duels')}</span>
-                   <span>1/3</span>
-                </div>
-                <div className="h-1.5 bg-brand-100 dark:bg-brand-900/60 rounded-full overflow-hidden">
-                   <div className="h-full bg-brand-500 rounded-full w-[33%]" />
-                </div>
-             </div>
-          </motion.div>
-        </div>
-      </div>
-    </motion.div>
+      <style>{`@keyframes marquee { from { transform: translateX(0) } to { transform: translateX(-50%) } }`}</style>
     </>
   );
 }
