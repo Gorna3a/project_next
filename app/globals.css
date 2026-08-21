@@ -5,22 +5,27 @@
 @tailwind utilities;
 
 :root {
-    --bg-base: #FFFDF5;
+    --bg-base: #dfe5f2;
     --bg-surface: #ffffff;
     --bg-elevated: #ffffff;
-    --bg-subtle: #FFFDF5;
+    --bg-subtle: #dfe5f2;
     --border: #000000;
     --border-subtle: #000000;
     --text-primary: #000000;
-    --text-secondary: #1a1a1a;
-    --text-muted: #52525b;
-    --accent: #FFD23F;
-    --accent-hover: #FFC300;
-    --accent-subtle: #FFF4CC;
+    --text-secondary: #000000;
+    --text-muted: #6b7280;
+    --accent: #88aaee;
+    --accent-hover: #7aa0f0;
+    --accent-subtle: #e6efff;
     --accent-text: #000000;
-    --bg-sidebar: #FFFDF5;
+    --bg-sidebar: #dfe5f2;
     --bg-header: #ffffff;
     --particle-opacity: 0;
+    /* Figma kit extras — 4px shadow, 5px radius */
+    --border-radius: 5px;
+    --box-shadow-x: 4px;
+    --box-shadow-y: 4px;
+    --shadow: var(--box-shadow-x) var(--box-shadow-y) 0px 0px var(--border);
 }
 
 @layer base {
