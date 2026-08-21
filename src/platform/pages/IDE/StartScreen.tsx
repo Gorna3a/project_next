@@ -19,9 +19,11 @@ interface StartScreenProps {
 }
 
 const TEMPLATES: { type: ProjectType; label: string; desc: string }[] = [
-  { type: "react-ts", label: "React + TypeScript", desc: "Vite + React with TS" },
-  { type: "react-js", label: "React + JavaScript", desc: "Vite + React with JS" },
+  { type: "web", label: "Web", desc: "HTML · CSS · JavaScript" },
   { type: "python", label: "Python", desc: "Pyodide in the browser" },
+  { type: "java", label: "Java", desc: "CheerpJ in the browser" },
+  { type: "c", label: "C", desc: "WebAssembly in the browser" },
+  { type: "cpp", label: "C++", desc: "WebAssembly in the browser" },
 ];
 
 export function StartScreen({ onCreate, onImport }: StartScreenProps) {

@@ -10,6 +10,7 @@ const PYODIDE_INDEX = `https://cdn.jsdelivr.net/pyodide/${PYODIDE_VERSION}/full/
 const PYODIDE_CDN = `${PYODIDE_INDEX}pyodide.js`;
 
 interface PyodideModule {
+  FS: { mkdir: (path: string) => void; writeFile: (path: string, data: string) => void };
   setStdout: (opts: { batched: (text: string) => void }) => void;
   setStderr: (opts: { batched: (text: string) => void }) => void;
   runPythonAsync: (code: string) => Promise<unknown>;
@@ -76,16 +77,40 @@ export function usePyodide(files: ProjectFile[], enabled = true) {
       return;
     }
 
-    const main = files.find(file => file.name === "main.py")?.content ?? "";
+    const pyFiles = files.filter(
+      (file) => file.name.endsWith(".py") && file.content != null,
+    );
     runningRef.current = true;
     setState("running");
     setLogs(["$ python main.py"]);
 
     let output = "";
     try {
+      const mkdirTree = (path: string) => {
+        const parts = path.split("/").filter(Boolean);
+        let current = "";
+        for (const part of parts) {
+          current = current ? `${current}/${part}` : part;
+          try { py.FS.mkdir(current); } catch { /* exists */ }
+        }
+      };
+      for (const file of pyFiles) {
+        const path = file.id;
+        const dir = path.includes("/") ? path.slice(0, path.lastIndexOf("/")) : "";
+        if (dir) mkdirTree(dir);
+        py.FS.writeFile(path, file.content ?? "");
+      }
       py.setStdout({ batched: (text: string) => { output += text; } });
       py.setStderr({ batched: (text: string) => { output += text; } });
-      await py.runPythonAsync(main);
+      const entry =
+        pyFiles.find((file) => file.name === "main.py")?.id ?? pyFiles[0]?.id;
+      if (!entry) {
+        output += "\nNo .py file found to run.";
+      } else {
+        await py.runPythonAsync(
+          `import runpy\nrunpy.run_path("${entry}", run_name="__main__")`,
+        );
+      }
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
       output += `\nTraceback: ${message}`;

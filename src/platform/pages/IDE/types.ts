@@ -1,5 +1,5 @@
-export type FileKind = "html" | "css" | "js" | "ts" | "json" | "py" | "md" | "folder";
-export type ProjectType = "web" | "python" | "react-ts" | "react-js";
+export type FileKind = "html" | "css" | "js" | "ts" | "json" | "c" | "cpp" | "h" | "java" | "py" | "md" | "folder";
+export type ProjectType = "web" | "python" | "java" | "c" | "cpp";
 
 export type ProjectFile = {
   id: string;
@@ -389,275 +389,169 @@ A tiny Python workspace that runs in your browser with Pyodide.
 Edit **main.py** and press **Run** to see the output below.` },
 ];
 
-export const reactTsStarterFiles: ProjectFile[] = [
+export const javaStarterFiles: ProjectFile[] = [
   {
-    id: "package.json",
-    name: "package.json",
-    kind: "json",
-    content: `{
-  "name": "react-ts-app",
-  "private": true,
-  "scripts": {
-    "dev": "vite --host 0.0.0.0"
-  },
-  "dependencies": {
-    "react": "latest",
-    "react-dom": "latest"
-  },
-  "devDependencies": {
-    "@vitejs/plugin-react": "latest",
-    "vite": "latest",
-    "typescript": "latest",
-    "@types/react": "latest",
-    "@types/react-dom": "latest"
+    id: "Main.java",
+    name: "Main.java",
+    kind: "java",
+    content: `public class Main {
+  public static void main(String[] args) {
+    System.out.println("Hello from PixelLab!");
+    for (int i = 1; i <= 5; i++) {
+      System.out.println("Count: " + i);
+    }
   }
 }`,
   },
   {
-    id: "vite.config.ts",
-    name: "vite.config.ts",
-    kind: "ts",
-    content: `import { defineConfig } from "vite";
-import react from "@vitejs/plugin-react";
-
-export default defineConfig({
-  plugins: [react()],
-});`,
-  },
-  {
-    id: "tsconfig.json",
-    name: "tsconfig.json",
-    kind: "json",
-    content: `{
-  "compilerOptions": {
-    "target": "ES2020",
-    "useDefineForClassFields": true,
-    "lib": ["ES2020", "DOM", "DOM.Iterable"],
-    "module": "ESNext",
-    "skipLibCheck": true,
-    "moduleResolution": "bundler",
-    "allowImportingTsExtensions": true,
-    "resolveJsonModule": true,
-    "isolatedModules": true,
-    "noEmit": true,
-    "jsx": "react-jsx",
-    "strict": true
-  },
-  "include": ["src"]
+    id: "Greeting.java",
+    name: "Greeting.java",
+    kind: "java",
+    content: `public class Greeting {
+  public String sayHello(String name) {
+    return "Hello, " + name + "!";
+  }
 }`,
-  },
-  {
-    id: "index.html",
-    name: "index.html",
-    kind: "html",
-    content: `<!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>React + TypeScript</title>
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
-  </body>
-</html>`,
-  },
-  {
-    id: "src/main.tsx",
-    name: "main.tsx",
-    kind: "ts",
-    parent: "src",
-    content: `import React from "react";
-import ReactDOM from "react-dom/client";
-import App from "./App";
-import "./index.css";
-
-ReactDOM.createRoot(document.getElementById("root")!).render(
-  <React.StrictMode>
-    <App />
-  </React.StrictMode>
-);`,
-  },
-  {
-    id: "src/App.tsx",
-    name: "App.tsx",
-    kind: "ts",
-    parent: "src",
-    content: `import { useState } from "react";
-
-export default function App() {
-  const [count, setCount] = useState(0);
-  return (
-    <main style={{ fontFamily: "system-ui, sans-serif", padding: "48px", textAlign: "center", color: "#eef0ff" }}>
-      <h1>React + TypeScript</h1>
-      <p>Edit <code>src/App.tsx</code> and save to see changes.</p>
-      <button
-        onClick={() => setCount((c) => c + 1)}
-        style={{ fontSize: 16, padding: "10px 18px", borderRadius: 12, border: "none", background: "#6272f5", color: "white", cursor: "pointer" }}
-      >
-        count is {count}
-      </button>
-    </main>
-  );
-}`,
-  },
-  {
-    id: "src/index.css",
-    name: "index.css",
-    kind: "css",
-    parent: "src",
-    content: `:root { color-scheme: light dark; }
-body { margin: 0; background: #0f1020; }`,
-  },
-  {
-    id: "src/vite-env.d.ts",
-    name: "vite-env.d.ts",
-    kind: "ts",
-    parent: "src",
-    content: `/// <reference types="vite/client" />`,
   },
   {
     id: "README.md",
     name: "README.md",
     kind: "md",
-    content: `# React + TypeScript starter
+    content: `# Java starter
 
-A Vite + React + TypeScript project that runs entirely in your browser.
+A Java project that compiles and runs entirely in your browser with CheerpJ.
 
-Press **Run**, then edit \`src/App.tsx\` and watch the preview update.`,
+Edit Main.java and press Run. All .java files in the project are compiled together.`,
   },
 ];
 
-export const reactJsStarterFiles: ProjectFile[] = [
+export const cStarterFiles: ProjectFile[] = [
   {
-    id: "package.json",
-    name: "package.json",
-    kind: "json",
-    content: `{
-  "name": "react-js-app",
-  "private": true,
-  "scripts": {
-    "dev": "vite --host 0.0.0.0"
-  },
-  "dependencies": {
-    "react": "latest",
-    "react-dom": "latest"
-  },
-  "devDependencies": {
-    "@vitejs/plugin-react": "latest",
-    "vite": "latest"
-  }
+    id: "main.c",
+    name: "main.c",
+    kind: "c",
+    content: `#include <stdio.h>
+#include "math_utils.h"
+
+int main(void) {
+  printf("Hello from PixelLab!\\n");
+  printf("factorial(5) = %d\\n", factorial(5));
+  printf("is_prime(7) = %d\\n", is_prime(7));
+  return 0;
 }`,
   },
   {
-    id: "vite.config.js",
-    name: "vite.config.js",
-    kind: "js",
-    content: `import { defineConfig } from "vite";
-import react from "@vitejs/plugin-react";
+    id: "math_utils.h",
+    name: "math_utils.h",
+    kind: "h",
+    content: `#ifndef MATH_UTILS_H
+#define MATH_UTILS_H
 
-export default defineConfig({
-  plugins: [react()],
-});`,
+int factorial(int n);
+int is_prime(int n);
+
+#endif`,
   },
   {
-    id: "index.html",
-    name: "index.html",
-    kind: "html",
-    content: `<!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>React + JavaScript</title>
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.jsx"></script>
-  </body>
-</html>`,
-  },
-  {
-    id: "src/main.jsx",
-    name: "main.jsx",
-    kind: "js",
-    parent: "src",
-    content: `import React from "react";
-import ReactDOM from "react-dom/client";
-import App from "./App";
-import "./index.css";
+    id: "math_utils.c",
+    name: "math_utils.c",
+    kind: "c",
+    content: `#include "math_utils.h"
 
-ReactDOM.createRoot(document.getElementById("root")).render(
-  <React.StrictMode>
-    <App />
-  </React.StrictMode>
-);`,
-  },
-  {
-    id: "src/App.jsx",
-    name: "App.jsx",
-    kind: "js",
-    parent: "src",
-    content: `import { useState } from "react";
+int factorial(int n) {
+  int result = 1;
+  for (int i = 2; i <= n; i++) result *= i;
+  return result;
+}
 
-export default function App() {
-  const [count, setCount] = useState(0);
-  return (
-    <main style={{ fontFamily: "system-ui, sans-serif", padding: "48px", textAlign: "center", color: "#eef0ff" }}>
-      <h1>React + JavaScript</h1>
-      <p>Edit <code>src/App.jsx</code> and save to see changes.</p>
-      <button
-        onClick={() => setCount((c) => c + 1)}
-        style={{ fontSize: 16, padding: "10px 18px", borderRadius: 12, border: "none", background: "#6272f5", color: "white", cursor: "pointer" }}
-      >
-        count is {count}
-      </button>
-    </main>
-  );
+int is_prime(int n) {
+  if (n < 2) return 0;
+  for (int i = 2; i * i <= n; i++)
+    if (n % i == 0) return 0;
+  return 1;
 }`,
-  },
-  {
-    id: "src/index.css",
-    name: "index.css",
-    kind: "css",
-    parent: "src",
-    content: `:root { color-scheme: light dark; }
-body { margin: 0; background: #0f1020; }`,
   },
   {
     id: "README.md",
     name: "README.md",
     kind: "md",
-    content: `# React + JavaScript starter
+    content: `# C starter
 
-A Vite + React + JavaScript project that runs entirely in your browser.
+A C project that compiles and runs entirely in your browser with WebAssembly.
 
-Press **Run**, then edit \`src/App.jsx\` and watch the preview update.`,
+Edit main.c and press Run. All .c / .h files are compiled together.`,
+  },
+];
+
+export const cppStarterFiles: ProjectFile[] = [
+  {
+    id: "main.cpp",
+    name: "main.cpp",
+    kind: "cpp",
+    content: `#include <iostream>
+#include <string>
+#include "string_utils.hpp"
+
+int main() {
+  std::cout << "Hello from PixelLab!" << std::endl;
+  std::string text = "open code";
+  std::cout << "reversed: " << reverse(text) << std::endl;
+  return 0;
+}`,
+  },
+  {
+    id: "string_utils.hpp",
+    name: "string_utils.hpp",
+    kind: "h",
+    content: `#ifndef STRING_UTILS_HPP
+#define STRING_UTILS_HPP
+
+#include <string>
+
+std::string reverse(const std::string& s);
+
+#endif`,
+  },
+  {
+    id: "string_utils.cpp",
+    name: "string_utils.cpp",
+    kind: "cpp",
+    content: `#include "string_utils.hpp"
+#include <algorithm>
+
+std::string reverse(const std::string& s) {
+  std::string r = s;
+  std::reverse(r.begin(), r.end());
+  return r;
+}`,
+  },
+  {
+    id: "README.md",
+    name: "README.md",
+    kind: "md",
+    content: `# C++ starter
+
+A C++ project that compiles and runs entirely in your browser with WebAssembly.
+
+Edit main.cpp and press Run. All .cpp / .h files are compiled together.`,
   },
 ];
 
 export const detectProjectType = (files: ProjectFile[]): ProjectType => {
-  if (
-    files.some((file) => file.name === "main.py") ||
-    files.some((file) => file.name.endsWith(".py"))
-  ) {
-    return "python";
-  }
-  const pkg = files.find((file) => file.name === "package.json");
-  const hasReact = pkg ? /"react"\s*:\s*"[^"]*"/.test(pkg.content ?? "") : false;
-  const hasTs =
-    files.some((file) => file.name.endsWith(".ts") || file.name.endsWith(".tsx")) ||
-    files.some((file) => file.name === "tsconfig.json");
-  if (hasReact) return hasTs ? "react-ts" : "react-js";
+  if (files.some((file) => file.name.endsWith(".java"))) return "java";
+  if (files.some((file) => file.name.endsWith(".cpp") || file.name.endsWith(".hpp") || file.name.endsWith(".cc"))) return "cpp";
+  if (files.some((file) => file.name.endsWith(".c") || file.name.endsWith(".h"))) return "c";
+  if (files.some((file) => file.name === "main.py") || files.some((file) => file.name.endsWith(".py"))) return "python";
   return "web";
 };
 
 export const projectLabel = (type: ProjectType): string =>
   type === "python"
     ? "python"
-    : type === "react-ts"
-      ? "react · ts"
-      : type === "react-js"
-        ? "react · js"
-        : "web";
+    : type === "java"
+      ? "java"
+      : type === "c"
+        ? "c"
+        : type === "cpp"
+          ? "c++"
+          : "web";

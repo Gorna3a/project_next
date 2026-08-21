@@ -14,8 +14,9 @@ import {
 } from "@/core/services/projectService";
 import {
   detectProjectType,
-  reactTsStarterFiles,
-  reactJsStarterFiles,
+  javaStarterFiles,
+  cStarterFiles,
+  cppStarterFiles,
   pythonStarterFiles,
   starterFiles,
   type FileKind,
@@ -52,20 +53,24 @@ const firstEditableId = (files: ProjectFile[]) =>
 const templateFor = (type: ProjectType): ProjectFile[] =>
   type === "python"
     ? pythonStarterFiles
-    : type === "react-ts"
-      ? reactTsStarterFiles
-      : type === "react-js"
-        ? reactJsStarterFiles
-        : starterFiles;
+    : type === "java"
+      ? javaStarterFiles
+      : type === "c"
+        ? cStarterFiles
+        : type === "cpp"
+          ? cppStarterFiles
+          : starterFiles;
 
 const defaultNameFor = (type: ProjectType): string =>
   type === "python"
     ? "python-starter"
-    : type === "react-ts"
-      ? "react-ts-app"
-      : type === "react-js"
-        ? "react-js-app"
-        : "web-app";
+    : type === "java"
+      ? "java-app"
+      : type === "c"
+        ? "c-app"
+        : type === "cpp"
+          ? "cpp-app"
+          : "web-app";
 
 export function useProject() {
   const { user } = useAuth();
@@ -218,7 +223,7 @@ export function useProject() {
         ? fileName.replaceAll("/", "-").trim()
         : fileName.includes(".")
           ? fileName.trim()
-          : `${fileName.trim()}.${kind === "py" ? "py" : kind === "js" ? "js" : kind === "ts" ? "ts" : kind === "css" ? "css" : kind === "json" ? "json" : "html"}`;
+          : `${fileName.trim()}.${kind === "py" ? "py" : kind === "js" ? "js" : kind === "ts" ? "ts" : kind === "c" ? "c" : kind === "cpp" ? "cpp" : kind === "h" ? "h" : kind === "css" ? "css" : kind === "json" ? "json" : "html"}`;
     if (
       !normalized ||
       files.some((file) => file.name === normalized && file.parent === parent)
@@ -236,9 +241,17 @@ export function useProject() {
               ? "// Start writing TypeScript here\n"
               : kind === "py"
                 ? "# Start writing Python here\n"
-                : kind === "json"
-                  ? "{\n  \n}\n"
-                  : "<!-- Start writing HTML here -->\n";
+                : kind === "java"
+                  ? "// Start writing Java here\n"
+                  : kind === "c"
+                    ? "// Start writing C here\n"
+                    : kind === "cpp"
+                      ? "// Start writing C++ here\n"
+                      : kind === "h"
+                        ? "// Header file\n"
+                        : kind === "json"
+                          ? "{\n  \n}\n"
+                          : "<!-- Start writing HTML here -->\n";
     setFiles((items) => [
       ...items,
       { id, name: normalized, kind, content, parent },
