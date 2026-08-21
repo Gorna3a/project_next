@@ -1,28 +1,34 @@
 /* ═══════════════════════════════════════════════════════════════════
-   neobrutalism.css  —  Global Neo-Brutalism theme layer
-   Applied automatically when data-theme="neobrutalism" (the default).
-   Generic hard borders / offset shadows / zero radius / pixel fonts,
-   plus a best-effort remap of hardcoded Tailwind utilities and a
-   green-phosphor CRT overlay for the IDE.
+   neobrutalism.css  —  Global Neubrutalism theme layer
+   Mirrors the canonical tokens from neubrutalism.com so the platform
+   (not the landing page — that stays on its own .nb-root) matches the
+   definitive grammar: 3px borders, hard shadows, 0 radius, flat fills.
+   Applied when data-theme="neobrutalism" (locked default).
    ═══════════════════════════════════════════════════════════════════ */
 
 :root[data-theme="neobrutalism"] {
-  --nb-ink: #0d0d0d;
-  --nb-shadow: 4px 4px 0 #0d0d0d;
-  --nb-shadow-sm: 3px 3px 0 #0d0d0d;
-  --nb-shadow-lg: 6px 6px 0 #0d0d0d;
-  --nb-paper: #fffef7;
+  --nb-ink: #000000;
+  --nb-paper: #ffffff;
+  --nb-bg: #FFFDF5;
+  --nb-yellow: #FFD23F;
+  --nb-pink: #FF6B6B;
+  --nb-blue: #74B9FF;
+  --nb-shadow-sm: 3px 3px 0 0 #000;
+  --nb-shadow: 5px 5px 0 0 #000;
+  --nb-shadow-lg: 8px 8px 0 0 #000;
+  --nb-shadow-xl: 12px 12px 0 0 #000;
+  --nb-radius: 0;
   --nb-phosphor: #33ff66;
 }
 
-/* ── Base typography + paper grid + noise ───────────────────────────── */
+/* ── Base — calm body, loud headings (neubrutalism.com pairing) ─────── */
 :root[data-theme="neobrutalism"] body {
-  font-family: 'Space Mono', 'Courier New', monospace;
+  font-family: 'Inter', system-ui, sans-serif;
   background-color: var(--bg-base);
   color: var(--text-primary);
   background-image:
-    linear-gradient(rgba(13, 13, 13, 0.05) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(13, 13, 13, 0.05) 1px, transparent 1px);
+    linear-gradient(rgba(0, 0, 0, 0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 0, 0, 0.05) 1px, transparent 1px);
   background-size: 40px 40px;
 }
 
@@ -32,93 +38,139 @@
   inset: 0;
   pointer-events: none;
   z-index: 9999;
-  opacity: 0.025;
+  opacity: 0.022;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23noise)' opacity='1'/%3E%3C/svg%3E");
   background-repeat: repeat;
 }
 
-/* ── Buttons ────────────────────────────────────────────────────────── */
+/* Display / heading faces — reserve loud moves for hero and titles */
+:root[data-theme="neobrutalism"] h1,
+:root[data-theme="neobrutalism"] .display {
+  font-family: 'Syne', sans-serif;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+
+:root[data-theme="neobrutalism"] h2,
+:root[data-theme="neobrutalism"] h3,
+:root[data-theme="neobrutalism"] .heading {
+  font-family: 'Space Grotesk', sans-serif;
+  font-weight: 700;
+}
+
+:root[data-theme="neobrutalism"] code,
+:root[data-theme="neobrutalism"] pre,
+:root[data-theme="neobrutalism"] .mono {
+  font-family: 'Space Mono', monospace;
+}
+
+/* ── Buttons — canonical .btn pattern ───────────────────────────────── */
 :root[data-theme="neobrutalism"] .btn-primary,
 :root[data-theme="neobrutalism"] .btn-secondary,
 :root[data-theme="neobrutalism"] .btn-ghost {
   border: 3px solid var(--nb-ink) !important;
-  border-radius: 0 !important;
-  box-shadow: var(--nb-shadow-sm);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
+  border-radius: var(--nb-radius) !important;
+  box-shadow: var(--nb-shadow);
+  font-family: 'Space Grotesk', sans-serif;
   font-weight: 700;
-  font-family: 'Space Mono', monospace;
-  transition: transform 0.1s, box-shadow 0.1s;
+  letter-spacing: 0.02em;
+  transition: transform 0.1s ease, box-shadow 0.1s ease;
 }
 
 :root[data-theme="neobrutalism"] .btn-primary {
-  color: #ffffff !important;
+  background: var(--nb-yellow) !important;
+  color: #000 !important;
+}
+
+:root[data-theme="neobrutalism"] .btn-secondary {
+  background: #fff !important;
+  color: #000 !important;
 }
 
 :root[data-theme="neobrutalism"] .btn-primary:hover,
 :root[data-theme="neobrutalism"] .btn-secondary:hover {
   transform: translate(-2px, -2px);
-  box-shadow: var(--nb-shadow);
+  box-shadow: 7px 7px 0 0 #000;
 }
 
 :root[data-theme="neobrutalism"] .btn-primary:active,
 :root[data-theme="neobrutalism"] .btn-secondary:active,
 :root[data-theme="neobrutalism"] .btn-ghost:active {
-  transform: translate(2px, 2px);
+  transform: translate(3px, 3px);
   box-shadow: none !important;
 }
 
-/* ── Cards / surfaces ───────────────────────────────────────────────── */
-:root[data-theme="neobrutalism"] .card {
-  border: 3px solid var(--nb-ink) !important;
-  border-radius: 0 !important;
-  box-shadow: var(--nb-shadow);
-  background-color: var(--bg-surface);
+:root[data-theme="neobrutalism"] .btn-primary:focus-visible,
+:root[data-theme="neobrutalism"] .btn-secondary:focus-visible,
+:root[data-theme="neobrutalism"] .btn-ghost:focus-visible {
+  outline: 3px solid var(--nb-blue);
+  outline-offset: 3px;
 }
 
-/* ── Inputs ─────────────────────────────────────────────────────────── */
+/* ── Cards ────────────────────────────────────────────────────────────── */
+:root[data-theme="neobrutalism"] .card {
+  background: #fff;
+  border: 3px solid var(--nb-ink) !important;
+  border-radius: var(--nb-radius) !important;
+  box-shadow: var(--nb-shadow);
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+
+:root[data-theme="neobrutalism"] .card:hover {
+  transform: translate(-2px, -2px);
+  box-shadow: 7px 7px 0 0 #000;
+}
+
+/* ── Inputs — .nb-input pattern ─────────────────────────────────────── */
 :root[data-theme="neobrutalism"] .input,
 :root[data-theme="neobrutalism"] input,
 :root[data-theme="neobrutalism"] textarea,
 :root[data-theme="neobrutalism"] select {
   border: 3px solid var(--nb-ink) !important;
-  border-radius: 0 !important;
+  border-radius: var(--nb-radius) !important;
+  background: #fff !important;
+  color: #000 !important;
   box-shadow: var(--nb-shadow-sm);
-  background-color: var(--nb-paper) !important;
-  color: var(--text-primary) !important;
-  font-family: 'Space Mono', monospace;
+  font-family: 'Inter', sans-serif;
+  transition: box-shadow 0.15s, transform 0.15s;
 }
 
-:root[data-theme="neobrutalism"] .input:focus {
+:root[data-theme="neobrutalism"] .input:focus,
+:root[data-theme="neobrutalism"] input:focus,
+:root[data-theme="neobrutalism"] textarea:focus,
+:root[data-theme="neobrutalism"] select:focus {
+  outline: 3px solid var(--nb-blue);
+  outline-offset: 2px;
   box-shadow: var(--nb-shadow);
-  border-color: var(--nb-ink) !important;
+  transform: translate(-1px, -1px);
 }
 
-/* ── Sidebar links ──────────────────────────────────────────────────── */
+/* ── Sidebar ──────────────────────────────────────────────────────────── */
 :root[data-theme="neobrutalism"] .sidebar-link {
   border: 2px solid transparent;
-  border-radius: 0 !important;
+  border-radius: var(--nb-radius) !important;
+  font-family: 'Space Grotesk', sans-serif;
   font-weight: 700;
 }
 
 :root[data-theme="neobrutalism"] .sidebar-link-active {
   border: 2px solid var(--nb-ink) !important;
   box-shadow: var(--nb-shadow-sm);
-  background-color: var(--accent) !important;
-  color: #ffffff !important;
+  background: var(--nb-yellow) !important;
+  color: #000 !important;
 }
 
-/* ── Modals / dialogs / dropdowns ──────────────────────────────────── */
+/* ── Modals / dialogs ─────────────────────────────────────────────────── */
 :root[data-theme="neobrutalism"] .modal,
 :root[data-theme="neobrutalism"] [role="dialog"],
 :root[data-theme="neobrutalism"] .dropdown,
 :root[data-theme="neobrutalism"] .popover {
   border: 3px solid var(--nb-ink) !important;
-  border-radius: 0 !important;
+  border-radius: var(--nb-radius) !important;
   box-shadow: var(--nb-shadow-lg);
 }
 
-/* ── IDE panels get chunky ink borders ──────────────────────────────── */
+/* ── IDE panels ───────────────────────────────────────────────────────── */
 :root[data-theme="neobrutalism"] .editor-panel,
 :root[data-theme="neobrutalism"] .runtime-panel,
 :root[data-theme="neobrutalism"] .file-tree {
@@ -126,8 +178,8 @@
   border-width: 2px !important;
 }
 
-/* ═══ Best-effort remap of hardcoded Tailwind utilities ═══════════════ */
-:root[data-theme="neobrutalism"] .bg-white { background-color: var(--bg-surface) !important; }
+/* ═══ Best-effort remap of hardcoded Tailwind (admin/kids/modals) ═══════ */
+:root[data-theme="neobrutalism"] .bg-white { background-color: #ffffff !important; }
 :root[data-theme="neobrutalism"] .bg-gray-50 { background-color: var(--bg-subtle) !important; }
 :root[data-theme="neobrutalism"] .bg-gray-100 { background-color: var(--bg-subtle) !important; }
 :root[data-theme="neobrutalism"] .bg-gray-200 { background-color: var(--bg-subtle) !important; }
@@ -137,29 +189,28 @@
 :root[data-theme="neobrutalism"] .border-gray-300 { border-color: var(--nb-ink) !important; }
 :root[data-theme="neobrutalism"] .border-indigo-200 { border-color: var(--nb-ink) !important; }
 
-:root[data-theme="neobrutalism"] .text-gray-400 { color: var(--text-secondary) !important; }
+:root[data-theme="neobrutalism"] .text-gray-400 { color: #52525b !important; }
 :root[data-theme="neobrutalism"] .text-gray-500,
 :root[data-theme="neobrutalism"] .text-gray-600,
 :root[data-theme="neobrutalism"] .text-gray-700,
-:root[data-theme="neobrutalism"] .text-gray-900 { color: var(--text-primary) !important; }
+:root[data-theme="neobrutalism"] .text-gray-900 { color: #000 !important; }
 
 :root[data-theme="neobrutalism"] .bg-indigo-500,
-:root[data-theme="neobrutalism"] .bg-indigo-600 { background-color: var(--accent) !important; }
+:root[data-theme="neobrutalism"] .bg-indigo-600 { background-color: var(--nb-yellow) !important; color: #000 !important; }
 :root[data-theme="neobrutalism"] .text-indigo-500,
-:root[data-theme="neobrutalism"] .text-indigo-600 { color: var(--accent) !important; }
+:root[data-theme="neobrutalism"] .text-indigo-600 { color: #000 !important; }
 :root[data-theme="neobrutalism"] .ring-indigo-500 {
-  --tw-ring-color: var(--accent) !important;
-  box-shadow: 0 0 0 3px var(--accent) !important;
+  --tw-ring-color: var(--nb-yellow) !important;
+  box-shadow: 0 0 0 3px var(--nb-yellow) !important;
 }
 
-/* Kids area (purple) → brutalist ink */
-:root[data-theme="neobrutalism"] .bg-purple-500 { background-color: var(--accent) !important; }
+:root[data-theme="neobrutalism"] .bg-purple-500 { background-color: var(--nb-yellow) !important; }
 :root[data-theme="neobrutalism"] .bg-purple-50 { background-color: var(--accent-subtle) !important; }
 :root[data-theme="neobrutalism"] .border-purple-500 { border-color: var(--nb-ink) !important; }
-:root[data-theme="neobrutalism"] .text-purple-700 { color: var(--text-primary) !important; }
-:root[data-theme="neobrutalism"] .text-purple-200 { color: var(--text-secondary) !important; }
+:root[data-theme="neobrutalism"] .text-purple-700 { color: #000 !important; }
+:root[data-theme="neobrutalism"] .text-purple-200 { color: #1a1a1a !important; }
 
-/* ═══ Green-phosphor CRT overlay for the IDE ══════════════════════════ */
+/* ═══ Green-phosphor CRT overlay for the IDE (unchanged) ═══════════════ */
 :root[data-theme="neobrutalism"] .nb-crt {
   position: relative;
 }
