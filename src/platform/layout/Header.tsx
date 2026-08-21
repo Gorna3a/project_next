@@ -11,6 +11,10 @@ import { UserMenu } from "../../shared/ui/UserMenu";
 import { NotificationTray } from "../../shared/ui/NotificationTray";
 import { UserSearch } from "../../shared/ui/UserSearch";
 
+// Theme switching is disabled for now (neobrutalism is the fixed default
+// until a dark-brutalism palette is chosen). Flip to true to re-enable.
+const THEME_PICKER_ENABLED = false;
+
 // ─── Theme Menu ───────────────────────────────────────────────────────────────
 
 const ThemeMenu = () => {
@@ -207,7 +211,7 @@ export const Header = ({ sidebarCollapsed }: HeaderProps) => {
         </button>
 
         <LanguageMenu />
-        <ThemeMenu />
+        {THEME_PICKER_ENABLED && <ThemeMenu />}
 
         <div className="relative">
           <button

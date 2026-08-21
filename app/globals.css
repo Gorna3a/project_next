@@ -5,22 +5,22 @@
 @tailwind utilities;
 
 :root {
-    --bg-base: #0a0a0f;
-    --bg-surface: #13131f;
-    --bg-elevated: #1a1a2e;
-    --bg-subtle: #16162a;
-    --border: #2a2a45;
-    --border-subtle: #1e1e38;
-    --text-primary: #e8e8ff;
-    --text-secondary: #9395c8;
-    --text-muted: #5a5c90;
-    --accent: #6272f5;
-    --accent-hover: #7a8af7;
-    --accent-subtle: #1a1d40;
-    --accent-text: #8898fa;
-    --bg-sidebar: #13131f;
-    --bg-header: #13131f;
-    --particle-opacity: 0.25;
+    --bg-base: #f5f0e8;
+    --bg-surface: #fffef7;
+    --bg-elevated: #ffffff;
+    --bg-subtle: #ece7db;
+    --border: #0d0d0d;
+    --border-subtle: #0d0d0d;
+    --text-primary: #0d0d0d;
+    --text-secondary: #2b2b2b;
+    --text-muted: #5a5a5a;
+    --accent: #ff2d55;
+    --accent-hover: #ff4d6d;
+    --accent-subtle: #ffe1e8;
+    --accent-text: #ffffff;
+    --bg-sidebar: #fffef7;
+    --bg-header: #fffef7;
+    --particle-opacity: 0;
 }
 
 @layer base {

@@ -222,6 +222,31 @@ export const THEMES: ThemeDefinition[] = [
       "--particle-opacity": "0.4",
     },
   },
+  {
+    id: "neobrutalism",
+    label: "Neo-Brutalism",
+    isDark: false,
+    preview: ["#f5f0e8", "#ff2d55", "#0d0d0d"],
+    description: "Bold, chunky, in-your-face — the PixelCode signature look",
+    vars: {
+      "--bg-base": "#f5f0e8",
+      "--bg-surface": "#fffef7",
+      "--bg-elevated": "#ffffff",
+      "--bg-subtle": "#ece7db",
+      "--border": "#0d0d0d",
+      "--border-subtle": "#0d0d0d",
+      "--text-primary": "#0d0d0d",
+      "--text-secondary": "#2b2b2b",
+      "--text-muted": "#5a5a5a",
+      "--accent": "#ff2d55",
+      "--accent-hover": "#ff4d6d",
+      "--accent-subtle": "#ffe1e8",
+      "--accent-text": "#ffffff",
+      "--bg-sidebar": "#fffef7",
+      "--bg-header": "#fffef7",
+      "--particle-opacity": "0",
+    },
+  },
 ];
 
 // ─── Context ──────────────────────────────────────────────────────────────────
@@ -266,9 +291,9 @@ const applyTheme = (themeDef: ThemeDefinition) => {
 export const ThemeProvider = ({ children }: { children: ReactNode }) => {
   const [theme, setThemeState] = useState<AppTheme>(() => {
     if (typeof window !== "undefined") {
-      return (localStorage.getItem("pixelcode-theme") as AppTheme) || "dark";
+      return (localStorage.getItem("pixelcode-theme") as AppTheme) || "neobrutalism";
     }
-    return "dark";
+    return "neobrutalism";
   });
 
   const [customTheme, setCustomTheme] = useState<ThemeDefinition | null>(() => {

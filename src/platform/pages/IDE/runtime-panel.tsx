@@ -10,6 +10,7 @@ import type { ProjectFile, ProjectType } from "./types";
 import { ensurePod, useNodepod } from "./use-nodepod";
 import { usePyodide } from "./use-pyodide";
 import { useEmscripten } from "./use-emscripten";
+import { useTheme } from "../../../core/context/ThemeContext";
 
 type Props = {
   files: ProjectFile[];
@@ -25,6 +26,40 @@ const LABELS: Record<ProjectType, { tag: string; name: string }> = {
   cpp: { tag: "C++", name: "C++ · WebAssembly" },
 };
 
+const xtermThemeDark = {
+  background: "#1a1a2e",
+  foreground: "#9395c8",
+  cursor: "#8898fa",
+  selectionBackground: "#1a1d40",
+  black: "#0a0a0f",
+  brightBlack: "#5a5c90",
+  white: "#e8e8ff",
+  brightWhite: "#ffffff",
+};
+
+const xtermThemeNeo = {
+  background: "#0d0d0d",
+  foreground: "#33ff66",
+  cursor: "#33ff66",
+  selectionBackground: "#1f3b1f",
+  black: "#0d0d0d",
+  brightBlack: "#2f6b2f",
+  red: "#ff5555",
+  green: "#33ff66",
+  yellow: "#caffca",
+  blue: "#66ff88",
+  magenta: "#9bff9b",
+  cyan: "#7fffa0",
+  white: "#33ff66",
+  brightRed: "#ff7777",
+  brightGreen: "#33ff66",
+  brightYellow: "#caffca",
+  brightBlue: "#66ff88",
+  brightMagenta: "#9bff9b",
+  brightCyan: "#7fffa0",
+  brightWhite: "#9bff9b",
+};
+
 export function RuntimePanel({
   files,
   projectType,
@@ -35,6 +70,9 @@ export function RuntimePanel({
   const isPython = projectType === "python";
   const isC = projectType === "c";
   const isCpp = projectType === "cpp";
+
+  const { theme } = useTheme();
+  const isNeo = theme === "neobrutalism";
 
   if (collapsed) {
     return (
@@ -108,16 +146,7 @@ export function RuntimePanel({
           FitAddon,
           fontSize: 12,
           fontFamily: "'JetBrains Mono', 'DM Mono', monospace",
-          theme: {
-            background: "#1a1a2e",
-            foreground: "#9395c8",
-            cursor: "#8898fa",
-            selectionBackground: "#1a1d40",
-            black: "#0a0a0f",
-            brightBlack: "#5a5c90",
-            white: "#e8e8ff",
-            brightWhite: "#ffffff",
-          },
+          theme: isNeo ? xtermThemeNeo : xtermThemeDark,
         });
         terminal.attach(terminalRef.current);
         terminal.setCwd("/project");
@@ -213,10 +242,10 @@ export function RuntimePanel({
       ) : (
         <div className="thin-scroll min-h-0 flex-1 overflow-y-auto bg-[var(--bg-elevated)] p-4" data-testid="terminal-output">
           <div className="mb-3 flex items-center justify-between border-b border-[var(--border)] pb-3 text-[10px] uppercase tracking-[.14em] text-[var(--text-muted)]"><span>node · workspace</span><button onClick={runtimeClear} title="Clear terminal" data-testid="button-clear-terminal"><X size={13} /></button></div>
-          <div ref={terminalRef} className="h-[calc(100%-32px)] min-h-[260px] w-full overflow-hidden" />
+          <div ref={terminalRef} className="nb-crt relative h-[calc(100%-32px)] min-h-[260px] w-full overflow-hidden" />
         </div>
       )) : (
-        <div className="thin-scroll min-h-0 flex-1 overflow-y-auto bg-[var(--bg-elevated)] p-4" data-testid="output-console">
+        <div className="thin-scroll nb-crt relative min-h-0 flex-1 overflow-y-auto bg-[var(--bg-elevated)] p-4" data-testid="output-console">
           <div className="mb-3 flex items-center justify-between border-b border-[var(--border)] pb-3 text-[10px] uppercase tracking-[.14em] text-[var(--text-muted)]"><span>{projectType} · workspace</span><button onClick={runtimeClear} title="Clear output" data-testid="button-clear-output"><X size={13} /></button></div>
           <pre className="whitespace-pre-wrap font-mono text-xs leading-6 text-[var(--text-secondary)]">{(runtimeLogs && runtimeLogs.length) ? runtimeLogs.join("\n") : `Run ${projectType === "python" ? "main.py" : "main." + (projectType === "cpp" ? "cpp" : "c")} to see the output here.`}</pre>
         </div>

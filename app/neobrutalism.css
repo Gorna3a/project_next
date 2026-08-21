@@ -1,0 +1,196 @@
+/* ═══════════════════════════════════════════════════════════════════
+   neobrutalism.css  —  Global Neo-Brutalism theme layer
+   Applied automatically when data-theme="neobrutalism" (the default).
+   Generic hard borders / offset shadows / zero radius / pixel fonts,
+   plus a best-effort remap of hardcoded Tailwind utilities and a
+   green-phosphor CRT overlay for the IDE.
+   ═══════════════════════════════════════════════════════════════════ */
+
+:root[data-theme="neobrutalism"] {
+  --nb-ink: #0d0d0d;
+  --nb-shadow: 4px 4px 0 #0d0d0d;
+  --nb-shadow-sm: 3px 3px 0 #0d0d0d;
+  --nb-shadow-lg: 6px 6px 0 #0d0d0d;
+  --nb-paper: #fffef7;
+  --nb-phosphor: #33ff66;
+}
+
+/* ── Base typography + paper grid + noise ───────────────────────────── */
+:root[data-theme="neobrutalism"] body {
+  font-family: 'Space Mono', 'Courier New', monospace;
+  background-color: var(--bg-base);
+  color: var(--text-primary);
+  background-image:
+    linear-gradient(rgba(13, 13, 13, 0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(13, 13, 13, 0.05) 1px, transparent 1px);
+  background-size: 40px 40px;
+}
+
+:root[data-theme="neobrutalism"] body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 9999;
+  opacity: 0.025;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23noise)' opacity='1'/%3E%3C/svg%3E");
+  background-repeat: repeat;
+}
+
+/* ── Buttons ────────────────────────────────────────────────────────── */
+:root[data-theme="neobrutalism"] .btn-primary,
+:root[data-theme="neobrutalism"] .btn-secondary,
+:root[data-theme="neobrutalism"] .btn-ghost {
+  border: 3px solid var(--nb-ink) !important;
+  border-radius: 0 !important;
+  box-shadow: var(--nb-shadow-sm);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-weight: 700;
+  font-family: 'Space Mono', monospace;
+  transition: transform 0.1s, box-shadow 0.1s;
+}
+
+:root[data-theme="neobrutalism"] .btn-primary {
+  color: #ffffff !important;
+}
+
+:root[data-theme="neobrutalism"] .btn-primary:hover,
+:root[data-theme="neobrutalism"] .btn-secondary:hover {
+  transform: translate(-2px, -2px);
+  box-shadow: var(--nb-shadow);
+}
+
+:root[data-theme="neobrutalism"] .btn-primary:active,
+:root[data-theme="neobrutalism"] .btn-secondary:active,
+:root[data-theme="neobrutalism"] .btn-ghost:active {
+  transform: translate(2px, 2px);
+  box-shadow: none !important;
+}
+
+/* ── Cards / surfaces ───────────────────────────────────────────────── */
+:root[data-theme="neobrutalism"] .card {
+  border: 3px solid var(--nb-ink) !important;
+  border-radius: 0 !important;
+  box-shadow: var(--nb-shadow);
+  background-color: var(--bg-surface);
+}
+
+/* ── Inputs ─────────────────────────────────────────────────────────── */
+:root[data-theme="neobrutalism"] .input,
+:root[data-theme="neobrutalism"] input,
+:root[data-theme="neobrutalism"] textarea,
+:root[data-theme="neobrutalism"] select {
+  border: 3px solid var(--nb-ink) !important;
+  border-radius: 0 !important;
+  box-shadow: var(--nb-shadow-sm);
+  background-color: var(--nb-paper) !important;
+  color: var(--text-primary) !important;
+  font-family: 'Space Mono', monospace;
+}
+
+:root[data-theme="neobrutalism"] .input:focus {
+  box-shadow: var(--nb-shadow);
+  border-color: var(--nb-ink) !important;
+}
+
+/* ── Sidebar links ──────────────────────────────────────────────────── */
+:root[data-theme="neobrutalism"] .sidebar-link {
+  border: 2px solid transparent;
+  border-radius: 0 !important;
+  font-weight: 700;
+}
+
+:root[data-theme="neobrutalism"] .sidebar-link-active {
+  border: 2px solid var(--nb-ink) !important;
+  box-shadow: var(--nb-shadow-sm);
+  background-color: var(--accent) !important;
+  color: #ffffff !important;
+}
+
+/* ── Modals / dialogs / dropdowns ──────────────────────────────────── */
+:root[data-theme="neobrutalism"] .modal,
+:root[data-theme="neobrutalism"] [role="dialog"],
+:root[data-theme="neobrutalism"] .dropdown,
+:root[data-theme="neobrutalism"] .popover {
+  border: 3px solid var(--nb-ink) !important;
+  border-radius: 0 !important;
+  box-shadow: var(--nb-shadow-lg);
+}
+
+/* ── IDE panels get chunky ink borders ──────────────────────────────── */
+:root[data-theme="neobrutalism"] .editor-panel,
+:root[data-theme="neobrutalism"] .runtime-panel,
+:root[data-theme="neobrutalism"] .file-tree {
+  border-color: var(--nb-ink) !important;
+  border-width: 2px !important;
+}
+
+/* ═══ Best-effort remap of hardcoded Tailwind utilities ═══════════════ */
+:root[data-theme="neobrutalism"] .bg-white { background-color: var(--bg-surface) !important; }
+:root[data-theme="neobrutalism"] .bg-gray-50 { background-color: var(--bg-subtle) !important; }
+:root[data-theme="neobrutalism"] .bg-gray-100 { background-color: var(--bg-subtle) !important; }
+:root[data-theme="neobrutalism"] .bg-gray-200 { background-color: var(--bg-subtle) !important; }
+:root[data-theme="neobrutalism"] .bg-gray-900 { background-color: var(--nb-ink) !important; }
+
+:root[data-theme="neobrutalism"] .border-gray-200,
+:root[data-theme="neobrutalism"] .border-gray-300 { border-color: var(--nb-ink) !important; }
+:root[data-theme="neobrutalism"] .border-indigo-200 { border-color: var(--nb-ink) !important; }
+
+:root[data-theme="neobrutalism"] .text-gray-400 { color: var(--text-secondary) !important; }
+:root[data-theme="neobrutalism"] .text-gray-500,
+:root[data-theme="neobrutalism"] .text-gray-600,
+:root[data-theme="neobrutalism"] .text-gray-700,
+:root[data-theme="neobrutalism"] .text-gray-900 { color: var(--text-primary) !important; }
+
+:root[data-theme="neobrutalism"] .bg-indigo-500,
+:root[data-theme="neobrutalism"] .bg-indigo-600 { background-color: var(--accent) !important; }
+:root[data-theme="neobrutalism"] .text-indigo-500,
+:root[data-theme="neobrutalism"] .text-indigo-600 { color: var(--accent) !important; }
+:root[data-theme="neobrutalism"] .ring-indigo-500 {
+  --tw-ring-color: var(--accent) !important;
+  box-shadow: 0 0 0 3px var(--accent) !important;
+}
+
+/* Kids area (purple) → brutalist ink */
+:root[data-theme="neobrutalism"] .bg-purple-500 { background-color: var(--accent) !important; }
+:root[data-theme="neobrutalism"] .bg-purple-50 { background-color: var(--accent-subtle) !important; }
+:root[data-theme="neobrutalism"] .border-purple-500 { border-color: var(--nb-ink) !important; }
+:root[data-theme="neobrutalism"] .text-purple-700 { color: var(--text-primary) !important; }
+:root[data-theme="neobrutalism"] .text-purple-200 { color: var(--text-secondary) !important; }
+
+/* ═══ Green-phosphor CRT overlay for the IDE ══════════════════════════ */
+:root[data-theme="neobrutalism"] .nb-crt {
+  position: relative;
+}
+
+:root[data-theme="neobrutalism"] .nb-crt::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 40;
+  background: repeating-linear-gradient(
+    0deg,
+    rgba(0, 0, 0, 0) 0px,
+    rgba(0, 0, 0, 0) 2px,
+    rgba(0, 0, 0, 0.14) 2px,
+    rgba(0, 0, 0, 0.14) 3px
+  );
+  mix-blend-mode: multiply;
+}
+
+:root[data-theme="neobrutalism"] .nb-crt::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 41;
+  background: radial-gradient(ellipse at center, rgba(0, 0, 0, 0) 55%, rgba(0, 0, 0, 0.28) 100%);
+}
+
+:root[data-theme="neobrutalism"] [data-testid="output-console"] pre {
+  color: var(--nb-phosphor) !important;
+  text-shadow: 0 0 4px rgba(51, 255, 102, 0.45);
+  font-family: 'Space Mono', monospace;
+}

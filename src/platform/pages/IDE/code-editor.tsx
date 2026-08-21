@@ -4,6 +4,7 @@ import { useCallback, useState } from "react";
 import Editor, { type BeforeMount } from "@monaco-editor/react";
 import { Braces, Check, Circle, Code2, Copy, Download, FileCode2, FileText, Hash, Save } from "lucide-react";
 import type { ProjectFile } from "./types";
+import { useTheme } from "../../../core/context/ThemeContext";
 
 type Props = {
   file: ProjectFile;
@@ -72,11 +73,39 @@ const pixelcodeTheme: PixelcodeTheme = {
   },
 };
 
+const neoRetroTheme: PixelcodeTheme = {
+  base: "vs-dark",
+  inherit: true,
+  rules: [
+    { token: "comment", foreground: "4a7a4a" },
+    { token: "keyword", foreground: "33ff66" },
+    { token: "string", foreground: "9bff9b" },
+    { token: "number", foreground: "caffca" },
+    { token: "type", foreground: "7fffa0" },
+    { token: "delimiter", foreground: "66ff88" },
+  ],
+  colors: {
+    "editor.background": "#0d0d0d",
+    "editor.foreground": "#33ff66",
+    "editorCursor.foreground": "#33ff66",
+    "editor.lineHighlightBackground": "#161616",
+    "editor.selectionBackground": "#1f3b1f",
+    "editorLineNumber.foreground": "#2f6b2f",
+    "editorLineNumber.activeForeground": "#33ff66",
+    "editorIndentGuide.background": "#1c1c1c",
+    "editorWidget.background": "#0d0d0d",
+    "scrollbarSlider.background": "#1c1c1c",
+  },
+};
+
 const defineTheme: BeforeMount = monaco => {
   monaco.editor.defineTheme("pixelcode", pixelcodeTheme as never);
+  monaco.editor.defineTheme("neo-retro", neoRetroTheme as never);
 };
 export function CodeEditor({ file, files, activeId, onSelect, onChange, savedAt }: Props) {
   const [copied, setCopied] = useState(false);
+  const { theme } = useTheme();
+  const isNeo = theme === "neobrutalism";
 
   const copyFile = useCallback(async () => {
     try {
@@ -104,7 +133,7 @@ export function CodeEditor({ file, files, activeId, onSelect, onChange, savedAt 
       <button onClick={downloadFile} className="ml-auto mr-2 hidden p-2 text-[var(--text-muted)] hover:text-[var(--accent-text)] sm:block" title="Download active file" data-testid="button-download"><Download size={15} /></button>
     </div>
     <div className="flex items-center justify-between border-b border-[var(--border)] px-4 py-2 text-[11px] text-[var(--text-muted)]"><div className="flex items-center gap-2"><Code2 size={13} className="text-[var(--accent-text)]" /><span>{language(file.kind)}</span><span className="text-[var(--text-muted)]">·</span><span>{file.name}</span></div><div className="flex items-center gap-2">{savedAt && <span className="hidden text-[var(--text-muted)] sm:inline">Saved just now</span>}<button className="rounded p-1.5 hover:bg-[var(--bg-subtle)] hover:text-[var(--accent-text)]" title="Save file" data-testid="button-save"><Save size={14} /></button><button onClick={copyFile} className="flex items-center gap-1 rounded p-1.5 text-[var(--accent-text)] hover:bg-[var(--bg-subtle)]" title="Copy code" data-testid="button-copy">{copied ? <Check size={14} /> : <Copy size={14} />}</button></div></div>
-    <div className="code-scroll min-h-0 flex-1 overflow-hidden bg-[var(--bg-elevated)]" data-testid="input-code-editor"><Editor height="100%" path={file.id} language={monacoLanguage(file.kind)} value={file.content ?? ""} onChange={value => onChange(value ?? "")} theme="pixelcode" beforeMount={defineTheme} options={{ automaticLayout: true, minimap: { enabled: false }, fontSize: 13, fontFamily: "'JetBrains Mono', 'DM Mono', monospace", lineNumbersMinChars: 3, padding: { top: 16, bottom: 16 }, smoothScrolling: true, tabSize: 2, wordWrap: "on", scrollBeyondLastLine: false }} /></div>
+    <div className="code-scroll nb-crt relative min-h-0 flex-1 overflow-hidden bg-[var(--bg-elevated)]" data-testid="input-code-editor"><Editor height="100%" path={file.id} language={monacoLanguage(file.kind)} value={file.content ?? ""} onChange={value => onChange(value ?? "")} theme={isNeo ? "neo-retro" : "pixelcode"} beforeMount={defineTheme} options={{ automaticLayout: true, minimap: { enabled: false }, fontSize: 13, fontFamily: "'JetBrains Mono', 'DM Mono', monospace", lineNumbersMinChars: 3, padding: { top: 16, bottom: 16 }, smoothScrolling: true, tabSize: 2, wordWrap: "on", scrollBeyondLastLine: false }} /></div>
     <div className="flex shrink-0 items-center justify-between border-t border-[var(--border)] bg-[var(--bg-elevated)] px-4 py-2 text-[10px] uppercase tracking-[.1em] text-[var(--text-muted)]"><span>Ln 1, Col 1</span><span>UTF-8 · LF · {language(file.kind)}</span></div>
   </section>;
 }

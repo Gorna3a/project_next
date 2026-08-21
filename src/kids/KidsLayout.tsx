@@ -6,6 +6,10 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useState, type ReactNode } from "react";
 import { UserMenu } from "../shared/ui/UserMenu";
 
+// Theme switching is disabled for now (neobrutalism is the fixed default
+// until a dark-brutalism palette is chosen). Flip to true to re-enable.
+const THEME_PICKER_ENABLED = false;
+
 const navItems = [
   { to: "/kids", label: "Home", emoji: "🏠", end: true },
   { to: "/kids/cs", label: "Learn CS", emoji: "💻" },
@@ -72,7 +76,7 @@ export default function KidsLayout({ children }: { children?: ReactNode }) {
 
           <div className="ml-auto flex items-center gap-3">
             {/* Theme Toggle */}
-            <div className="relative">
+            {THEME_PICKER_ENABLED && (<div className="relative">
               <button
                 onClick={() => setShowThemePicker(!showThemePicker)}
                 className="p-2 rounded-full bg-white/20 text-white hover:bg-white/30 transition-colors"
@@ -112,7 +116,7 @@ export default function KidsLayout({ children }: { children?: ReactNode }) {
                   </motion.div>
                 )}
               </AnimatePresence>
-            </div>
+            </div>)}
 
             <div className="h-8 w-px bg-white/20 mx-1 hidden sm:block" />
 

@@ -9,6 +9,10 @@ import { db } from "../../../core/firebase/config";
 import { useAuth } from "../../../core/context/AuthContext";
 import { ThemePicker } from "../../../shared/ui/ThemePicker";
 import { ThemeLab } from "../../../shared/ui/ThemeLab";
+
+// Theme switching is disabled for now (neobrutalism is the fixed default
+// until a dark-brutalism palette is chosen). Flip to true to re-enable.
+const THEME_PICKER_ENABLED = false;
 import { useRouter } from "next/navigation";
 import { useLanguage } from "../../../core/context/LanguageContext";
 import toast from "react-hot-toast";
@@ -117,7 +121,7 @@ export default function SettingsPage() {
         <p className="text-xs" style={{ color: "var(--text-muted)" }}>
           {t('settings.appearanceDesc')}
         </p>
-        <ThemePicker />
+        {THEME_PICKER_ENABLED && <ThemePicker />}
       </Section>
 
       {/* ── Theme Lab ── */}
@@ -125,7 +129,7 @@ export default function SettingsPage() {
         <p className="text-xs mb-4" style={{ color: "var(--text-muted)" }}>
           {t('settings.themeLabDesc')}
         </p>
-        <ThemeLab />
+        {THEME_PICKER_ENABLED && <ThemeLab />}
       </Section>
 
       {/* ── Notifications ── */}

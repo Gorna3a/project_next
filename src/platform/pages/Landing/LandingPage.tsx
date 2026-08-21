@@ -265,6 +265,10 @@ const CodeSnippet = () => (
 
 // ─── Nav Theme Picker ────────────────────────────────────────────────────────
 
+// Theme switching is disabled for now (neobrutalism is the fixed default
+// until a dark-brutalism palette is chosen). Flip to true to re-enable.
+const THEME_PICKER_ENABLED = false;
+
 const NavThemePicker = () => {
   const { themeData } = useTheme();
   const [open, setOpen] = useState(false);
@@ -372,7 +376,7 @@ export default function LandingPage() {
               ✦ Neo-Brutalist
             </Link>
             <LandingLanguageSwitcher />
-            <NavThemePicker />
+            {THEME_PICKER_ENABLED && <NavThemePicker />}
             <UserMenu variant="landing" />
           </div>
         </div>

@@ -9,6 +9,7 @@ export type AppTheme =
   | "kids-ocean"
   | "kids-green"
   | "kids-sunset"
+  | "neobrutalism"
   | "custom"
   | "system";
 
@@ -40,6 +41,7 @@ export interface UserPreferences {
     | "kids-ocean"
     | "kids-green"
     | "kids-sunset"
+    | "neobrutalism"
     | "custom"
     | "system";
   language: string; // preferred programming language
