@@ -1,5 +1,5 @@
-export type FileKind = "html" | "css" | "js" | "ts" | "json" | "c" | "cpp" | "h" | "java" | "py" | "md" | "folder";
-export type ProjectType = "web" | "python" | "java" | "c" | "cpp";
+export type FileKind = "html" | "css" | "js" | "ts" | "json" | "c" | "cpp" | "h" | "py" | "md" | "folder";
+export type ProjectType = "web" | "python" | "c" | "cpp";
 
 export type ProjectFile = {
   id: string;
@@ -389,42 +389,6 @@ A tiny Python workspace that runs in your browser with Pyodide.
 Edit **main.py** and press **Run** to see the output below.` },
 ];
 
-export const javaStarterFiles: ProjectFile[] = [
-  {
-    id: "Main.java",
-    name: "Main.java",
-    kind: "java",
-    content: `public class Main {
-  public static void main(String[] args) {
-    System.out.println("Hello from PixelLab!");
-    for (int i = 1; i <= 5; i++) {
-      System.out.println("Count: " + i);
-    }
-  }
-}`,
-  },
-  {
-    id: "Greeting.java",
-    name: "Greeting.java",
-    kind: "java",
-    content: `public class Greeting {
-  public String sayHello(String name) {
-    return "Hello, " + name + "!";
-  }
-}`,
-  },
-  {
-    id: "README.md",
-    name: "README.md",
-    kind: "md",
-    content: `# Java starter
-
-A Java project that compiles and runs entirely in your browser with CheerpJ.
-
-Edit Main.java and press Run. All .java files in the project are compiled together.`,
-  },
-];
-
 export const cStarterFiles: ProjectFile[] = [
   {
     id: "main.c",
@@ -538,7 +502,6 @@ Edit main.cpp and press Run. All .cpp / .h files are compiled together.`,
 ];
 
 export const detectProjectType = (files: ProjectFile[]): ProjectType => {
-  if (files.some((file) => file.name.endsWith(".java"))) return "java";
   if (files.some((file) => file.name.endsWith(".cpp") || file.name.endsWith(".hpp") || file.name.endsWith(".cc"))) return "cpp";
   if (files.some((file) => file.name.endsWith(".c") || file.name.endsWith(".h"))) return "c";
   if (files.some((file) => file.name === "main.py") || files.some((file) => file.name.endsWith(".py"))) return "python";
@@ -548,10 +511,8 @@ export const detectProjectType = (files: ProjectFile[]): ProjectType => {
 export const projectLabel = (type: ProjectType): string =>
   type === "python"
     ? "python"
-    : type === "java"
-      ? "java"
-      : type === "c"
-        ? "c"
-        : type === "cpp"
-          ? "c++"
-          : "web";
+    : type === "c"
+      ? "c"
+      : type === "cpp"
+        ? "c++"
+        : "web";

@@ -21,7 +21,6 @@ const language = (kind: string) =>
   : kind === "ts" ? "TypeScript"
   : kind === "json" ? "JSON"
   : kind === "py" ? "Python"
-  : kind === "java" ? "Java"
   : kind === "c" ? "C"
   : kind === "cpp" ? "C++"
   : kind === "h" ? "C/C++ Header"
@@ -35,7 +34,6 @@ const monacoLanguage = (kind: string) =>
   : kind === "ts" ? "typescript"
   : kind === "json" ? "json"
   : kind === "py" ? "python"
-  : kind === "java" ? "java"
   : kind === "c" ? "c"
   : kind === "cpp" ? "cpp"
   : kind === "h" ? "c"
@@ -102,7 +100,7 @@ export function CodeEditor({ file, files, activeId, onSelect, onChange, savedAt 
 
   return <section className="editor-panel flex min-h-0 flex-col bg-[var(--bg-surface)]" data-testid="panel-code-editor">
     <div className="thin-scroll flex h-[45px] shrink-0 items-end overflow-x-auto border-b border-[var(--border)] bg-[var(--bg-elevated)]">
-      {files.map(item => <button key={item.id} onClick={() => onSelect(item.id)} className={`relative flex h-full min-w-[132px] items-center gap-2 border-r border-[var(--border)] px-3 text-[12px] ${item.id === activeId ? "bg-[var(--bg-surface)] text-[var(--text-primary)]" : "text-[var(--text-muted)] hover:bg-[var(--bg-subtle)]"}`} data-testid={`tab-${item.id}`}>{item.id === activeId && <span className="absolute left-0 top-0 h-[2px] w-full bg-[var(--accent)]" />}{item.kind === "html" ? <FileCode2 size={14} className="text-[#de9970]" /> : item.kind === "css" ? <Hash size={14} className="text-[#72c8ed]" /> : item.kind === "js" || item.kind === "ts" ? <Braces size={14} className="text-[#e2c66f]" /> : item.kind === "py" ? <span className="text-[9px] font-bold text-[#9ece6a]">PY</span> : item.kind === "java" ? <span className="text-[9px] font-bold text-[#f89820]">JV</span> : item.kind === "c" ? <span className="text-[9px] font-bold text-[#659ad2]">C</span> : item.kind === "cpp" ? <span className="text-[9px] font-bold text-[#659ad2]">C++</span> : item.kind === "h" ? <span className="text-[9px] font-bold text-[#a074c4]">H</span> : <FileText size={14} />}<span>{item.name}</span>{item.id === activeId && <Circle size={6} fill={savedAt ? "#34d399" : "#fbbf24"} strokeWidth={0} className="ml-auto" />}</button>)}
+      {files.map(item => <button key={item.id} onClick={() => onSelect(item.id)} className={`relative flex h-full min-w-[132px] items-center gap-2 border-r border-[var(--border)] px-3 text-[12px] ${item.id === activeId ? "bg-[var(--bg-surface)] text-[var(--text-primary)]" : "text-[var(--text-muted)] hover:bg-[var(--bg-subtle)]"}`} data-testid={`tab-${item.id}`}>{item.id === activeId && <span className="absolute left-0 top-0 h-[2px] w-full bg-[var(--accent)]" />}{item.kind === "html" ? <FileCode2 size={14} className="text-[#de9970]" /> : item.kind === "css" ? <Hash size={14} className="text-[#72c8ed]" /> : item.kind === "js" || item.kind === "ts" ? <Braces size={14} className="text-[#e2c66f]" /> : item.kind === "py" ? <span className="text-[9px] font-bold text-[#9ece6a]">PY</span> : item.kind === "c" ? <span className="text-[9px] font-bold text-[#659ad2]">C</span> : item.kind === "cpp" ? <span className="text-[9px] font-bold text-[#659ad2]">C++</span> : item.kind === "h" ? <span className="text-[9px] font-bold text-[#a074c4]">H</span> : <FileText size={14} />}<span>{item.name}</span>{item.id === activeId && <Circle size={6} fill={savedAt ? "#34d399" : "#fbbf24"} strokeWidth={0} className="ml-auto" />}</button>)}
       <button onClick={downloadFile} className="ml-auto mr-2 hidden p-2 text-[var(--text-muted)] hover:text-[var(--accent-text)] sm:block" title="Download active file" data-testid="button-download"><Download size={15} /></button>
     </div>
     <div className="flex items-center justify-between border-b border-[var(--border)] px-4 py-2 text-[11px] text-[var(--text-muted)]"><div className="flex items-center gap-2"><Code2 size={13} className="text-[var(--accent-text)]" /><span>{language(file.kind)}</span><span className="text-[var(--text-muted)]">·</span><span>{file.name}</span></div><div className="flex items-center gap-2">{savedAt && <span className="hidden text-[var(--text-muted)] sm:inline">Saved just now</span>}<button className="rounded p-1.5 hover:bg-[var(--bg-subtle)] hover:text-[var(--accent-text)]" title="Save file" data-testid="button-save"><Save size={14} /></button><button onClick={copyFile} className="flex items-center gap-1 rounded p-1.5 text-[var(--accent-text)] hover:bg-[var(--bg-subtle)]" title="Copy code" data-testid="button-copy">{copied ? <Check size={14} /> : <Copy size={14} />}</button></div></div>

@@ -10,7 +10,6 @@ export const fileKindFromName = (name: string): FileKind => {
   if (ext === ".json") return "json";
   if (ext === ".md") return "md";
   if (ext === ".py") return "py";
-  if (ext === ".java") return "java";
   if (ext === ".c" || ext === ".h") return "c";
   if (ext === ".cpp" || ext === ".hpp" || ext === ".cc") return "cpp";
   return "js";

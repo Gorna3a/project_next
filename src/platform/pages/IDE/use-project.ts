@@ -14,7 +14,6 @@ import {
 } from "@/core/services/projectService";
 import {
   detectProjectType,
-  javaStarterFiles,
   cStarterFiles,
   cppStarterFiles,
   pythonStarterFiles,
@@ -53,24 +52,20 @@ const firstEditableId = (files: ProjectFile[]) =>
 const templateFor = (type: ProjectType): ProjectFile[] =>
   type === "python"
     ? pythonStarterFiles
-    : type === "java"
-      ? javaStarterFiles
-      : type === "c"
-        ? cStarterFiles
-        : type === "cpp"
-          ? cppStarterFiles
-          : starterFiles;
+    : type === "c"
+      ? cStarterFiles
+      : type === "cpp"
+        ? cppStarterFiles
+        : starterFiles;
 
 const defaultNameFor = (type: ProjectType): string =>
   type === "python"
     ? "python-starter"
-    : type === "java"
-      ? "java-app"
-      : type === "c"
-        ? "c-app"
-        : type === "cpp"
-          ? "cpp-app"
-          : "web-app";
+    : type === "c"
+      ? "c-app"
+      : type === "cpp"
+        ? "cpp-app"
+        : "web-app";
 
 export function useProject() {
   const { user } = useAuth();
@@ -239,12 +234,10 @@ export function useProject() {
             ? "// Start writing JavaScript here\n"
             : kind === "ts"
               ? "// Start writing TypeScript here\n"
-              : kind === "py"
-                ? "# Start writing Python here\n"
-                : kind === "java"
-                  ? "// Start writing Java here\n"
+                : kind === "py"
+                  ? "# Start writing Python here\n"
                   : kind === "c"
-                    ? "// Start writing C here\n"
+                      ? "// Start writing C here\n"
                     : kind === "cpp"
                       ? "// Start writing C++ here\n"
                       : kind === "h"

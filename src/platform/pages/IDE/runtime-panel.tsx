@@ -9,7 +9,6 @@ import type { NodepodTerminal } from "@scelar/nodepod";
 import type { ProjectFile, ProjectType } from "./types";
 import { ensurePod, useNodepod } from "./use-nodepod";
 import { usePyodide } from "./use-pyodide";
-import { useCheerpj } from "./use-cheerpj";
 import { useEmscripten } from "./use-emscripten";
 
 type Props = {
@@ -22,7 +21,6 @@ type Props = {
 const LABELS: Record<ProjectType, { tag: string; name: string }> = {
   web: { tag: "WEB", name: "Web · Nodepod" },
   python: { tag: "PY", name: "Python · Pyodide" },
-  java: { tag: "JV", name: "Java · CheerpJ" },
   c: { tag: "C", name: "C · WebAssembly" },
   cpp: { tag: "C++", name: "C++ · WebAssembly" },
 };
@@ -35,7 +33,6 @@ export function RuntimePanel({
 }: Props) {
   const isWeb = projectType === "web";
   const isPython = projectType === "python";
-  const isJava = projectType === "java";
   const isC = projectType === "c";
   const isCpp = projectType === "cpp";
 
@@ -65,7 +62,6 @@ export function RuntimePanel({
     onOutput: (chunk) => terminalInstance.current?.write(chunk),
   });
   const python = usePyodide(files, isPython);
-  const java = useCheerpj(files, isJava);
   const cRunner = useEmscripten(files, isC, "c");
   const cppRunner = useEmscripten(files, isCpp, "cpp");
 
@@ -73,11 +69,9 @@ export function RuntimePanel({
     ? web
     : isPython
       ? python
-      : isJava
-        ? java
-        : isC
-          ? cRunner
-          : cppRunner;
+      : isC
+        ? cRunner
+        : cppRunner;
   const active = runner as unknown as {
     state: string;
     logs?: string[];
@@ -187,7 +181,7 @@ export function RuntimePanel({
         <button onClick={() => setView("preview")} className={`flex items-center gap-1.5 rounded-md px-3 py-1.5 text-[11px] font-bold ${view === "preview" ? "bg-[var(--accent-subtle)] text-[var(--accent-text)]" : "text-[var(--text-muted)] hover:text-[var(--text-secondary)]"}`} data-testid="button-view-preview"><ExternalLink size={13} /> Preview</button>
         <button onClick={() => setView("terminal")} className={`flex items-center gap-1.5 rounded-md px-3 py-1.5 text-[11px] font-bold ${view === "terminal" ? "bg-[var(--accent-subtle)] text-[var(--accent-text)]" : "text-[var(--text-muted)] hover:text-[var(--text-secondary)]"}`} data-testid="button-view-terminal"><TerminalSquare size={13} /> Terminal</button>
       </div>}
-      {!isWeb && <div className="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-[.12em] text-[var(--text-muted)]"><span className={`rounded px-1.5 py-0.5 text-[9px] font-bold ${projectType === "python" ? "bg-emerald-400/10 text-emerald-300" : projectType === "java" ? "bg-orange-400/10 text-orange-300" : "bg-sky-400/10 text-sky-300"}`}>{tag.tag}</span> {tag.name}</div>}
+      {!isWeb && <div className="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-[.12em] text-[var(--text-muted)]"><span className={`rounded px-1.5 py-0.5 text-[9px] font-bold ${projectType === "python" ? "bg-emerald-400/10 text-emerald-300" : "bg-sky-400/10 text-sky-300"}`}>{tag.tag}</span> {tag.name}</div>}
       <div className="flex items-center gap-1">
         {isRunning ? <button onClick={() => runtimeStop?.()} disabled={!runtimeStop} className="rounded-md p-2 text-rose-400 hover:bg-[var(--bg-subtle)] disabled:cursor-not-allowed disabled:opacity-40" title="Stop runtime" data-testid="button-stop-runtime"><CircleStop size={15} /></button> : <button onClick={runProject} disabled={isLoading} className="rounded-md bg-[var(--accent)] p-2 text-white shadow-[0_0_16px_rgba(98,114,245,.2)] hover:bg-[var(--accent-hover)] disabled:cursor-wait disabled:opacity-50" title="Run project" data-testid="button-run-project"><Play size={14} fill="currentColor" /></button>}
         {isWeb && <button onClick={refresh} disabled={!previewUrl} className="rounded-md p-2 text-[var(--text-muted)] hover:bg-[var(--bg-subtle)] hover:text-[var(--accent-text)] disabled:opacity-40" title="Refresh preview" data-testid="button-refresh-preview"><RefreshCw size={14} /></button>}
@@ -224,10 +218,10 @@ export function RuntimePanel({
       )) : (
         <div className="thin-scroll min-h-0 flex-1 overflow-y-auto bg-[var(--bg-elevated)] p-4" data-testid="output-console">
           <div className="mb-3 flex items-center justify-between border-b border-[var(--border)] pb-3 text-[10px] uppercase tracking-[.14em] text-[var(--text-muted)]"><span>{projectType} · workspace</span><button onClick={runtimeClear} title="Clear output" data-testid="button-clear-output"><X size={13} /></button></div>
-          <pre className="whitespace-pre-wrap font-mono text-xs leading-6 text-[var(--text-secondary)]">{(runtimeLogs && runtimeLogs.length) ? runtimeLogs.join("\n") : `Run ${projectType === "python" ? "main.py" : projectType === "java" ? "Main.java" : "main." + (projectType === "cpp" ? "cpp" : "c")} to see the output here.`}</pre>
+          <pre className="whitespace-pre-wrap font-mono text-xs leading-6 text-[var(--text-secondary)]">{(runtimeLogs && runtimeLogs.length) ? runtimeLogs.join("\n") : `Run ${projectType === "python" ? "main.py" : "main." + (projectType === "cpp" ? "cpp" : "c")} to see the output here.`}</pre>
         </div>
       )}
     </div>
-    <div className="flex shrink-0 items-center gap-2 border-t border-[var(--border)] px-4 py-2 text-[10px] text-[var(--text-muted)]"><Check size={13} className="text-emerald-400" /> Files persisted automatically <span className="ml-auto">{isWeb ? "Node.js in browser" : projectType === "python" ? "Python in browser" : projectType === "java" ? "Java in browser" : "C/C++ in browser"}</span></div>
+    <div className="flex shrink-0 items-center gap-2 border-t border-[var(--border)] px-4 py-2 text-[10px] text-[var(--text-muted)]"><Check size={13} className="text-emerald-400" /> Files persisted automatically <span className="ml-auto">{isWeb ? "Node.js in browser" : projectType === "python" ? "Python in browser" : "C/C++ in browser"}</span></div>
   </section>;
 }

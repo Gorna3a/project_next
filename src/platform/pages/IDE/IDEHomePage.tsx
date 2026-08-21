@@ -100,7 +100,7 @@ export function IDEHomePage() {
               {project.name}
             </span>
             <span
-              className={`shrink-0 rounded px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider ${project.projectType === "python" ? "bg-emerald-400/10 text-emerald-300" : project.projectType === "java" ? "bg-orange-400/10 text-orange-300" : project.projectType === "c" || project.projectType === "cpp" ? "bg-sky-400/10 text-sky-300" : "bg-[var(--accent-subtle)] text-[var(--accent-text)]"}`}
+              className={`shrink-0 rounded px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider ${project.projectType === "python" ? "bg-emerald-400/10 text-emerald-300" : project.projectType === "c" || project.projectType === "cpp" ? "bg-sky-400/10 text-sky-300" : "bg-[var(--accent-subtle)] text-[var(--accent-text)]"}`}
             >
               {projectLabel(project.projectType)}
             </span>
