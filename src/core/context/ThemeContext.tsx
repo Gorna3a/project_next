@@ -9,6 +9,11 @@ import {
 } from "react";
 import type { AppTheme } from "../types";
 
+// Theme is locked to neobrutalism until a good dark-brutalism palette exists.
+// Set to false to re-enable switching (and flip THEME_PICKER_ENABLED in the pickers).
+const THEME_LOCKED = true;
+const LOCKED_THEME: AppTheme = "neobrutalism";
+
 // ─── Theme definitions ────────────────────────────────────────────────────────
 
 export interface ThemeDefinition {
@@ -290,6 +295,7 @@ const applyTheme = (themeDef: ThemeDefinition) => {
 
 export const ThemeProvider = ({ children }: { children: ReactNode }) => {
   const [theme, setThemeState] = useState<AppTheme>(() => {
+    if (THEME_LOCKED) return LOCKED_THEME;
     if (typeof window !== "undefined") {
       return (localStorage.getItem("pixelcode-theme") as AppTheme) || "neobrutalism";
     }
@@ -304,7 +310,12 @@ export const ThemeProvider = ({ children }: { children: ReactNode }) => {
     return null;
   });
 
-  const resolved: AppTheme = theme === "system" ? getSystemPreferred() : theme;
+  const resolved: AppTheme = THEME_LOCKED ? LOCKED_THEME : (theme === "system" ? getSystemPreferred() : theme);
+
+  // Keep storage in sync so a refresh doesn't flash the old theme
+  useEffect(() => {
+    if (THEME_LOCKED) localStorage.setItem("pixelcode-theme", LOCKED_THEME);
+  }, []);
 
   let themeData: ThemeDefinition;
   if (resolved === 'custom' && customTheme) {
@@ -331,6 +342,11 @@ export const ThemeProvider = ({ children }: { children: ReactNode }) => {
   }, [theme]);
 
   const setTheme = (newTheme: AppTheme) => {
+    if (THEME_LOCKED) {
+      localStorage.setItem("pixelcode-theme", LOCKED_THEME);
+      setThemeState(LOCKED_THEME);
+      return;
+    }
     setThemeState(newTheme);
     localStorage.setItem("pixelcode-theme", newTheme);
   };
