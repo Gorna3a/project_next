@@ -1,219 +1,142 @@
 /* ═══════════════════════════════════════════════════════════════════
-   neobrutalism.css — Figma Kit (neobrutalism.dev / shadcn)
-   Mirrors the Neo-Brutalism UI Library you linked: 2px borders,
-   4px hard shadows, 5px radius, --main #88aaee on --bg #dfe5f2.
-   Applied when data-theme="neobrutalism" (locked default).
-   Landing page (.nb-root) is excluded — keep it untouched.
+   neobrutalism.css — Notebook Brutalism (dashboard theme, now global)
+   Light beige paper #FFFDF5, 3px ink, 5px hard shadow, 0 radius.
+   Matches the gazette dashboard so every page feels like the same notebook.
+   Landing page (.nb-root) is excluded.
    ═══════════════════════════════════════════════════════════════════ */
 
 :root[data-theme="neobrutalism"] {
   --nb-ink: #000000;
   --nb-paper: #ffffff;
-  --nb-bg: #dfe5f2;
-  --nb-main: #88aaee;
-  --nb-overlay: rgba(0, 0, 0, 0.8);
-  --nb-border: #000000;
-  --nb-text: #000000;
-  --nb-mtext: #000000;
-  --nb-ring: #000000;
-  --nb-radius: 5px;
-  --nb-shadow-x: 4px;
-  --nb-shadow-y: 4px;
-  --nb-shadow: var(--nb-shadow-x) var(--nb-shadow-y) 0px 0px var(--nb-border);
-  --nb-shadow-sm: 2px 2px 0px 0px var(--nb-border);
+  --nb-bg: #FFFDF5;
+  --nb-main: #FFD23F;
+  --nb-pink: #FF6B6B;
+  --nb-blue: #74B9FF;
+  --nb-green: #88D498;
+  --nb-orange: #FFA552;
+  --nb-radius: 0px;
+  --nb-shadow-x: 5px;
+  --nb-shadow-y: 5px;
+  --nb-shadow: var(--nb-shadow-x) var(--nb-shadow-y) 0px 0px var(--nb-ink);
+  --nb-shadow-sm: 3px 3px 0px 0px var(--nb-ink);
+  --nb-shadow-lg: 8px 8px 0px 0px var(--nb-ink);
   --nb-phosphor: #33ff66;
 }
 
-/* ── Base — Figma kit uses DM Sans/Inter for body, Space Grotesk/Syne for headings ─ */
+/* ── Base — notebook paper with subtle grid ─────────────────────────── */
 :root[data-theme="neobrutalism"] body {
   font-family: 'Inter', system-ui, sans-serif;
   background-color: var(--bg-base);
   color: var(--text-primary);
-  /* Figma kit is flat #dfe5f2, not grid — keep a very subtle grid for the platform only */
   background-image:
-    linear-gradient(rgba(0, 0, 0, 0.04) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(0, 0, 0, 0.04) 1px, transparent 1px);
-  background-size: 32px 32px;
+    linear-gradient(rgba(0,0,0,0.06) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0,0,0,0.06) 1px, transparent 1px);
+  background-size: 24px 24px;
 }
-
 :root[data-theme="neobrutalism"] body::before {
   content: '';
   position: fixed;
   inset: 0;
   pointer-events: none;
   z-index: 9999;
-  opacity: 0.018;
+  opacity: 0.02;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23noise)' opacity='1'/%3E%3C/svg%3E");
   background-repeat: repeat;
 }
 
-/* Display / headings — Figma kit uses heavy grotesk */
+/* Headings */
 :root[data-theme="neobrutalism"] h1,
-:root[data-theme="neobrutalism"] .display {
-  font-family: 'Syne', sans-serif;
-  font-weight: 800;
-  letter-spacing: -0.02em;
-}
+:root[data-theme="neobrutalism"] .display { font-family: 'Syne', sans-serif; font-weight: 800; letter-spacing: -0.02em; }
 :root[data-theme="neobrutalism"] h2,
 :root[data-theme="neobrutalism"] h3,
-:root[data-theme="neobrutalism"] .heading {
-  font-family: 'Space Grotesk', sans-serif;
-  font-weight: 700;
-}
+:root[data-theme="neobrutalism"] .heading { font-family: 'Space Grotesk', sans-serif; font-weight: 700; }
 :root[data-theme="neobrutalism"] code,
 :root[data-theme="neobrutalism"] pre,
-:root[data-theme="neobrutalism"] .mono {
-  font-family: 'Space Mono', monospace;
-}
+:root[data-theme="neobrutalism"] .mono { font-family: 'Space Mono', monospace; }
 
-/* ── Buttons — Figma kit: 2px border, 5px radius, 4px shadow, --main fill ─ */
+/* ── Buttons ────────────────────────────────────────────────────────── */
 :root[data-theme="neobrutalism"] .btn-primary,
 :root[data-theme="neobrutalism"] .btn-secondary,
 :root[data-theme="neobrutalism"] .btn-ghost {
-  border: 2px solid var(--nb-border) !important;
+  border: 3px solid var(--nb-ink) !important;
   border-radius: var(--nb-radius) !important;
   box-shadow: var(--nb-shadow);
   font-family: 'Space Grotesk', sans-serif;
-  font-weight: 700;
-  letter-spacing: 0.01em;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
   transition: transform 0.12s ease, box-shadow 0.12s ease;
 }
-:root[data-theme="neobrutalism"] .btn-primary {
-  background: var(--nb-main) !important;
-  color: var(--nb-mtext) !important;
-}
-:root[data-theme="neobrutalism"] .btn-secondary {
-  background: var(--nb-paper) !important;
-  color: var(--nb-text) !important;
-}
+:root[data-theme="neobrutalism"] .btn-primary { background: var(--nb-main) !important; color: #000 !important; }
+:root[data-theme="neobrutalism"] .btn-secondary { background: var(--nb-paper) !important; color: #000 !important; }
 :root[data-theme="neobrutalism"] .btn-primary:hover,
-:root[data-theme="neobrutalism"] .btn-secondary:hover {
-  transform: translate(-2px, -2px);
-  box-shadow: 6px 6px 0px 0px var(--nb-border);
-}
+:root[data-theme="neobrutalism"] .btn-secondary:hover { transform: translate(-2px,-2px); box-shadow: 7px 7px 0 0 #000; }
 :root[data-theme="neobrutalism"] .btn-primary:active,
-:root[data-theme="neobrutalism"] .btn-secondary:active,
-:root[data-theme="neobrutalism"] .btn-ghost:active {
-  transform: translate(2px, 2px);
-  box-shadow: none !important;
-}
-:root[data-theme="neobrutalism"] .btn-primary:focus-visible,
-:root[data-theme="neobrutalism"] .btn-secondary:focus-visible {
-  outline: 2px solid var(--nb-ring);
-  outline-offset: 2px;
-}
+:root[data-theme="neobrutalism"] .btn-secondary:active { transform: translate(2px,2px); box-shadow: none !important; }
+:root[data-theme="neobrutalism"] .btn-primary:focus-visible { outline: 3px solid var(--nb-blue); outline-offset: 2px; }
 
 /* ── Cards ────────────────────────────────────────────────────────────── */
 :root[data-theme="neobrutalism"] .card {
   background: var(--nb-paper);
-  border: 2px solid var(--nb-border) !important;
+  border: 3px solid var(--nb-ink) !important;
   border-radius: var(--nb-radius) !important;
   box-shadow: var(--nb-shadow);
-  transition: transform 0.15s, box-shadow 0.15s;
 }
-:root[data-theme="neobrutalism"] .card:hover {
-  transform: translate(-1px, -1px);
-  box-shadow: 6px 6px 0px 0px var(--nb-border);
-}
+:root[data-theme="neobrutalism"] .card:hover { transform: translate(-1px,-1px); box-shadow: 6px 6px 0 0 #000; }
 
 /* ── Inputs ───────────────────────────────────────────────────────────── */
 :root[data-theme="neobrutalism"] .input,
 :root[data-theme="neobrutalism"] input,
 :root[data-theme="neobrutalism"] textarea,
 :root[data-theme="neobrutalism"] select {
-  border: 2px solid var(--nb-border) !important;
+  border: 3px solid var(--nb-ink) !important;
   border-radius: var(--nb-radius) !important;
   background: var(--nb-paper) !important;
-  color: var(--nb-text) !important;
+  color: #000 !important;
   box-shadow: var(--nb-shadow-sm);
-  font-family: 'Inter', sans-serif;
-  transition: box-shadow 0.15s, transform 0.15s;
+  font-family: 'Space Mono', monospace;
 }
-:root[data-theme="neobrutalism"] .input:focus,
-:root[data-theme="neobrutalism"] input:focus,
-:root[data-theme="neobrutalism"] textarea:focus,
-:root[data-theme="neobrutalism"] select:focus {
-  outline: 2px solid var(--nb-ring);
-  outline-offset: 1px;
-  box-shadow: var(--nb-shadow);
-  transform: translate(-1px, -1px);
-}
+:root[data-theme="neobrutalism"] .input:focus { outline: 3px solid var(--nb-blue); outline-offset: 2px; box-shadow: var(--nb-shadow); }
 
 /* ── Sidebar ──────────────────────────────────────────────────────────── */
-:root[data-theme="neobrutalism"] .sidebar-link {
-  border: 2px solid transparent;
-  border-radius: var(--nb-radius) !important;
-  font-family: 'Space Grotesk', sans-serif;
-  font-weight: 600;
-}
-:root[data-theme="neobrutalism"] .sidebar-link-active {
-  border: 2px solid var(--nb-border) !important;
-  box-shadow: var(--nb-shadow-sm);
-  background: var(--nb-main) !important;
-  color: var(--nb-mtext) !important;
-}
+:root[data-theme="neobrutalism"] .sidebar-link { border: 2px solid transparent; border-radius: 0 !important; font-weight: 800; font-family: 'Space Grotesk', sans-serif; }
+:root[data-theme="neobrutalism"] .sidebar-link-active { border: 3px solid var(--nb-ink) !important; box-shadow: var(--nb-shadow-sm); background: var(--nb-main) !important; color: #000 !important; }
 
-/* ── Modals / dialogs ─────────────────────────────────────────────────── */
+/* ── Modals ───────────────────────────────────────────────────────────── */
 :root[data-theme="neobrutalism"] .modal,
 :root[data-theme="neobrutalism"] [role="dialog"],
-:root[data-theme="neobrutalism"] .dropdown,
-:root[data-theme="neobrutalism"] .popover {
-  border: 2px solid var(--nb-border) !important;
-  border-radius: var(--nb-radius) !important;
-  box-shadow: var(--nb-shadow);
-}
+:root[data-theme="neobrutalism"] .dropdown { border: 3px solid var(--nb-ink) !important; border-radius: 0 !important; box-shadow: var(--nb-shadow-lg); }
 
 /* ── IDE panels ───────────────────────────────────────────────────────── */
 :root[data-theme="neobrutalism"] .editor-panel,
 :root[data-theme="neobrutalism"] .runtime-panel,
-:root[data-theme="neobrutalism"] .file-tree {
-  border-color: var(--nb-border) !important;
-  border-width: 2px !important;
-}
+:root[data-theme="neobrutalism"] .file-tree { border-color: var(--nb-ink) !important; border-width: 3px !important; }
 
-/* ═══ Tailwind remap for hardcoded pages (admin/kids) — now to Figma kit ══ */
+/* ── Tailwind remap for hardcoded pages (admin/kids) ─────────────────── */
 :root[data-theme="neobrutalism"] .bg-white { background-color: var(--nb-paper) !important; }
 :root[data-theme="neobrutalism"] .bg-gray-50 { background-color: var(--nb-bg) !important; }
 :root[data-theme="neobrutalism"] .bg-gray-100 { background-color: var(--nb-bg) !important; }
-:root[data-theme="neobrutalism"] .bg-gray-900 { background-color: var(--nb-text) !important; }
+:root[data-theme="neobrutalism"] .bg-gray-900 { background-color: var(--nb-ink) !important; }
 :root[data-theme="neobrutalism"] .border-gray-200,
-:root[data-theme="neobrutalism"] .border-gray-300 { border-color: var(--nb-border) !important; }
-:root[data-theme="neobrutalism"] .border-indigo-200 { border-color: var(--nb-border) !important; }
-:root[data-theme="neobrutalism"] .text-gray-400 { color: #6b7280 !important; }
+:root[data-theme="neobrutalism"] .border-gray-300 { border-color: var(--nb-ink) !important; }
 :root[data-theme="neobrutalism"] .text-gray-500,
 :root[data-theme="neobrutalism"] .text-gray-600,
 :root[data-theme="neobrutalism"] .text-gray-700,
-:root[data-theme="neobrutalism"] .text-gray-900 { color: var(--nb-text) !important; }
+:root[data-theme="neobrutalism"] .text-gray-900 { color: #000 !important; }
 :root[data-theme="neobrutalism"] .bg-indigo-500,
-:root[data-theme="neobrutalism"] .bg-indigo-600 { background-color: var(--nb-main) !important; color: var(--nb-mtext) !important; }
-:root[data-theme="neobrutalism"] .text-indigo-500,
-:root[data-theme="neobrutalism"] .text-indigo-600 { color: var(--nb-text) !important; }
+:root[data-theme="neobrutalism"] .bg-indigo-600 { background-color: var(--nb-main) !important; color: #000 !important; }
 :root[data-theme="neobrutalism"] .bg-purple-500 { background-color: var(--nb-main) !important; }
 :root[data-theme="neobrutalism"] .bg-purple-50 { background-color: var(--nb-bg) !important; }
-:root[data-theme="neobrutalism"] .border-purple-500 { border-color: var(--nb-border) !important; }
-:root[data-theme="neobrutalism"] .text-purple-700 { color: var(--nb-text) !important; }
 
-/* ═══ Green-phosphor CRT for IDE (kept) ════════════════════════════════ */
+/* ── CRT for IDE (kept) ───────────────────────────────────────────────── */
 :root[data-theme="neobrutalism"] .nb-crt { position: relative; }
 :root[data-theme="neobrutalism"] .nb-crt::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  z-index: 40;
+  content: ""; position: absolute; inset: 0; pointer-events: none; z-index: 40;
   background: repeating-linear-gradient(0deg, rgba(0,0,0,0) 0px, rgba(0,0,0,0) 2px, rgba(0,0,0,0.14) 2px, rgba(0,0,0,0.14) 3px);
   mix-blend-mode: multiply;
 }
 :root[data-theme="neobrutalism"] .nb-crt::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  z-index: 41;
+  content: ""; position: absolute; inset: 0; pointer-events: none; z-index: 41;
   background: radial-gradient(ellipse at center, rgba(0,0,0,0) 55%, rgba(0,0,0,0.22) 100%);
 }
-:root[data-theme="neobrutalism"] [data-testid="output-console"] pre {
-  color: var(--nb-phosphor) !important;
-  text-shadow: 0 0 4px rgba(51, 255, 102, 0.45);
-  font-family: 'Space Mono', monospace;
-}
+:root[data-theme="neobrutalism"] [data-testid="output-console"] pre { color: var(--nb-phosphor) !important; text-shadow: 0 0 4px rgba(51,255,102,0.45); font-family: 'Space Mono', monospace; }

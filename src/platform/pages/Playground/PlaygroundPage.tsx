@@ -37,7 +37,7 @@ const fadeUp: Variants = {
   },
 };
 
-// ─── Language Selector ────────────────────────────────────────────────────────
+// ─── Language Selector — hard brutalist ───────────────────────────────────────
 
 const LanguageSelector = ({
   selected,
@@ -54,17 +54,11 @@ const LanguageSelector = ({
     <div className="relative">
       <button
         onClick={() => setOpen((v) => !v)}
-        className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium transition-all duration-200 ${isRTL ? 'flex-row-reverse' : ''}`}
-        style={{
-          backgroundColor: "var(--bg-elevated)",
-          border: "1px solid var(--border)",
-          color: "var(--text-primary)",
-        }}
+        className={`flex items-center gap-2 bg-white text-black border-[3px] border-black shadow-[3px_3px_0_0_#000] px-3 py-1.5 font-mono text-xs font-black uppercase tracking-widest hover:translate-x-[-1px] hover:translate-y-[-1px] hover:shadow-[4px_4px_0_0_#000] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none transition-all ${isRTL ? 'flex-row-reverse' : ''}`}
       >
         <span>{current?.label ?? selected}</span>
         <ChevronDown
           className={`w-3.5 h-3.5 transition-transform duration-200 ${open ? "rotate-180" : ""}`}
-          style={{ color: "var(--text-muted)" }}
         />
       </button>
 
@@ -75,11 +69,9 @@ const LanguageSelector = ({
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -6, scale: 0.97 }}
             transition={{ duration: 0.15 }}
-            className={`absolute ${isRTL ? 'right-0' : 'left-0'} top-full mt-1 z-50 rounded-xl shadow-xl border overflow-hidden`}
+            className={`absolute ${isRTL ? 'right-0' : 'left-0'} top-full mt-2 z-50 bg-white border-[3px] border-black shadow-[5px_5px_0_0_#000] overflow-hidden`}
             style={{
-              backgroundColor: "var(--bg-elevated)",
-              borderColor: "var(--border)",
-              width: "180px",
+              width: "200px",
               maxHeight: "320px",
               overflowY: "auto",
             }}
@@ -91,23 +83,7 @@ const LanguageSelector = ({
                   onChange(key);
                   setOpen(false);
                 }}
-                className={`w-full flex items-center gap-2 px-3 py-2 text-sm transition-colors ${isRTL ? 'flex-row-reverse text-right' : 'text-left'}`}
-                style={{
-                  backgroundColor:
-                    selected === key ? "var(--accent-subtle)" : "transparent",
-                  color:
-                    selected === key
-                      ? "var(--accent-text)"
-                      : "var(--text-secondary)",
-                }}
-                onMouseEnter={(e) => {
-                  if (selected !== key)
-                    e.currentTarget.style.backgroundColor = "var(--bg-subtle)";
-                }}
-                onMouseLeave={(e) => {
-                  if (selected !== key)
-                    e.currentTarget.style.backgroundColor = "transparent";
-                }}
+                className={`w-full flex items-center gap-2 px-3 py-2 font-mono text-xs font-black uppercase tracking-widest border-b border-black/10 last:border-0 transition-colors ${isRTL ? 'flex-row-reverse text-right' : 'text-left'} ${selected === key ? 'bg-black text-white' : 'bg-white text-black hover:bg-[#FFD23F]'}`}
               >
                 {lang.label}
               </button>
@@ -119,7 +95,7 @@ const LanguageSelector = ({
   );
 };
 
-// ─── Output Panel ─────────────────────────────────────────────────────────────
+// ─── Output Panel — hard brutalist ────────────────────────────────────────────
 
 type OutputTab = "output" | "ai";
 
@@ -140,54 +116,30 @@ const OutputPanel = ({
 }) => {
   const { t, isRTL } = useLanguage();
   const getStatusColor = () => {
-    if (!result) return "var(--text-muted)";
-    if (result.status === "success") return "#22c55e";
-    if (result.status === "timeout") return "#f59e0b";
-    return "#ef4444";
+    if (!result) return "text-black";
+    if (result.status === "success") return "text-black bg-[#88D498] border-black";
+    if (result.status === "timeout") return "text-black bg-[#FFD23F] border-black";
+    return "text-white bg-[#FF6B6B] border-black";
   };
 
   const getStatusIcon = () => {
     if (!result) return null;
     if (result.status === "success")
-      return (
-        <CheckCircle2 className="w-3.5 h-3.5" style={{ color: "#22c55e" }} />
-      );
+      return <CheckCircle2 className="w-3.5 h-3.5 text-black" />;
     if (result.status === "timeout")
-      return <Clock className="w-3.5 h-3.5" style={{ color: "#f59e0b" }} />;
-    return <AlertCircle className="w-3.5 h-3.5" style={{ color: "#ef4444" }} />;
+      return <Clock className="w-3.5 h-3.5 text-black" />;
+    return <AlertCircle className="w-3.5 h-3.5 text-white" />;
   };
 
   return (
-    <div
-      className="flex flex-col h-full rounded-xl overflow-hidden border"
-      style={{
-        borderColor: "var(--border)",
-        backgroundColor: "var(--bg-surface)",
-      }}
-    >
-      {/* Tabs */}
-      <div
-        className={`flex items-center border-b px-2 pt-2 gap-1 flex-shrink-0 ${isRTL ? 'flex-row-reverse' : ''}`}
-        style={{
-          borderColor: "var(--border)",
-          backgroundColor: "var(--bg-elevated)",
-        }}
-      >
+    <div className="flex flex-col h-full bg-white border-[3px] border-black shadow-[5px_5px_0_0_#000] overflow-hidden">
+      {/* Tabs — hard */}
+      <div className={`flex items-center gap-2 border-b-[3px] border-black p-2 bg-[#FFFDF5] shrink-0 ${isRTL ? 'flex-row-reverse' : ''}`}>
         {(["output", "ai"] as OutputTab[]).map((tab) => (
           <button
             key={tab}
             onClick={() => onTabChange(tab)}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-t-lg text-xs font-medium transition-all duration-200 ${isRTL ? 'flex-row-reverse' : ''}`}
-            style={{
-              backgroundColor:
-                activeTab === tab ? "var(--bg-surface)" : "transparent",
-              color:
-                activeTab === tab ? "var(--text-primary)" : "var(--text-muted)",
-              borderBottom:
-                activeTab === tab
-                  ? "2px solid var(--accent)"
-                  : "2px solid transparent",
-            }}
+            className={`flex items-center gap-1.5 px-3 py-1.5 font-mono text-[11px] font-black uppercase tracking-widest border-[3px] transition-all ${isRTL ? 'flex-row-reverse' : ''} ${activeTab === tab ? 'bg-black text-white border-black shadow-[2px_2px_0_0_#000]' : 'bg-white text-black border-black hover:bg-[#FFD23F]'}`}
           >
             {tab === "output" ? (
               <>
@@ -203,30 +155,21 @@ const OutputPanel = ({
 
         {/* Status indicator */}
         {result && activeTab === "output" && (
-          <div
-            className={`${isRTL ? 'mr-auto' : 'ml-auto'} flex items-center gap-1.5 px-2 pb-1 text-xs ${isRTL ? 'flex-row-reverse' : ''}`}
-            style={{ color: "var(--text-muted)" }}
-          >
+          <div className={`${isRTL ? 'mr-auto' : 'ml-auto'} flex items-center gap-1.5 px-2 py-1 font-mono text-[11px] font-black uppercase tracking-widest border-[2px] ${getStatusColor()} ${isRTL ? 'flex-row-reverse' : ''}`}>
             {getStatusIcon()}
-            <span style={{ color: getStatusColor() }}>{result.status}</span>
+            <span>{result.status}</span>
             {result.time && <span>· {result.time}ms</span>}
           </div>
         )}
       </div>
 
       {/* Content */}
-      <div className={`flex-1 overflow-auto p-4 ${isRTL ? 'text-right' : 'text-left'}`}>
+      <div className={`flex-1 overflow-auto p-4 bg-white ${isRTL ? 'text-right' : 'text-left'}`}>
         {activeTab === "output" ? (
           <div className="h-full">
             {isRunning ? (
-              <div
-                className={`flex items-center gap-3 text-sm ${isRTL ? 'flex-row-reverse' : ''}`}
-                style={{ color: "var(--text-muted)" }}
-              >
-                <Loader2
-                  className="w-4 h-4 animate-spin"
-                  style={{ color: "var(--accent)" }}
-                />
+              <div className={`flex items-center gap-3 font-mono text-xs font-black uppercase tracking-widest text-black ${isRTL ? 'flex-row-reverse' : ''}`}>
+                <Loader2 className="w-4 h-4 animate-spin" />
                 {isRTL ? 'جاري تشغيل الكود الخاص بك...' : 'Running your code…'}
               </div>
             ) : result ? (
@@ -238,60 +181,40 @@ const OutputPanel = ({
               >
                 {result.stdout && (
                   <div>
-                    <p
-                      className="text-xs font-medium mb-1.5"
-                      style={{ color: "var(--text-muted)" }}
-                    >
+                    <p className="font-mono text-[10px] font-black uppercase tracking-widest mb-1.5 text-black">
                       STDOUT
                     </p>
-                    <pre
-                      className="text-sm font-mono whitespace-pre-wrap leading-6 p-3 rounded-lg text-left dir-ltr"
-                      style={{
-                        backgroundColor: "var(--bg-elevated)",
-                        color: "#22c55e",
-                      }}
-                    >
+                    <pre className="font-mono text-sm whitespace-pre-wrap leading-6 p-3 bg-[#FFFDF5] border-[3px] border-black text-black text-left dir-ltr">
                       {result.stdout}
                     </pre>
                   </div>
                 )}
                 {result.stderr && (
                   <div>
-                    <p
-                      className="text-xs font-medium mb-1.5"
-                      style={{ color: "#ef4444" }}
-                    >
+                    <p className="font-mono text-[10px] font-black uppercase tracking-widest mb-1.5 text-black">
                       STDERR
                     </p>
-                    <pre
-                      className="text-sm font-mono whitespace-pre-wrap leading-6 p-3 rounded-lg text-left dir-ltr"
-                      style={{
-                        backgroundColor: "rgba(239,68,68,0.08)",
-                        color: "#ef4444",
-                        border: "1px solid rgba(239,68,68,0.2)",
-                      }}
-                    >
+                    <pre className="font-mono text-sm whitespace-pre-wrap leading-6 p-3 bg-[#FF6B6B] border-[3px] border-black text-black text-left dir-ltr">
                       {result.stderr}
                     </pre>
                   </div>
                 )}
                 {!result.stdout && !result.stderr && (
-                  <p className="text-sm" style={{ color: "var(--text-muted)" }}>
+                  <p className="font-mono text-xs font-bold uppercase tracking-widest text-black/60">
                     {isRTL ? 'لم يتم إنتاج أي مخرجات.' : 'No output produced.'}
                   </p>
                 )}
               </motion.div>
             ) : (
               <div className="h-full flex flex-col items-center justify-center gap-3 text-center">
-                <Terminal
-                  className="w-8 h-8 opacity-20"
-                  style={{ color: "var(--text-muted)" }}
-                />
-                <p className="text-sm" style={{ color: "var(--text-muted)" }}>
+                <span className="w-12 h-12 bg-[#FFD23F] border-[3px] border-black grid place-items-center shadow-[3px_3px_0_0_#000] rotate-[-1deg]">
+                  <Terminal className="w-6 h-6 text-black" />
+                </span>
+                <p className="font-mono text-xs font-black uppercase tracking-widest text-black/60 max-w-[220px]">
                   {isRTL ? (
-                    <>انقر فوق <strong>تشغيل</strong> لتنفيذ الكود الخاص بك</>
+                    <>انقر فوق <span className="bg-black text-white px-1">تشغيل</span> لتنفيذ الكود الخاص بك</>
                   ) : (
-                    <>Click <strong>Run</strong> to execute your code</>
+                    <>Click <span className="bg-black text-white px-1">Run</span> to execute your code</>
                   )}
                 </p>
               </div>
@@ -300,36 +223,26 @@ const OutputPanel = ({
         ) : (
           <div className="h-full">
             {isReviewing ? (
-              <div
-                className={`flex items-center gap-3 text-sm ${isRTL ? 'flex-row-reverse' : ''}`}
-                style={{ color: "var(--text-muted)" }}
-              >
-                <Loader2
-                  className="w-4 h-4 animate-spin"
-                  style={{ color: "var(--accent)" }}
-                />
+              <div className={`flex items-center gap-3 font-mono text-xs font-black uppercase tracking-widest text-black ${isRTL ? 'flex-row-reverse' : ''}`}>
+                <Loader2 className="w-4 h-4 animate-spin" />
                 {isRTL ? 'يقوم الذكاء الاصطناعي بمراجعة الكود الخاص بك...' : 'AI is reviewing your code…'}
               </div>
             ) : aiContent ? (
               <motion.div variants={fadeUp} initial="hidden" animate="show">
-                <pre
-                  className={`text-sm whitespace-pre-wrap leading-7 font-sans ${isRTL ? 'text-right' : 'text-left'}`}
-                  style={{ color: "var(--text-secondary)" }}
-                >
+                <pre className={`font-mono text-sm whitespace-pre-wrap leading-7 bg-[#FFFDF5] border-[3px] border-black p-3 text-black ${isRTL ? 'text-right' : 'text-left'}`}>
                   {aiContent}
                 </pre>
               </motion.div>
             ) : (
               <div className="h-full flex flex-col items-center justify-center gap-3 text-center">
-                <Sparkles
-                  className="w-8 h-8 opacity-20"
-                  style={{ color: "var(--text-muted)" }}
-                />
-                <p className="text-sm" style={{ color: "var(--text-muted)" }}>
+                <span className="w-12 h-12 bg-[#74B9FF] border-[3px] border-black grid place-items-center shadow-[3px_3px_0_0_#000] rotate-[1deg]">
+                  <Sparkles className="w-6 h-6 text-black" />
+                </span>
+                <p className="font-mono text-xs font-black uppercase tracking-widest text-black/60 max-w-[220px]">
                   {isRTL ? (
-                    <>انقر فوق <strong>مراجعة الذكاء الاصطناعي</strong> للحصول على تعليقات</>
+                    <>انقر فوق <span className="bg-black text-white px-1">مراجعة الذكاء الاصطناعي</span> للحصول على تعليقات</>
                   ) : (
-                    <>Click <strong>AI Review</strong> to get feedback on your code</>
+                    <>Click <span className="bg-black text-white px-1">AI Review</span> to get feedback on your code</>
                   )}
                 </p>
               </div>
@@ -456,39 +369,52 @@ export default function PlaygroundPage() {
   // ─────────────────────────────────────────────────────────────────────────────
 
   return (
-    <div className="h-[calc(100vh-4rem-3rem)] flex flex-col gap-3 max-w-full">
-      {/* ── Top bar ── */}
-      <div className={`flex items-center gap-2 flex-wrap flex-shrink-0 ${isRTL ? 'flex-row-reverse' : ''}`}>
-        <LanguageSelector selected={language} onChange={handleLanguageChange} />
+    <div className="h-[calc(100vh-4rem-3rem)] flex flex-col gap-4 max-w-full pb-4">
+      {/* ── Masthead — playground header ── */}
+      <div className={`bg-black text-white border-[3px] border-black shadow-[5px_5px_0_0_#000] p-4 flex flex-wrap items-center gap-3 ${isRTL ? 'flex-row-reverse' : ''}`}>
+        <h1 className="font-black text-lg tracking-tight flex items-center gap-3" style={{ fontFamily: "'Syne', sans-serif" }}>
+          <span className="w-2 h-6 bg-[#FFD23F] border border-white hidden sm:inline-block" />
+          <Terminal className="w-5 h-5 text-[#FFD23F]" />
+          <span className="hidden sm:inline">{t('playground.title') ?? 'Playground'}</span>
+        </h1>
+        <span className="hidden md:inline-flex font-mono text-[10px] font-black uppercase tracking-widest bg-white text-black border-[2px] border-white px-2 py-1">
+          {LANGUAGES[language]?.label} v{LANGUAGES[language]?.version}
+        </span>
+        <div className={`flex items-center gap-2 flex-wrap ${isRTL ? 'mr-auto flex-row-reverse' : 'ml-auto'}`}>
+          <LanguageSelector selected={language} onChange={handleLanguageChange} />
+        </div>
+      </div>
 
-        <div className={`flex items-center gap-1.5 ${isRTL ? 'mr-auto' : 'ml-auto'} flex-wrap ${isRTL ? 'flex-row-reverse' : ''}`}>
-          {/* Reset */}
+      {/* ── Toolbar — hard controls ── */}
+      <div className={`flex items-center gap-2 flex-wrap shrink-0 bg-white border-[3px] border-black shadow-[4px_4px_0_0_#000] p-3 ${isRTL ? 'flex-row-reverse' : ''}`}>
+        <div className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
           <button
             onClick={handleReset}
-            className="btn-ghost p-2"
+            className="bg-white text-black border-[3px] border-black shadow-[2px_2px_0_0_#000] p-2 hover:bg-black hover:text-white active:translate-x-[1px] active:translate-y-[1px] active:shadow-none transition-all"
             title={t('playground.resetCode')}
           >
             <RotateCcw className="w-4 h-4" />
           </button>
 
-          {/* Copy */}
           <button
             onClick={handleCopy}
-            className="btn-ghost p-2"
+            className="bg-white text-black border-[3px] border-black shadow-[2px_2px_0_0_#000] p-2 hover:bg-black hover:text-white active:translate-x-[1px] active:translate-y-[1px] active:shadow-none transition-all"
             title={t('playground.copyCode')}
           >
             {copied ? (
-              <Check className="w-4 h-4 text-green-500" />
+              <Check className="w-4 h-4 text-[#88D498]" />
             ) : (
               <Copy className="w-4 h-4" />
             )}
           </button>
+        </div>
 
+        <div className={`flex items-center gap-2 flex-wrap ${isRTL ? 'mr-auto flex-row-reverse' : 'ml-auto'}`}>
           {/* AI Review */}
           <button
             onClick={handleAIReview}
             disabled={isReviewing || !code.trim()}
-            className={`btn-secondary flex items-center gap-2 text-xs px-3 py-1.5 ${isRTL ? 'flex-row-reverse' : ''}`}
+            className={`bg-white text-black border-[3px] border-black shadow-[3px_3px_0_0_#000] font-mono text-xs font-black uppercase tracking-widest px-3 py-1.5 hover:bg-black hover:text-white active:translate-x-[1px] active:translate-y-[1px] active:shadow-none transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}
           >
             {isReviewing ? (
               <Loader2 className="w-3.5 h-3.5 animate-spin" />
@@ -498,26 +424,25 @@ export default function PlaygroundPage() {
             {t('playground.aiReview')}
           </button>
 
-          {/* Explain Error — only shown when there's an error */}
+          {/* Explain Error — only when error */}
           {result?.status === "error" && (
             <motion.button
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
               onClick={handleExplainError}
               disabled={isReviewing}
-              className={`btn-secondary flex items-center gap-2 text-xs px-3 py-1.5 ${isRTL ? 'flex-row-reverse' : ''}`}
-              style={{ borderColor: "#ef4444", color: "#ef4444" }}
+              className={`bg-[#FF6B6B] text-black border-[3px] border-black shadow-[3px_3px_0_0_#000] font-mono text-xs font-black uppercase tracking-widest px-3 py-1.5 hover:translate-x-[-1px] hover:translate-y-[-1px] hover:shadow-[4px_4px_0_0_#000] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none transition-all flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}
             >
               <AlertCircle className="w-3.5 h-3.5" />
               {isRTL ? 'شرح الخطأ' : 'Explain Error'}
             </motion.button>
           )}
 
-          {/* Run */}
+          {/* Run — primary yellow */}
           <button
             onClick={handleRun}
             disabled={isRunning}
-            className={`btn-primary flex items-center gap-2 text-sm px-4 py-1.5 ${isRTL ? 'flex-row-reverse' : ''}`}
+            className={`bg-[#FFD23F] text-black border-[3px] border-black shadow-[3px_3px_0_0_#000] font-mono text-sm font-black uppercase tracking-widest px-5 py-1.5 hover:translate-x-[-1px] hover:translate-y-[-1px] hover:shadow-[4px_4px_0_0_#000] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}
           >
             {isRunning ? (
               <Loader2 className="w-4 h-4 animate-spin" />
@@ -530,42 +455,46 @@ export default function PlaygroundPage() {
       </div>
 
       {/* ── Main split panel ── */}
-      <div className={`flex gap-3 flex-1 min-h-0 ${isRTL ? 'flex-row-reverse' : ''}`}>
-        {/* Editor */}
-        <div
-          className="flex-[6] min-w-0 rounded-xl overflow-hidden border"
-          style={{ borderColor: "var(--border)" }}
-        >
-          <Editor
-            height="100%"
-            language={LANGUAGES[language]?.monacoLang ?? language}
-            value={code}
-            theme={monacoTheme}
-            onChange={(val) => setCode(val ?? "")}
-            onMount={(editor) => {
-              editorRef.current = editor;
-            }}
-            options={{
-              fontSize: 14,
-              fontFamily: "JetBrains Mono, Fira Code, monospace",
-              fontLigatures: true,
-              minimap: { enabled: false },
-              scrollBeyondLastLine: false,
-              lineNumbers: "on",
-              roundedSelection: true,
-              automaticLayout: true,
-              tabSize: 4,
-              wordWrap: "on",
-              padding: { top: 16, bottom: 16 },
-              scrollbar: {
-                verticalScrollbarSize: 6,
-                horizontalScrollbarSize: 6,
-              },
-            }}
-          />
+      <div className={`flex gap-4 flex-1 min-h-0 ${isRTL ? 'flex-row-reverse' : ''}`}>
+        {/* Editor — hard frame */}
+        <div className="flex-[6] min-w-0 bg-white border-[3px] border-black shadow-[5px_5px_0_0_#000] overflow-hidden flex flex-col">
+          <div className="bg-black text-white border-b-[3px] border-black px-3 py-1.5 flex items-center gap-2 shrink-0">
+            <span className="w-2 h-2 bg-[#FFD23F] border border-white" />
+            <span className="font-mono text-[10px] font-black uppercase tracking-widest">EDITOR // {LANGUAGES[language]?.label}</span>
+            <span className={`font-mono text-[10px] font-bold tracking-widest text-white/60 ${isRTL ? 'mr-auto' : 'ml-auto'}`}>MONACO</span>
+          </div>
+          <div className="flex-1 min-h-0">
+            <Editor
+              height="100%"
+              language={LANGUAGES[language]?.monacoLang ?? language}
+              value={code}
+              theme={monacoTheme}
+              onChange={(val) => setCode(val ?? "")}
+              onMount={(editor) => {
+                editorRef.current = editor;
+              }}
+              options={{
+                fontSize: 14,
+                fontFamily: "JetBrains Mono, Fira Code, monospace",
+                fontLigatures: true,
+                minimap: { enabled: false },
+                scrollBeyondLastLine: false,
+                lineNumbers: "on",
+                roundedSelection: true,
+                automaticLayout: true,
+                tabSize: 4,
+                wordWrap: "on",
+                padding: { top: 16, bottom: 16 },
+                scrollbar: {
+                  verticalScrollbarSize: 6,
+                  horizontalScrollbarSize: 6,
+                },
+              }}
+            />
+          </div>
         </div>
 
-        {/* Output */}
+        {/* Output — hard frame */}
         <div className="flex-[4] min-w-0 min-h-0">
           <OutputPanel
             result={result}
@@ -578,27 +507,20 @@ export default function PlaygroundPage() {
         </div>
       </div>
 
-      {/* ── Status bar ── */}
-      <div
-        className={`flex items-center gap-4 text-xs flex-shrink-0 px-1 ${isRTL ? 'flex-row-reverse' : ''}`}
-        style={{ color: "var(--text-muted)" }}
-      >
-        <span>{LANGUAGES[language]?.label}</span>
-        <span>v{LANGUAGES[language]?.version}</span>
+      {/* ── Status bar — hard ── */}
+      <div className={`flex items-center gap-3 font-mono text-[11px] font-black uppercase tracking-widest bg-white border-[3px] border-black shadow-[3px_3px_0_0_#000] px-3 py-2 shrink-0 ${isRTL ? 'flex-row-reverse' : ''}`}>
+        <span className="bg-black text-white border-[2px] border-black px-2 py-0.5">{LANGUAGES[language]?.label}</span>
+        <span className="text-black/60">v{LANGUAGES[language]?.version}</span>
         {result && (
           <>
-            <span>·</span>
-            <span
-              style={{
-                color: result.status === "success" ? "#22c55e" : "#ef4444",
-              }}
-            >
+            <span className="text-black">·</span>
+            <span className={`px-2 py-0.5 border-[2px] border-black ${result.status === "success" ? "bg-[#88D498] text-black" : "bg-[#FF6B6B] text-black"}`}>
               {isRTL ? 'خروج' : 'exit'} {result.exitCode}
             </span>
-            {result.time && <span>· {result.time}ms</span>}
+            {result.time && <span className="text-black/60">· {result.time}ms</span>}
           </>
         )}
-        <span className={isRTL ? 'mr-auto' : 'ml-auto'}>{isRTL ? 'بدعم من Piston API' : 'Powered by Piston API'}</span>
+        <span className={`${isRTL ? 'mr-auto' : 'ml-auto'} text-black/60 hidden sm:inline`}>{isRTL ? 'بدعم من Piston API' : 'Powered by Piston API'}</span>
       </div>
     </div>
   );

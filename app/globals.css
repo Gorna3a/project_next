@@ -5,26 +5,26 @@
 @tailwind utilities;
 
 :root {
-    --bg-base: #dfe5f2;
+    --bg-base: #FFFDF5;
     --bg-surface: #ffffff;
     --bg-elevated: #ffffff;
-    --bg-subtle: #dfe5f2;
+    --bg-subtle: #FFFDF5;
     --border: #000000;
     --border-subtle: #000000;
     --text-primary: #000000;
-    --text-secondary: #000000;
-    --text-muted: #6b7280;
-    --accent: #88aaee;
-    --accent-hover: #7aa0f0;
-    --accent-subtle: #e6efff;
+    --text-secondary: #1a1a1a;
+    --text-muted: #52525b;
+    --accent: #FFD23F;
+    --accent-hover: #FFC300;
+    --accent-subtle: #FFF4CC;
     --accent-text: #000000;
-    --bg-sidebar: #dfe5f2;
+    --bg-sidebar: #FFFDF5;
     --bg-header: #ffffff;
     --particle-opacity: 0;
-    /* Figma kit extras — 4px shadow, 5px radius */
-    --border-radius: 5px;
-    --box-shadow-x: 4px;
-    --box-shadow-y: 4px;
+    /* Notebook brutalism — 3px ink, 5px hard shadow, 0 radius */
+    --border-radius: 0px;
+    --box-shadow-x: 5px;
+    --box-shadow-y: 5px;
     --shadow: var(--box-shadow-x) var(--box-shadow-y) 0px 0px var(--border);
 }
 

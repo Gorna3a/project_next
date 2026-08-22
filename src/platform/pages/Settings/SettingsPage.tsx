@@ -9,10 +9,6 @@ import { db } from "../../../core/firebase/config";
 import { useAuth } from "../../../core/context/AuthContext";
 import { ThemePicker } from "../../../shared/ui/ThemePicker";
 import { ThemeLab } from "../../../shared/ui/ThemeLab";
-
-// Theme switching is disabled for now (neobrutalism is the fixed default
-// until a dark-brutalism palette is chosen). Flip to true to re-enable.
-const THEME_PICKER_ENABLED = false;
 import { useRouter } from "next/navigation";
 import { useLanguage } from "../../../core/context/LanguageContext";
 import toast from "react-hot-toast";
@@ -32,13 +28,14 @@ const stagger: Variants = {
   show: { transition: { staggerChildren: 0.1 } },
 };
 
-// ─── Section wrapper ──────────────────────────────────────────────────────────
+// ─── Section wrapper — hard brutalist card ───────────────────────────────────
 
 const Section = ({
   icon: Icon,
   title,
   children,
   isRTL,
+  accent = "bg-[#FFD23F]",
 }: {
   icon: React.ComponentType<{
     className?: string;
@@ -47,15 +44,20 @@ const Section = ({
   title: string;
   children: React.ReactNode;
   isRTL: boolean;
+  accent?: string;
 }) => (
-  <motion.div variants={fadeUp} className={`card p-6 space-y-4 ${isRTL ? 'text-right' : 'text-left'}`}>
-    <div className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
-      <Icon className="w-5 h-5" style={{ color: "var(--accent-text)" }} />
-      <h2 className="font-semibold" style={{ color: "var(--text-primary)" }}>
+  <motion.div variants={fadeUp} className={`bg-white border-[3px] border-black shadow-[5px_5px_0_0_#000] overflow-hidden ${isRTL ? 'text-right' : 'text-left'}`}>
+    <div className={`flex items-center gap-3 px-6 py-3 border-b-[3px] border-black ${accent} ${isRTL ? 'flex-row-reverse' : ''}`}>
+      <span className="w-8 h-8 bg-black border-[2px] border-black grid place-items-center shrink-0">
+        <Icon className="w-4 h-4 text-white" />
+      </span>
+      <h2 className="font-mono text-xs font-black uppercase tracking-widest text-black">
         {title}
       </h2>
     </div>
-    {children}
+    <div className="p-6 space-y-4">
+      {children}
+    </div>
   </motion.div>
 );
 
@@ -101,121 +103,85 @@ export default function SettingsPage() {
       variants={stagger}
       initial="hidden"
       animate="show"
-      className={`max-w-2xl mx-auto space-y-6 ${isRTL ? 'text-right' : 'text-left'}`}
+      className={`max-w-2xl mx-auto space-y-6 pb-12 ${isRTL ? 'text-right' : 'text-left'}`}
     >
-      {/* Page heading */}
-      <motion.div variants={fadeUp}>
-        <h1
-          className="text-2xl font-bold"
-          style={{ color: "var(--text-primary)" }}
-        >
+      {/* Page heading — black masthead */}
+      <motion.div variants={fadeUp} className="bg-black text-white border-[3px] border-black shadow-[5px_5px_0_0_#000] p-6">
+        <h1 className="font-black text-2xl tracking-tight flex items-center gap-3" style={{ fontFamily: "'Syne', sans-serif" }}>
+          <span className="w-2 h-6 bg-[#FFD23F] border border-white hidden sm:inline-block" />
           {t('settings.title')}
         </h1>
-        <p className="text-sm mt-1" style={{ color: "var(--text-secondary)" }}>
+        <p className="font-mono text-xs font-bold uppercase tracking-widest mt-1 text-white/60">
           {t('settings.subtitle')}
         </p>
       </motion.div>
 
       {/* ── Appearance ── */}
-      <Section icon={Palette} title={t('settings.appearance')} isRTL={isRTL}>
-        <p className="text-xs" style={{ color: "var(--text-muted)" }}>
+      <Section icon={Palette} title={t('settings.appearance')} isRTL={isRTL} accent="bg-[#FFD23F]">
+        <p className="font-mono text-xs font-bold uppercase tracking-widest text-black/60">
           {t('settings.appearanceDesc')}
         </p>
-        {THEME_PICKER_ENABLED && <ThemePicker />}
+        <ThemePicker />
       </Section>
 
       {/* ── Theme Lab ── */}
-      <Section icon={Palette} title={t('settings.themeLab')} isRTL={isRTL}>
-        <p className="text-xs mb-4" style={{ color: "var(--text-muted)" }}>
+      <Section icon={Palette} title={t('settings.themeLab')} isRTL={isRTL} accent="bg-[#74B9FF]">
+        <p className="font-mono text-xs font-bold uppercase tracking-widest text-black/60 mb-2">
           {t('settings.themeLabDesc')}
         </p>
-        {THEME_PICKER_ENABLED && <ThemeLab />}
+        <ThemeLab />
       </Section>
 
       {/* ── Notifications ── */}
-      <Section icon={Bell} title={t('settings.notifications')} isRTL={isRTL}>
-        <div className={`flex items-center justify-between py-1 ${isRTL ? 'flex-row-reverse' : ''}`}>
+      <Section icon={Bell} title={t('settings.notifications')} isRTL={isRTL} accent="bg-[#88D498]">
+        <div className={`flex items-center justify-between gap-4 py-1 ${isRTL ? 'flex-row-reverse' : ''}`}>
           <div className={isRTL ? 'text-right' : 'text-left'}>
-            <p
-              className="text-sm font-medium"
-              style={{ color: "var(--text-primary)" }}
-            >
+            <p className="font-mono text-sm font-black uppercase tracking-widest text-black">
               {t('settings.emailNotifs')}
             </p>
-            <p
-              className="text-xs mt-0.5"
-              style={{ color: "var(--text-muted)" }}
-            >
+            <p className="font-mono text-xs font-bold mt-1 text-black/60">
               {t('settings.emailNotifsDesc')}
             </p>
           </div>
-          {/* Toggle switch */}
+          {/* Toggle — hard rectangle */}
           <button
             onClick={() => setEmailNotifs((v) => !v)}
-            className="w-12 h-6 rounded-full flex items-center p-1 transition-colors duration-300 flex-shrink-0"
-            style={{
-              backgroundColor: emailNotifs
-                ? "var(--accent)"
-                : "var(--bg-subtle)",
-            }}
+            className={`w-14 h-8 border-[3px] border-black flex items-center p-1 transition-colors duration-200 shrink-0 shadow-[3px_3px_0_0_#000] ${emailNotifs ? 'bg-black' : 'bg-white'}`}
+            aria-pressed={emailNotifs}
           >
             <motion.div
-              animate={{ x: isRTL ? (emailNotifs ? -24 : 0) : (emailNotifs ? 24 : 0) }}
+              animate={{ x: isRTL ? (emailNotifs ? -20 : 0) : (emailNotifs ? 20 : 0) }}
               transition={{ type: "spring", stiffness: 500, damping: 30 }}
-              className="w-4 h-4 bg-white rounded-full shadow"
+              className={`w-4 h-4 border-[2px] border-black shadow-sm ${emailNotifs ? 'bg-[#FFD23F]' : 'bg-black'}`}
             />
           </button>
         </div>
       </Section>
 
       {/* ── Account info ── */}
-      <Section icon={Shield} title={t('settings.account')} isRTL={isRTL}>
-        <div className="space-y-2">
-          <div
-            className={`flex justify-between items-center py-2 border-b ${isRTL ? 'flex-row-reverse' : ''}`}
-            style={{ borderColor: "var(--border)" }}
-          >
-            <span
-              className="text-sm"
-              style={{ color: "var(--text-secondary)" }}
-            >
+      <Section icon={Shield} title={t('settings.account')} isRTL={isRTL} accent="bg-white">
+        <div className="space-y-0 border-[3px] border-black overflow-hidden">
+          <div className={`flex justify-between items-center py-3 px-4 border-b-[3px] border-black bg-[#FFFDF5] ${isRTL ? 'flex-row-reverse' : ''}`}>
+            <span className="font-mono text-xs font-black uppercase tracking-widest text-black">
               {t('settings.email')}
             </span>
-            <span
-              className="text-sm font-medium"
-              style={{ color: "var(--text-primary)" }}
-            >
+            <span className="font-mono text-xs font-bold text-black">
               {user?.email}
             </span>
           </div>
-          <div
-            className={`flex justify-between items-center py-2 border-b ${isRTL ? 'flex-row-reverse' : ''}`}
-            style={{ borderColor: "var(--border)" }}
-          >
-            <span
-              className="text-sm"
-              style={{ color: "var(--text-secondary)" }}
-            >
+          <div className={`flex justify-between items-center py-3 px-4 border-b-[3px] border-black bg-white ${isRTL ? 'flex-row-reverse' : ''}`}>
+            <span className="font-mono text-xs font-black uppercase tracking-widest text-black">
               {t('settings.role')}
             </span>
-            <span
-              className="text-sm font-medium capitalize"
-              style={{ color: "var(--text-primary)" }}
-            >
+            <span className="font-mono text-xs font-black uppercase tracking-widest bg-black text-white border-[2px] border-black px-2 py-1">
               {profile?.role === 'student' ? t('common.student') : profile?.role === 'teacher' ? t('common.teacher') : profile?.role === 'admin' ? t('common.admin') : (profile?.role ?? t('common.student'))}
             </span>
           </div>
-          <div className={`flex justify-between items-center py-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
-            <span
-              className="text-sm"
-              style={{ color: "var(--text-secondary)" }}
-            >
+          <div className={`flex justify-between items-center py-3 px-4 bg-[#FFFDF5] ${isRTL ? 'flex-row-reverse' : ''}`}>
+            <span className="font-mono text-xs font-black uppercase tracking-widest text-black">
               {t('settings.memberSince')}
             </span>
-            <span
-              className="text-sm font-medium"
-              style={{ color: "var(--text-primary)" }}
-            >
+            <span className="font-mono text-xs font-bold text-black">
               {profile?.createdAt
                 ? new Date(profile.createdAt).toLocaleDateString(isRTL ? 'ar-EG' : 'en-US')
                 : "—"}
@@ -224,95 +190,92 @@ export default function SettingsPage() {
         </div>
       </Section>
 
-      {/* ── Danger Zone ── */}
+      {/* ── Danger Zone — hard red card ── */}
       <motion.div
         variants={fadeUp}
-        className={`card p-6 space-y-4 border-2 ${isRTL ? 'text-right' : 'text-left'}`}
-        style={{
-          borderColor: "rgba(239,68,68,0.3)",
-          backgroundColor: "rgba(239,68,68,0.04)",
-        }}
+        className={`bg-[#FF6B6B] border-[3px] border-black shadow-[5px_5px_0_0_#000] overflow-hidden ${isRTL ? 'text-right' : 'text-left'}`}
       >
-        <div className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
-          <AlertTriangle className="w-5 h-5 text-red-500" />
-          <h2 className="font-semibold text-red-600 dark:text-red-400">
+        <div className={`flex items-center gap-3 px-6 py-3 bg-black border-b-[3px] border-black ${isRTL ? 'flex-row-reverse' : ''}`}>
+          <span className="w-8 h-8 bg-[#FF6B6B] border-[2px] border-white grid place-items-center">
+            <AlertTriangle className="w-4 h-4 text-black" />
+          </span>
+          <h2 className="font-mono text-xs font-black uppercase tracking-widest text-white">
             {t('settings.dangerZone')}
           </h2>
         </div>
 
-        <AnimatePresence mode="wait">
-          {!deleteConfirm ? (
-            <motion.div
-              key="initial"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className={isRTL ? 'text-right' : 'text-left'}
-            >
-              <p
-                className="text-sm mb-3"
-                style={{ color: "var(--text-secondary)" }}
+        <div className="p-6">
+          <AnimatePresence mode="wait">
+            {!deleteConfirm ? (
+              <motion.div
+                key="initial"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className={isRTL ? 'text-right' : 'text-left'}
               >
-                {t('settings.deleteDesc')}
-              </p>
-              <button
-                onClick={() => setDeleteConfirm(true)}
-                className="px-4 py-2 rounded-xl text-sm font-semibold text-red-600 border border-red-300 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
+                <p className="font-mono text-xs font-bold leading-relaxed text-black">
+                  {t('settings.deleteDesc')}
+                </p>
+                <button
+                  onClick={() => setDeleteConfirm(true)}
+                  className="mt-3 bg-black text-white border-[3px] border-black shadow-[3px_3px_0_0_#000] font-mono text-xs font-black uppercase tracking-widest px-4 py-2 hover:bg-white hover:text-black active:translate-x-[1px] active:translate-y-[1px] active:shadow-none transition-all"
+                >
+                  {t('settings.deleteAccount')}
+                </button>
+              </motion.div>
+            ) : (
+              <motion.div
+                key="confirm"
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0 }}
+                className="space-y-3"
               >
-                {t('settings.deleteAccount')}
-              </button>
-            </motion.div>
-          ) : (
-            <motion.div
-              key="confirm"
-              initial={{ opacity: 0, y: 8 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0 }}
-              className="space-y-3"
-            >
-              <p className="text-sm font-semibold text-red-600">
-                {t('settings.deleteConfirm')}
-              </p>
-              <ul className={`text-xs space-y-1 text-red-500 ${isRTL ? 'pr-4' : 'pl-4'}`}>
-                <li>&bull; {t('settings.deleteWarning1')}</li>
-                <li>&bull; {t('settings.deleteWarning2')}</li>
-                <li>&bull; {t('settings.deleteWarning3')}</li>
-                <li>&bull; {t('settings.deleteWarning4')}</li>
-              </ul>
-              <p className="text-xs" style={{ color: "var(--text-muted)" }}>
-                {t('settings.typeDelete')}
-              </p>
-              <input
-                value={deleteInput}
-                onChange={(e) => setDeleteInput(e.target.value)}
-                placeholder="DELETE"
-                className={`input text-sm font-mono ${isRTL ? 'text-right' : 'text-left'}`}
-              />
-              <div className={`flex gap-3 ${isRTL ? 'flex-row-reverse' : ''}`}>
-                <button
-                  onClick={() => {
-                    setDeleteConfirm(false);
-                    setDeleteInput("");
-                  }}
-                  className="btn-secondary flex-1"
-                >
-                  {t('settings.cancel')}
-                </button>
-                <button
-                  onClick={handleDeleteAccount}
-                  disabled={deleteInput !== "DELETE" || deleting}
-                  className="flex-1 flex items-center justify-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold text-white bg-red-500 hover:bg-red-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                >
-                  {deleting ? (
-                    <Loader2 className="w-4 h-4 animate-spin" />
-                  ) : (
-                    t('settings.confirmDelete')
-                  )}
-                </button>
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
+                <p className="font-mono text-xs font-black uppercase tracking-widest bg-black text-white border-[2px] border-black px-3 py-2 inline-block">
+                  {t('settings.deleteConfirm')}
+                </p>
+                <ul className={`font-mono text-xs font-bold space-y-1 text-black bg-white border-[3px] border-black p-3 ${isRTL ? 'pr-6' : 'pl-6'}`}>
+                  <li>• {t('settings.deleteWarning1')}</li>
+                  <li>• {t('settings.deleteWarning2')}</li>
+                  <li>• {t('settings.deleteWarning3')}</li>
+                  <li>• {t('settings.deleteWarning4')}</li>
+                </ul>
+                <p className="font-mono text-xs font-black uppercase tracking-widest text-black">
+                  {t('settings.typeDelete')}
+                </p>
+                <input
+                  value={deleteInput}
+                  onChange={(e) => setDeleteInput(e.target.value)}
+                  placeholder="DELETE"
+                  className={`w-full bg-white border-[3px] border-black shadow-[3px_3px_0_0_#000] px-3 py-2.5 font-mono text-sm font-black tracking-widest placeholder:text-black/30 focus:outline-none ${isRTL ? 'text-right' : 'text-left'}`}
+                />
+                <div className={`flex gap-3 ${isRTL ? 'flex-row-reverse' : ''}`}>
+                  <button
+                    onClick={() => {
+                      setDeleteConfirm(false);
+                      setDeleteInput("");
+                    }}
+                    className="flex-1 bg-white text-black border-[3px] border-black shadow-[3px_3px_0_0_#000] font-mono text-xs font-black uppercase tracking-widest py-2.5 hover:bg-black hover:text-white transition-colors"
+                  >
+                    {t('settings.cancel')}
+                  </button>
+                  <button
+                    onClick={handleDeleteAccount}
+                    disabled={deleteInput !== "DELETE" || deleting}
+                    className="flex-1 flex items-center justify-center gap-2 bg-black text-white border-[3px] border-black shadow-[3px_3px_0_0_#000] font-mono text-xs font-black uppercase tracking-widest py-2.5 hover:bg-white hover:text-black disabled:opacity-50 disabled:cursor-not-allowed active:translate-x-[1px] active:translate-y-[1px] active:shadow-none transition-all"
+                  >
+                    {deleting ? (
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                    ) : (
+                      t('settings.confirmDelete')
+                    )}
+                  </button>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
       </motion.div>
     </motion.div>
   );

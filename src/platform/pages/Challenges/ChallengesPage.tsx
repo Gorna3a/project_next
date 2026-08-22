@@ -7,11 +7,9 @@ import { Search, Trophy, Star, Zap } from 'lucide-react';
 import { collection, getDocs } from 'firebase/firestore';
 import { db } from '../../../core/firebase/config';
 
-// ─── Animation variants ───────────────────────────────────────────────────────
-
 const fadeUp: Variants = {
-  hidden: { opacity: 0, y: 16 },
-  show:   { opacity: 1, y: 0, transition: { duration: 0.3, ease: 'easeOut' as const } },
+  hidden: { opacity: 0, y: 10 },
+  show:   { opacity: 1, y: 0, transition: { duration: 0.32, ease: 'easeOut' as const } },
 };
 
 const stagger: Variants = {
@@ -19,13 +17,11 @@ const stagger: Variants = {
   show:   { transition: { staggerChildren: 0.06 } },
 };
 
-// ─── Config ───────────────────────────────────────────────────────────────────
-
 const DIFFICULTY_CONFIG = {
-  easy:   { label: 'Easy',   color: '#22c55e', bg: 'rgba(34,197,94,0.12)',   border: 'rgba(34,197,94,0.3)'  },
-  medium: { label: 'Medium', color: '#f59e0b', bg: 'rgba(245,158,11,0.12)',  border: 'rgba(245,158,11,0.3)' },
-  hard:   { label: 'Hard',   color: '#ef4444', bg: 'rgba(239,68,68,0.12)',   border: 'rgba(239,68,68,0.3)'  },
-  expert: { label: 'Expert', color: '#a855f7', bg: 'rgba(168,85,247,0.12)',  border: 'rgba(168,85,247,0.3)' },
+  easy:   { label: 'Easy',   color: '#88D498', bg: '#88D498', border: '#000'  },
+  medium: { label: 'Medium', color: '#FFD23F', bg: '#FFD23F', border: '#000' },
+  hard:   { label: 'Hard',   color: '#FF6B6B', bg: '#FF6B6B', border: '#000'  },
+  expert: { label: 'Expert', color: '#B8A9FA', bg: '#B8A9FA', border: '#000' },
 };
 
 const LANGUAGE_META: Record<string, { emoji: string }> = {
@@ -47,8 +43,6 @@ const LANGUAGE_META: Record<string, { emoji: string }> = {
 const DIFFICULTY_TABS = ['all', 'easy', 'medium', 'hard', 'expert'] as const;
 type DifficultyTab = typeof DIFFICULTY_TABS[number];
 
-// ─── Types ────────────────────────────────────────────────────────────────────
-
 interface Challenge {
   id: string;
   title: string;
@@ -59,21 +53,17 @@ interface Challenge {
   description?: string;
 }
 
-// ─── Skeleton card ────────────────────────────────────────────────────────────
-
 const SkeletonCard = () => (
-  <div className="card p-5 space-y-3 animate-pulse">
+  <div className="bg-white border-[3px] border-black shadow-[4px_4px_0_0_#000] p-5 space-y-3 animate-pulse">
     <div className="flex justify-between">
-      <div className="h-3 rounded w-1/3" style={{ backgroundColor: 'var(--bg-subtle)' }} />
-      <div className="h-3 rounded w-12" style={{ backgroundColor: 'var(--bg-subtle)' }} />
+      <div className="h-3 w-1/3 bg-black/10 border border-black" />
+      <div className="h-3 w-12 bg-black/10 border border-black" />
     </div>
-    <div className="h-4 rounded w-3/4" style={{ backgroundColor: 'var(--bg-subtle)' }} />
-    <div className="h-3 rounded w-1/2" style={{ backgroundColor: 'var(--bg-subtle)' }} />
-    <div className="h-8 rounded-xl" style={{ backgroundColor: 'var(--bg-subtle)' }} />
+    <div className="h-4 w-3/4 bg-black/10 border border-black" />
+    <div className="h-3 w-1/2 bg-black/10 border border-black" />
+    <div className="h-8 border-[3px] border-black bg-black/10" />
   </div>
 );
-
-// ─── Page ─────────────────────────────────────────────────────────────────────
 
 export default function ChallengesPage() {
   const [challenges, setChallenges] = useState<Challenge[]>([]);
@@ -111,34 +101,25 @@ export default function ChallengesPage() {
   }, [challenges, diffTab, langFilter, search]);
 
   return (
-    <div className="max-w-6xl mx-auto space-y-6">
-
-      {/* ── Header ──────────────────────────────────────────────────────────── */}
-      <div className="flex items-start justify-between flex-wrap gap-4">
+    <div className="max-w-6xl mx-auto space-y-6 pb-12">
+      <motion.div variants={fadeUp} initial="hidden" animate="show" className="bg-black text-white border-[3px] border-black shadow-[5px_5px_0_0_#000] p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>
-            🏆 Challenges
+          <h1 className="font-black text-2xl tracking-tight flex items-center gap-3" style={{ fontFamily: "'Syne', sans-serif" }}>
+            <span className="w-2 h-6 bg-[#FFD23F] border border-white" /> Challenges
           </h1>
-          <p className="text-sm mt-1" style={{ color: 'var(--text-secondary)' }}>
+          <p className="font-mono text-xs font-bold uppercase tracking-widest text-white/60 mt-1">
             Test your skills and earn XP — new challenges added regularly
           </p>
         </div>
-
         {challenges.length > 0 && (
-          <div
-            className="flex items-center gap-2 text-xs font-medium px-3 py-1.5 rounded-full"
-            style={{ backgroundColor: 'var(--accent-subtle)', color: 'var(--accent-text)' }}
-          >
+          <span className="inline-flex items-center gap-2 bg-white text-black border-[3px] border-black px-4 py-2 font-mono text-xs font-black uppercase tracking-widest shadow-[3px_3px_0_0_#000] self-start sm:self-auto">
             <Trophy className="w-3.5 h-3.5" />
-            {challenges.length} challenges available
-          </div>
+            {challenges.length} challenges
+          </span>
         )}
-      </div>
+      </motion.div>
 
-      {/* ── Filters ─────────────────────────────────────────────────────────── */}
-      <div className="space-y-3">
-
-        {/* Difficulty tabs */}
+      <motion.div variants={fadeUp} initial="hidden" animate="show" className="bg-white border-[3px] border-black shadow-[4px_4px_0_0_#000] p-4 space-y-4">
         <div className="flex gap-2 flex-wrap">
           {DIFFICULTY_TABS.map(tab => {
             const cfg      = tab !== 'all' ? DIFFICULTY_CONFIG[tab] : null;
@@ -147,12 +128,8 @@ export default function ChallengesPage() {
               <button
                 key={tab}
                 onClick={() => setDiffTab(tab)}
-                className="px-4 py-1.5 rounded-full text-xs font-semibold border transition-all duration-200 capitalize"
-                style={{
-                  backgroundColor: isActive ? (cfg?.bg ?? 'var(--accent-subtle)') : 'transparent',
-                  borderColor:     isActive ? (cfg?.border ?? 'var(--accent)')     : 'var(--border)',
-                  color:           isActive ? (cfg?.color ?? 'var(--accent-text)') : 'var(--text-muted)',
-                }}
+                className={`border-[3px] px-4 py-1.5 font-mono text-xs font-black uppercase tracking-widest transition-all ${isActive ? 'bg-black text-white border-black shadow-[3px_3px_0_0_#000]' : 'bg-white text-black border-black hover:bg-[#FFF4CC]'}`}
+                style={isActive && cfg ? { backgroundColor: cfg.bg, color: '#000', borderColor: '#000' } : {}}
               >
                 {tab === 'all' ? 'All' : tab.charAt(0).toUpperCase() + tab.slice(1)}
               </button>
@@ -160,26 +137,22 @@ export default function ChallengesPage() {
           })}
         </div>
 
-        {/* Search + language dropdown */}
         <div className="flex gap-3 flex-wrap">
           <div className="relative flex-1 min-w-48">
-            <Search
-              className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4"
-              style={{ color: 'var(--text-muted)' }}
-            />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-black" />
             <input
               type="text"
               placeholder="Search challenges…"
               value={search}
               onChange={e => setSearch(e.target.value)}
-              className="input pl-9"
+              className="w-full bg-white border-[3px] border-black shadow-[3px_3px_0_0_#000] pl-9 pr-4 py-2.5 font-mono text-sm font-bold placeholder:text-black/40 focus:outline-none focus:translate-x-[-1px] focus:translate-y-[-1px] focus:shadow-[4px_4px_0_0_#000] transition-all"
             />
           </div>
 
           <select
             value={langFilter}
             onChange={e => setLangFilter(e.target.value)}
-            className="input"
+            className="bg-white border-[3px] border-black shadow-[3px_3px_0_0_#000] px-4 py-2.5 font-mono text-xs font-black uppercase tracking-widest cursor-pointer focus:outline-none"
             style={{ minWidth: '160px' }}
           >
             {languages.map(l => (
@@ -191,24 +164,22 @@ export default function ChallengesPage() {
             ))}
           </select>
         </div>
-      </div>
+      </motion.div>
 
-      {/* ── Challenge grid ───────────────────────────────────────────────────── */}
       {loading ? (
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
           {Array.from({ length: 6 }).map((_, i) => <SkeletonCard key={i} />)}
         </div>
 
       ) : filtered.length === 0 ? (
-        <div className="card p-12 text-center space-y-3">
-          <Trophy
-            className="w-12 h-12 mx-auto opacity-20"
-            style={{ color: 'var(--text-muted)' }}
-          />
-          <p className="font-medium" style={{ color: 'var(--text-primary)' }}>
+        <div className="bg-white border-[3px] border-black shadow-[5px_5px_0_0_#000] p-12 text-center space-y-3">
+          <div className="w-14 h-14 bg-[#FFD23F] border-[3px] border-black grid place-items-center mx-auto shadow-[3px_3px_0_0_#000] rotate-[-1deg]">
+            <Trophy className="w-6 h-6 text-black" />
+          </div>
+          <p className="font-black text-black" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
             {challenges.length === 0 ? 'No challenges yet' : 'No challenges match your filters'}
           </p>
-          <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>
+          <p className="font-mono text-xs font-bold uppercase tracking-widest text-black/60">
             {challenges.length === 0
               ? 'Add challenges to the Firestore "challenges" collection'
               : 'Try different filters or clear your search'}
@@ -230,84 +201,48 @@ export default function ChallengesPage() {
               <motion.div
                 key={challenge.id}
                 variants={fadeUp}
-                className="card p-5 flex flex-col gap-3 hover:shadow-md transition-shadow"
+                className="bg-white border-[3px] border-black shadow-[5px_5px_0_0_#000] hover:shadow-[6px_6px_0_0_#000] hover:translate-x-[-1px] hover:translate-y-[-1px] p-5 flex flex-col gap-3 transition-all"
               >
-                {/* Top row — difficulty + XP */}
                 <div className="flex items-center justify-between">
-                  <span
-                    className="text-xs font-semibold px-2.5 py-1 rounded-full border"
-                    style={{
-                      backgroundColor: diff.bg,
-                      borderColor:     diff.border,
-                      color:           diff.color,
-                    }}
-                  >
+                  <span className="border-[2px] border-black px-2.5 py-1 font-mono text-[10px] font-black uppercase tracking-widest" style={{ backgroundColor: diff.bg, color: '#000' }}>
                     {diff.label}
                   </span>
-                  <div
-                    className="flex items-center gap-1 text-xs font-bold"
-                    style={{ color: '#f59e0b' }}
-                  >
-                    <Star className="w-3.5 h-3.5 fill-current" />
+                  <span className="flex items-center gap-1 font-mono text-xs font-black bg-black text-white border-[2px] border-black px-2 py-1">
+                    <Star className="w-3.5 h-3.5 fill-current text-[#FFD23F]" />
                     {challenge.xp} XP
-                  </div>
+                  </span>
                 </div>
 
-                {/* Title + description */}
                 <div>
                   <div className="flex items-center gap-2 mb-1">
                     {langMeta && <span className="text-lg">{langMeta.emoji}</span>}
-                    <h3
-                      className="font-semibold text-sm leading-snug"
-                      style={{ color: 'var(--text-primary)' }}
-                    >
+                    <h3 className="font-black text-sm leading-snug text-black" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
                       {challenge.title}
                     </h3>
                   </div>
                   {challenge.description && (
-                    <p
-                      className="text-xs line-clamp-2 leading-relaxed"
-                      style={{ color: 'var(--text-muted)' }}
-                    >
+                    <p className="font-mono text-xs leading-relaxed text-black/60 line-clamp-2">
                       {challenge.description}
                     </p>
                   )}
                 </div>
 
-                {/* Tags */}
                 {challenge.tags && challenge.tags.length > 0 && (
                   <div className="flex flex-wrap gap-1">
                     {challenge.tags.slice(0, 3).map(tag => (
-                      <span
-                        key={tag}
-                        className="text-xs px-2 py-0.5 rounded-full"
-                        style={{
-                          backgroundColor: 'var(--bg-subtle)',
-                          color:           'var(--text-muted)',
-                        }}
-                      >
+                      <span key={tag} className="border-[2px] border-black bg-white px-2 py-0.5 font-mono text-[10px] font-bold">
                         {tag}
                       </span>
                     ))}
                     {challenge.tags.length > 3 && (
-                      <span
-                        className="text-xs px-2 py-0.5 rounded-full"
-                        style={{
-                          backgroundColor: 'var(--bg-subtle)',
-                          color:           'var(--text-muted)',
-                        }}
-                      >
+                      <span className="border-[2px] border-black bg-white px-2 py-0.5 font-mono text-[10px] font-bold">
                         +{challenge.tags.length - 3}
                       </span>
                     )}
                   </div>
                 )}
 
-                {/* CTA */}
-                <Link
-                  href={`/app/challenges/${challenge.id}`}
-                  className="btn-primary w-full justify-center text-xs py-2 mt-auto"
-                >
+                <Link href={`/app/challenges/${challenge.id}`} className="bg-black text-white border-[3px] border-black shadow-[3px_3px_0_0_#000] hover:translate-x-[-1px] hover:translate-y-[-1px] hover:shadow-[4px_4px_0_0_#000] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none w-full flex items-center justify-center gap-2 py-2.5 font-mono text-xs font-black uppercase tracking-widest transition-all mt-auto">
                   <Zap className="w-3.5 h-3.5" />
                   Start Challenge
                 </Link>
@@ -317,9 +252,8 @@ export default function ChallengesPage() {
         </motion.div>
       )}
 
-      {/* Footer count */}
       {filtered.length > 0 && (
-        <p className="text-xs text-center" style={{ color: 'var(--text-muted)' }}>
+        <p className="font-mono text-xs font-black uppercase tracking-widest text-black/60 text-center">
           Showing {filtered.length} of {challenges.length} challenges
         </p>
       )}

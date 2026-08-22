@@ -98,36 +98,30 @@ const AddAssignmentModal = ({
       onClick={onClose}
     >
       <motion.div
-        initial={{ scale: 0.9, opacity: 0 }}
-        animate={{ scale: 1, opacity: 1 }}
-        exit={{ scale: 0.9, opacity: 0 }}
-        className={`card p-6 w-full max-w-md space-y-4 ${isRTL ? 'text-right' : 'text-left'}`}
+        initial={{ scale: 0.96, opacity: 0, y: 8 }}
+        animate={{ scale: 1, opacity: 1, y: 0 }}
+        exit={{ scale: 0.96, opacity: 0, y: 8 }}
+        className={`bg-white border-[3px] border-black shadow-[8px_8px_0_0_#000] p-6 w-full max-w-md space-y-4 ${isRTL ? 'text-right' : 'text-left'}`}
         onClick={e => e.stopPropagation()}
       >
-        <h2 className="text-lg font-bold" style={{ color: 'var(--text-primary)' }}>
+        <h2 className="font-black text-lg tracking-tight text-black" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
           {t('classroom.addAssignment')}
         </h2>
 
         <div className="space-y-3">
           <div>
-            <label
-              className="text-xs font-semibold mb-1 block"
-              style={{ color: 'var(--text-muted)' }}
-            >
+            <label className="font-mono text-[10px] font-black uppercase tracking-widest mb-1 block text-black">
               {t('classroom.assignmentTitleLabel')}
             </label>
             <input
               value={title}
               onChange={e => setTitle(e.target.value)}
               placeholder={t('classroom.assignmentTitlePlaceholder')}
-              className={`input ${isRTL ? 'text-right' : 'text-left'}`}
+              className={`w-full bg-white border-[3px] border-black shadow-[3px_3px_0_0_#000] px-3 py-2.5 font-mono text-sm font-bold placeholder:text-black/40 focus:outline-none ${isRTL ? 'text-right' : 'text-left'}`}
             />
           </div>
           <div>
-            <label
-              className="text-xs font-semibold mb-1 block"
-              style={{ color: 'var(--text-muted)' }}
-            >
+            <label className="font-mono text-[10px] font-black uppercase tracking-widest mb-1 block text-black">
               {t('classroom.assignmentDescLabel')}
             </label>
             <textarea
@@ -135,33 +129,30 @@ const AddAssignmentModal = ({
               onChange={e => setDesc(e.target.value)}
               placeholder={t('classroom.assignmentDescPlaceholder')}
               rows={3}
-              className={`input resize-none ${isRTL ? 'text-right' : 'text-left'}`}
+              className={`w-full bg-white border-[3px] border-black shadow-[3px_3px_0_0_#000] px-3 py-2.5 font-mono text-sm font-bold placeholder:text-black/40 focus:outline-none resize-none ${isRTL ? 'text-right' : 'text-left'}`}
             />
           </div>
           <div>
-            <label
-              className="text-xs font-semibold mb-1 block"
-              style={{ color: 'var(--text-muted)' }}
-            >
+            <label className="font-mono text-[10px] font-black uppercase tracking-widest mb-1 block text-black">
               {t('classroom.dueDateLabel')}
             </label>
             <input
               type="datetime-local"
               value={due}
               onChange={e => setDue(e.target.value)}
-              className={`input ${isRTL ? 'text-right' : 'text-left'}`}
+              className={`w-full bg-white border-[3px] border-black shadow-[3px_3px_0_0_#000] px-3 py-2.5 font-mono text-sm font-bold focus:outline-none ${isRTL ? 'text-right' : 'text-left'}`}
             />
           </div>
         </div>
 
         <div className={`flex gap-3 ${isRTL ? 'flex-row-reverse' : ''}`}>
-          <button onClick={onClose} className="btn-secondary flex-1">
+          <button onClick={onClose} className="flex-1 bg-white text-black border-[3px] border-black shadow-[3px_3px_0_0_#000] font-mono text-xs font-black uppercase tracking-widest py-2.5 hover:bg-black hover:text-white active:translate-x-[2px] active:translate-y-[2px] active:shadow-none transition-all">
             {t('common.cancel')}
           </button>
           <button
             onClick={handleSave}
             disabled={!title.trim() || saving}
-            className="btn-primary flex-1"
+            className="flex-1 bg-[#FFD23F] text-black border-[3px] border-black shadow-[3px_3px_0_0_#000] font-mono text-xs font-black uppercase tracking-widest py-2.5 hover:translate-x-[-1px] hover:translate-y-[-1px] hover:shadow-[4px_4px_0_0_#000] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
           >
             {saving ? (
               <Loader2 className="w-4 h-4 animate-spin" />
@@ -238,17 +229,10 @@ export default function ClassroomDetailPage() {
 
   if (loading) {
     return (
-      <div className="max-w-4xl mx-auto animate-pulse space-y-4">
-        <div
-          className="h-40 rounded-2xl"
-          style={{ backgroundColor: 'var(--bg-surface)' }}
-        />
+      <div className="max-w-4xl mx-auto space-y-4">
+        <div className="h-40 bg-white border-[3px] border-black shadow-[5px_5px_0_0_#000] animate-pulse" />
         {Array.from({ length: 3 }).map((_, i) => (
-          <div
-            key={i}
-            className="h-16 rounded-xl"
-            style={{ backgroundColor: 'var(--bg-surface)' }}
-          />
+          <div key={i} className="h-16 bg-white border-[3px] border-black shadow-[5px_5px_0_0_#000] animate-pulse" />
         ))}
       </div>
     );
@@ -258,13 +242,12 @@ export default function ClassroomDetailPage() {
 
   if (!classroom) {
     return (
-      <div className="text-center py-20 space-y-4">
-        <GraduationCap
-          className="w-12 h-12 mx-auto opacity-20"
-          style={{ color: 'var(--text-muted)' }}
-        />
-        <p style={{ color: 'var(--text-primary)' }}>{t('classroom.notFound')}</p>
-        <Link href="/app/classroom" className={`btn-secondary inline-flex gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
+      <div className="text-center py-20 space-y-4 max-w-md mx-auto">
+        <span className="w-14 h-14 bg-[#FFD23F] border-[3px] border-black grid place-items-center mx-auto shadow-[3px_3px_0_0_#000] rotate-[-1deg]">
+          <GraduationCap className="w-7 h-7 text-black" />
+        </span>
+        <p className="font-mono text-sm font-black uppercase tracking-widest text-black">{t('classroom.notFound')}</p>
+        <Link href="/app/classroom" className={`inline-flex items-center gap-2 bg-white text-black border-[3px] border-black shadow-[3px_3px_0_0_#000] font-mono text-xs font-black uppercase tracking-widest px-4 py-2 hover:bg-black hover:text-white transition-colors ${isRTL ? 'flex-row-reverse' : ''}`}>
           {isRTL ? <ArrowRight className="w-4 h-4" /> : <ArrowLeft className="w-4 h-4" />} {t('classroom.backToClassrooms')}
         </Link>
       </div>
@@ -278,7 +261,7 @@ export default function ClassroomDetailPage() {
       initial={{ opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.35, ease: 'easeOut' as const }}
-      className={`max-w-4xl mx-auto space-y-6 ${isRTL ? 'text-right' : 'text-left'}`}
+      className={`max-w-4xl mx-auto space-y-6 pb-12 ${isRTL ? 'text-right' : 'text-left'}`}
     >
       <AnimatePresence>
         {showAddAssign && id && (
@@ -293,46 +276,37 @@ export default function ClassroomDetailPage() {
       {/* ── Back link ── */}
       <Link
         href="/app/classroom"
-        className={`btn-ghost inline-flex gap-2 text-sm ${isRTL ? 'flex-row-reverse -mr-2' : '-ml-2'}`}
+        className={`inline-flex items-center gap-2 bg-white text-black border-[3px] border-black shadow-[3px_3px_0_0_#000] font-mono text-xs font-black uppercase tracking-widest px-3 py-1.5 hover:bg-black hover:text-white active:translate-x-[1px] active:translate-y-[1px] active:shadow-none transition-all ${isRTL ? 'flex-row-reverse' : ''}`}
       >
         {isRTL ? <ArrowRight className="w-4 h-4" /> : <ArrowLeft className="w-4 h-4" />} {t('classroom.title')}
       </Link>
 
-      {/* ── Classroom header card ── */}
-      <div className="card p-6 space-y-4">
+      {/* ── Classroom header — brutalist masthead variant ── */}
+      <div className="bg-black text-white border-[3px] border-black shadow-[5px_5px_0_0_#000] p-6 space-y-4">
         <div className={`flex items-start justify-between gap-4 flex-wrap ${isRTL ? 'flex-row-reverse' : ''}`}>
           <div className={`${isRTL ? 'text-right' : 'text-left'}`}>
-            <h1
-              className="text-2xl font-bold"
-              style={{ color: 'var(--text-primary)' }}
-            >
+            <h1 className="font-black text-2xl tracking-tight flex items-center gap-3" style={{ fontFamily: "'Syne', sans-serif" }}>
+              <span className="w-2 h-6 bg-[#FFD23F] border border-white hidden sm:inline-block" />
               {classroom.name}
             </h1>
-            <p className="text-sm mt-1" style={{ color: 'var(--text-muted)' }}>
+            <p className="font-mono text-xs font-bold uppercase tracking-widest mt-1 text-white/60">
               {isTeacher
                 ? t('classroom.studentsEnrolled').replace('{count}', classroom.students.length.toString())
                 : t('classroom.taughtBy').replace('{name}', classroom.teacherName)}
             </p>
           </div>
 
-          {/* Join code pill — teachers only */}
           {isTeacher && (
-            <div
-              className={`flex items-center gap-2 px-3 py-2 rounded-xl ${isRTL ? 'flex-row-reverse' : ''}`}
-              style={{ backgroundColor: 'var(--bg-subtle)' }}
-            >
-              <span className="text-xs" style={{ color: 'var(--text-muted)' }}>
+            <div className={`flex items-center gap-2 bg-white text-black border-[3px] border-black px-3 py-2 shadow-[3px_3px_0_0_#000] ${isRTL ? 'flex-row-reverse' : ''}`}>
+              <span className="font-mono text-[10px] font-black uppercase tracking-widest text-black/60">
                 {t('classroom.joinCodeLabel')}
               </span>
-              <code
-                className="font-mono font-bold text-sm"
-                style={{ color: 'var(--accent-text)' }}
-              >
+              <code className="font-mono font-black text-sm tracking-widest text-black">
                 {classroom.joinCode}
               </code>
-              <button onClick={copyCode} className="btn-ghost p-1">
+              <button onClick={copyCode} className="bg-black text-white border-[2px] border-black p-1 hover:bg-[#FFD23F] hover:text-black transition-colors">
                 {copied ? (
-                  <Check className="w-3.5 h-3.5 text-green-500" />
+                  <Check className="w-3.5 h-3.5 text-[#88D498]" />
                 ) : (
                   <Copy className="w-3.5 h-3.5" />
                 )}
@@ -342,45 +316,31 @@ export default function ClassroomDetailPage() {
         </div>
 
         {classroom.description && (
-          <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>
+          <p className="font-mono text-sm font-bold leading-relaxed text-white/80 border-l-[3px] border-[#FFD23F] pl-3">
             {classroom.description}
           </p>
         )}
 
         {/* Quick stats */}
-        <div className={`flex gap-4 flex-wrap ${isRTL ? 'flex-row-reverse' : ''}`}>
-          <div
-            className={`flex items-center gap-2 text-sm ${isRTL ? 'flex-row-reverse' : ''}`}
-            style={{ color: 'var(--text-muted)' }}
-          >
+        <div className={`flex gap-3 flex-wrap ${isRTL ? 'flex-row-reverse' : ''}`}>
+          <span className={`inline-flex items-center gap-2 bg-white text-black border-[2px] border-white px-3 py-1 font-mono text-xs font-black uppercase tracking-widest ${isRTL ? 'flex-row-reverse' : ''}`}>
             <Users className="w-4 h-4" />
             {t('classroom.studentsCount').replace('{count}', classroom.students.length.toString())}
-          </div>
-          <div
-            className={`flex items-center gap-2 text-sm ${isRTL ? 'flex-row-reverse' : ''}`}
-            style={{ color: 'var(--text-muted)' }}
-          >
+          </span>
+          <span className={`inline-flex items-center gap-2 bg-[#FFD23F] text-black border-[2px] border-white px-3 py-1 font-mono text-xs font-black uppercase tracking-widest ${isRTL ? 'flex-row-reverse' : ''}`}>
             <ClipboardList className="w-4 h-4" />
             {t('classroom.assignmentsCount').replace('{count}', assignments.length.toString())}
-          </div>
+          </span>
         </div>
       </div>
 
-      {/* ── Tabs ── */}
-      <div
-        className={`flex gap-1 p-1 rounded-xl ${isRTL ? 'flex-row-reverse' : ''}`}
-        style={{ backgroundColor: 'var(--bg-subtle)' }}
-      >
+      {/* ── Tabs — hard brutalist ── */}
+      <div className={`flex gap-2 bg-white border-[3px] border-black shadow-[4px_4px_0_0_#000] p-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
         {(['assignments', 'students'] as const).map(tab => (
           <button
             key={tab}
             onClick={() => setActiveTab(tab)}
-            className="flex-1 py-2 px-4 rounded-lg text-sm font-medium capitalize transition-all duration-200"
-            style={{
-              backgroundColor: activeTab === tab ? 'var(--bg-surface)' : 'transparent',
-              color:           activeTab === tab ? 'var(--text-primary)' : 'var(--text-muted)',
-              boxShadow:       activeTab === tab ? '0 1px 3px rgba(0,0,0,0.1)' : 'none',
-            }}
+            className={`flex-1 py-2.5 px-4 font-mono text-xs font-black uppercase tracking-widest border-[3px] transition-all ${activeTab === tab ? 'bg-black text-white border-black shadow-[3px_3px_0_0_#000]' : 'bg-white text-black border-black hover:bg-[#FFF4CC]'}`}
           >
             {tab === 'assignments' ? t('classroom.assignmentsTab') : t('classroom.studentsTab')}
           </button>
@@ -393,21 +353,20 @@ export default function ClassroomDetailPage() {
           {isTeacher && (
             <button
               onClick={() => setShowAddAssign(true)}
-              className={`btn-primary gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}
+              className={`bg-[#FFD23F] text-black border-[3px] border-black shadow-[3px_3px_0_0_#000] font-mono text-xs font-black uppercase tracking-widest px-4 py-2.5 hover:translate-x-[-1px] hover:translate-y-[-1px] hover:shadow-[4px_4px_0_0_#000] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none transition-all flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}
             >
               <Plus className="w-4 h-4" /> {t('classroom.addAssignment')}
             </button>
           )}
 
           {assignments.length === 0 ? (
-            <div className="card p-10 text-center space-y-2">
-              <ClipboardList
-                className="w-10 h-10 mx-auto opacity-20"
-                style={{ color: 'var(--text-muted)' }}
-              />
-              <p style={{ color: 'var(--text-primary)' }}>{t('classroom.noAssignmentsYet')}</p>
+            <div className="bg-white border-[3px] border-black shadow-[5px_5px_0_0_#000] p-10 text-center space-y-3">
+              <span className="w-12 h-12 bg-[#74B9FF] border-[3px] border-black grid place-items-center mx-auto shadow-[2px_2px_0_0_#000]">
+                <ClipboardList className="w-6 h-6 text-black" />
+              </span>
+              <p className="font-mono text-xs font-black uppercase tracking-widest text-black">{t('classroom.noAssignmentsYet')}</p>
               {isTeacher && (
-                <p className="text-sm" style={{ color: 'var(--text-muted)' }}>
+                <p className="font-mono text-xs font-bold text-black/60">
                   {t('classroom.addFirstAssignment')}
                 </p>
               )}
@@ -421,43 +380,28 @@ export default function ClassroomDetailPage() {
                   initial="hidden"
                   animate="show"
                   transition={{ delay: i * 0.06 }}
-                  className={`card p-4 flex items-start gap-4 ${isRTL ? 'flex-row-reverse text-right' : ''}`}
+                  className={`bg-white border-[3px] border-black shadow-[4px_4px_0_0_#000] p-4 flex items-start gap-4 hover:translate-x-[-1px] hover:translate-y-[-1px] hover:shadow-[5px_5px_0_0_#000] transition-all ${isRTL ? 'flex-row-reverse text-right' : ''}`}
                 >
-                  <div
-                    className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0"
-                    style={{ backgroundColor: 'var(--accent-subtle)' }}
-                  >
-                    <BookOpen
-                      className="w-4 h-4"
-                      style={{ color: 'var(--accent-text)' }}
-                    />
-                  </div>
+                  <span className="w-9 h-9 bg-[#FFD23F] border-[3px] border-black grid place-items-center shrink-0 shadow-[2px_2px_0_0_#000]">
+                    <BookOpen className="w-4 h-4 text-black" />
+                  </span>
                   <div className="flex-1 min-w-0">
-                    <h3
-                      className="font-semibold text-sm"
-                      style={{ color: 'var(--text-primary)' }}
-                    >
+                    <h3 className="font-black text-sm tracking-tight text-black" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
                       {a.title}
                     </h3>
                     {a.description && (
-                      <p
-                        className="text-xs mt-0.5 line-clamp-2"
-                        style={{ color: 'var(--text-secondary)' }}
-                      >
+                      <p className="font-mono text-xs mt-1 line-clamp-2 text-black/70">
                         {a.description}
                       </p>
                     )}
                     {a.dueDate && (
-                      <div
-                        className={`flex items-center gap-1 mt-1.5 text-xs ${isRTL ? 'flex-row-reverse' : ''}`}
-                        style={{ color: 'var(--text-muted)' }}
-                      >
+                      <span className={`inline-flex items-center gap-1.5 mt-2 bg-black text-white border-[2px] border-black px-2 py-1 font-mono text-[10px] font-black uppercase tracking-widest ${isRTL ? 'flex-row-reverse' : ''}`}>
                         <Calendar className="w-3 h-3" />
                         {t('classroom.due')}{' '}
                         {a.dueDate.toLocaleDateString(isRTL ? 'ar-EG' : undefined, {
                           dateStyle: 'medium',
                         })}
-                      </div>
+                      </span>
                     )}
                   </div>
                 </motion.div>
@@ -471,13 +415,12 @@ export default function ClassroomDetailPage() {
       {activeTab === 'students' && (
         <div className="space-y-3">
           {classroom.students.length === 0 ? (
-            <div className="card p-10 text-center space-y-2">
-              <Users
-                className="w-10 h-10 mx-auto opacity-20"
-                style={{ color: 'var(--text-muted)' }}
-              />
-              <p style={{ color: 'var(--text-primary)' }}>{t('classroom.noStudentsYet')}</p>
-              <p className="text-sm" style={{ color: 'var(--text-muted)' }}>
+            <div className="bg-white border-[3px] border-black shadow-[5px_5px_0_0_#000] p-10 text-center space-y-3">
+              <span className="w-12 h-12 bg-[#88D498] border-[3px] border-black grid place-items-center mx-auto shadow-[2px_2px_0_0_#000]">
+                <Users className="w-6 h-6 text-black" />
+              </span>
+              <p className="font-mono text-xs font-black uppercase tracking-widest text-black">{t('classroom.noStudentsYet')}</p>
+              <p className="font-mono text-xs font-bold text-black/60">
                 {t('classroom.shareJoinCode')}
               </p>
             </div>
@@ -489,28 +432,16 @@ export default function ClassroomDetailPage() {
                 initial="hidden"
                 animate="show"
                 transition={{ delay: i * 0.05 }}
-                className={`card p-4 flex items-center gap-3 ${isRTL ? 'flex-row-reverse text-right' : ''}`}
+                className={`bg-white border-[3px] border-black shadow-[4px_4px_0_0_#000] p-4 flex items-center gap-3 hover:bg-[#FFFDF5] transition-colors ${isRTL ? 'flex-row-reverse text-right' : ''}`}
               >
-                <div
-                  className="w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold flex-shrink-0"
-                  style={{
-                    backgroundColor: 'var(--accent-subtle)',
-                    color:           'var(--accent-text)',
-                  }}
-                >
+                <span className="w-8 h-8 bg-black text-white border-[2px] border-black grid place-items-center text-xs font-black shrink-0">
                   {i + 1}
-                </div>
+                </span>
                 <div className="flex-1">
-                  <p
-                    className="text-sm font-medium"
-                    style={{ color: 'var(--text-primary)' }}
-                  >
+                  <p className="font-mono text-xs font-black uppercase tracking-widest text-black">
                     {t('classroom.studentLabel').replace('{index}', (i + 1).toString())}
                   </p>
-                  <p
-                    className={`text-xs font-mono ${isRTL ? 'text-left' : 'text-left'}`}
-                    style={{ color: 'var(--text-muted)' }}
-                  >
+                  <p className="font-mono text-[11px] font-bold text-black/60">
                     {uid.slice(0, 12)}…
                   </p>
                 </div>

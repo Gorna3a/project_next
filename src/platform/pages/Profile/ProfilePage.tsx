@@ -34,10 +34,10 @@ export default function ProfilePage() {
   const [coursesStarted, setCoursesStarted] = useState<number | string>('—');
   const [lessonsCompleted, setLessonsCompleted] = useState<number | string>('—');
 
-  const ROLE_BADGE: Record<string, { label: string; color: string; bg: string }> = {
-    student: { label: t('common.student'),  color: 'var(--accent-text)', bg: 'var(--accent-subtle)' },
-    teacher: { label: t('common.teacher'),  color: '#059669', bg: 'rgba(5,150,105,0.12)' },
-    admin:   { label: t('common.admin'),    color: '#7c3aed', bg: 'rgba(124,58,237,0.12)' },
+  const ROLE_BADGE: Record<string, { label: string; bg: string; text: string }> = {
+    student: { label: t('common.student'),  bg: 'bg-[#FFD23F]', text: 'text-black' },
+    teacher: { label: t('common.teacher'),  bg: 'bg-[#88D498]', text: 'text-black' },
+    admin:   { label: t('common.admin'),    bg: 'bg-[#74B9FF]', text: 'text-black' },
   };
 
   useEffect(() => {
@@ -89,17 +89,30 @@ export default function ProfilePage() {
   return (
     <motion.div variants={stagger} initial="hidden" animate="show" className={`max-w-3xl mx-auto space-y-6 pb-20 ${isRTL ? 'text-right' : 'text-left'}`}>
 
-      {/* Profile card */}
-      <motion.div variants={fadeUp} className="card p-8">
+      {/* ── Masthead ── */}
+      <motion.div variants={fadeUp} className="bg-black text-white border-[3px] border-black shadow-[5px_5px_0_0_#000] p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+        <div>
+          <h1 className="font-black text-2xl tracking-tight flex items-center gap-3" style={{ fontFamily: "'Syne', sans-serif" }}>
+            <span className="w-2 h-6 bg-[#FFD23F] border border-white hidden sm:inline-block" />
+            {t('nav.profile') ?? 'Profile'}
+          </h1>
+          <p className="font-mono text-xs font-bold uppercase tracking-widest text-white/60 mt-1">
+            LVL {level} • {xp.toLocaleString()} XP • {streak} 🔥 STREAK
+          </p>
+        </div>
+        <span className={`inline-flex items-center gap-2 border-[3px] px-3 py-1 font-mono text-[11px] font-black uppercase tracking-widest shadow-[3px_3px_0_0_#000] ${roleCfg.bg} ${roleCfg.text} border-black`}>
+          {roleCfg.label}
+        </span>
+      </motion.div>
+
+      {/* Profile card — hard brutalist */}
+      <motion.div variants={fadeUp} className="bg-white border-[3px] border-black shadow-[5px_5px_0_0_#000] p-6 md:p-8">
         <div className={`flex items-start gap-6 flex-wrap ${isRTL ? 'flex-row-reverse' : ''}`}>
-          {/* Avatar */}
-          <div
-            className="w-20 h-20 rounded-2xl flex items-center justify-center text-2xl font-black flex-shrink-0 shadow-lg"
-            style={{ background: 'linear-gradient(135deg, var(--accent), var(--accent-hover, var(--accent)))', color: 'white' }}
-          >
+          {/* Avatar — hard square */}
+          <div className="w-20 h-20 bg-[#FFD23F] border-[3px] border-black shadow-[4px_4px_0_0_#000] flex items-center justify-center text-2xl font-black shrink-0 overflow-hidden" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
             {profile?.photoURL
-              ? <img src={profile.photoURL} alt="avatar" className="w-full h-full rounded-2xl object-cover" />
-              : initials}
+              ? <img src={profile.photoURL} alt="avatar" className="w-full h-full object-cover" />
+              : <span className="text-black">{initials}</span>}
           </div>
 
           {/* Name + meta */}
@@ -109,79 +122,70 @@ export default function ProfilePage() {
                 <input
                   value={displayName}
                   onChange={e => setDisplayName(e.target.value)}
-                  className={`input text-xl font-bold py-1.5 ${isRTL ? 'text-right' : 'text-left'}`}
+                  className={`flex-1 bg-white border-[3px] border-black shadow-[3px_3px_0_0_#000] px-3 py-2 font-mono text-sm font-black placeholder:text-black/40 focus:outline-none ${isRTL ? 'text-right' : 'text-left'}`}
                   autoFocus
                   onKeyDown={e => {
                     if (e.key === 'Enter')  handleSave();
                     if (e.key === 'Escape') handleCancel();
                   }}
                 />
-                <button onClick={handleSave} disabled={saving} className="btn-primary p-2">
+                <button onClick={handleSave} disabled={saving} className="bg-black text-white border-[3px] border-black shadow-[3px_3px_0_0_#000] p-2 hover:bg-[#FFD23F] hover:text-black transition-colors disabled:opacity-50">
                   <Check className="w-4 h-4" />
                 </button>
-                <button onClick={handleCancel} className="btn-ghost p-2">
+                <button onClick={handleCancel} className="bg-white text-black border-[3px] border-black shadow-[3px_3px_0_0_#000] p-2 hover:bg-black hover:text-white transition-colors">
                   <X className="w-4 h-4" />
                 </button>
               </div>
             ) : (
               <div className={`flex items-center gap-2 flex-wrap ${isRTL ? 'flex-row-reverse' : ''}`}>
-                <h1 className="text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>
+                <h2 className="font-black text-2xl tracking-tight text-black" style={{ fontFamily: "'Syne', sans-serif" }}>
                   {profile?.displayName ?? t('common.user')}
-                </h1>
-                <button onClick={() => setEditing(true)} className="btn-ghost p-1.5">
+                </h2>
+                <button onClick={() => setEditing(true)} className="bg-white text-black border-[2px] border-black p-1.5 hover:bg-black hover:text-white transition-colors">
                   <Edit2 className="w-4 h-4" />
                 </button>
               </div>
             )}
-            <p className="text-sm" style={{ color: 'var(--text-muted)' }}>{user?.email}</p>
-            <span
-              className="inline-block text-xs px-2.5 py-1 rounded-full font-semibold"
-              style={{ backgroundColor: roleCfg.bg, color: roleCfg.color }}
-            >
+            <p className="font-mono text-xs font-bold text-black/60">{user?.email}</p>
+            <span className={`inline-flex border-[3px] border-black px-3 py-1 font-mono text-[11px] font-black uppercase tracking-widest shadow-[2px_2px_0_0_#000] ${roleCfg.bg} ${roleCfg.text}`}>
               {roleCfg.label}
             </span>
           </div>
         </div>
 
-        {/* XP Progress */}
+        {/* XP Progress — segmented brutalist bar */}
         <div className="mt-6 space-y-2">
-          <div className={`flex justify-between text-sm ${isRTL ? 'flex-row-reverse' : ''}`}>
-            <span style={{ color: 'var(--text-secondary)' }}>
+          <div className={`flex justify-between font-mono text-[11px] font-black uppercase tracking-widest ${isRTL ? 'flex-row-reverse' : ''}`}>
+            <span className="text-black">
               {isRTL ? (
                 <>{t('common.level')} {level} &larr; {level + 1}</>
               ) : (
                 <>{t('common.level')} {level} &rarr; {level + 1}</>
               )}
             </span>
-            <span style={{ color: 'var(--text-muted)' }}>
-              {xpIntoLevel} / {XP_PER_LEVEL} {t('common.xp')} &middot; {t('profile.toGo').replace('{count}', xpToNextLevel.toString())}
+            <span className="text-black/60">
+              {xpIntoLevel} / {XP_PER_LEVEL} {t('common.xp')} · {t('profile.toGo').replace('{count}', xpToNextLevel.toString())}
             </span>
           </div>
-          <div className="h-2.5 rounded-full overflow-hidden" style={{ backgroundColor: 'var(--bg-subtle)' }}>
-            <motion.div
-              className={`h-full rounded-full ${isRTL ? 'float-right' : ''}`}
-              style={{ backgroundColor: 'var(--accent)' }}
-              initial={{ width: 0 }}
-              animate={{ width: `${xpPercent}%` }}
-              transition={{ duration: 1, delay: 0.3, ease: 'easeOut' as const }}
-            />
+          <div className="h-[18px] bg-white border-[3px] border-black p-[3px] flex gap-[3px]">
+            {Array.from({ length: 20 }).map((_, i) => (
+              <span key={i} className={`flex-1 h-full ${i < Math.round((xpPercent / 100) * 20) ? "bg-black" : "bg-black/10"}`} />
+            ))}
           </div>
         </div>
       </motion.div>
 
-      {/* Tabs */}
-      <div className={`flex border-b border-gray-100 dark:border-gray-800 ${isRTL ? 'flex-row-reverse' : ''}`}>
+      {/* Tabs — hard brutalist */}
+      <div className={`flex gap-2 bg-white border-[3px] border-black shadow-[4px_4px_0_0_#000] p-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
         <button 
           onClick={() => setActiveTab('stats')}
-          className={`px-6 py-3 text-xs font-black uppercase tracking-widest border-b-2 transition-all
-            ${activeTab === 'stats' ? 'border-brand-500 text-brand-600' : 'border-transparent text-gray-400 hover:text-gray-600'}`}
+          className={`flex-1 py-2.5 px-4 font-mono text-xs font-black uppercase tracking-widest border-[3px] transition-all ${activeTab === 'stats' ? 'bg-black text-white border-black shadow-[3px_3px_0_0_#000]' : 'bg-white text-black border-black hover:bg-[#FFF4CC]'}`}
         >
           {t('common.overview')}
         </button>
         <button 
           onClick={() => setActiveTab('friends')}
-          className={`px-6 py-3 text-xs font-black uppercase tracking-widest border-b-2 transition-all
-            ${activeTab === 'friends' ? 'border-brand-500 text-brand-600' : 'border-transparent text-gray-400 hover:text-gray-600'}`}
+          className={`flex-1 py-2.5 px-4 font-mono text-xs font-black uppercase tracking-widest border-[3px] transition-all ${activeTab === 'friends' ? 'bg-black text-white border-black shadow-[3px_3px_0_0_#000]' : 'bg-white text-black border-black hover:bg-[#FFF4CC]'}`}
         >
           {t('profile.friends')} ({friends.length})
         </button>
@@ -196,40 +200,42 @@ export default function ProfilePage() {
             exit={{ opacity: 0, y: -10 }}
             className="space-y-6"
           >
-            {/* Stats */}
+            {/* Stats — hard bento */}
             <div className={`grid grid-cols-2 md:grid-cols-4 gap-4 ${isRTL ? 'direction-rtl' : ''}`}>
               {[
-                { icon: Star,       label: t('dashboard.totalXP'),  value: xp.toLocaleString(), color: '#f59e0b' },
-                { icon: Zap,        label: t('profile.level'),      value: level,              color: 'var(--accent)' },
-                { icon: Flame,      label: t('profile.dayStreak'),  value: `${streak}`,        color: '#f97316' },
-                { icon: TrendingUp, label: t('profile.rank'),       value: '#—',               color: '#8b5cf6' },
-              ].map(({ icon: Icon, label, value, color }) => (
-                <div key={label} className="card p-4 text-center space-y-1">
-                  <Icon className="w-5 h-5 mx-auto" style={{ color }} />
-                  <p className="text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>{value}</p>
-                  <p className="text-xs" style={{ color: 'var(--text-muted)' }}>{label}</p>
+                { icon: Star,       label: t('dashboard.totalXP'),  value: xp.toLocaleString(), bg: 'bg-[#FFD23F]' },
+                { icon: Zap,        label: t('profile.level'),      value: level,              bg: 'bg-white' },
+                { icon: Flame,      label: t('profile.dayStreak'),  value: `${streak}`,        bg: 'bg-[#FF6B6B]' },
+                { icon: TrendingUp, label: t('profile.rank'),       value: '#—',               bg: 'bg-[#88D498]' },
+              ].map(({ icon: Icon, label, value, bg }) => (
+                <div key={label} className={`${bg} border-[3px] border-black shadow-[5px_5px_0_0_#000] p-4 text-center space-y-2 hover:translate-x-[-1px] hover:translate-y-[-1px] hover:shadow-[6px_6px_0_0_#000] transition-all`}>
+                  <span className="w-10 h-10 bg-black border-[2px] border-black grid place-items-center mx-auto">
+                    <Icon className="w-5 h-5 text-white" />
+                  </span>
+                  <p className="font-black text-2xl leading-none tracking-tight text-black" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>{value}</p>
+                  <p className="font-mono text-[10px] font-black uppercase tracking-widest text-black/70">{label}</p>
                 </div>
               ))}
             </div>
 
-            {/* Activity */}
-            <div className={`card p-6 space-y-4 ${isRTL ? 'text-right' : 'text-left'}`}>
-              <h2 className={`font-semibold flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`} style={{ color: 'var(--text-primary)' }}>
-                <span>📊</span> {t('dashboard.recentActivity')}
+            {/* Activity — hard card */}
+            <div className={`bg-white border-[3px] border-black shadow-[5px_5px_0_0_#000] p-6 space-y-4 ${isRTL ? 'text-right' : 'text-left'}`}>
+              <h2 className={`font-mono text-xs font-black uppercase tracking-widest flex items-center gap-2 text-black ${isRTL ? 'flex-row-reverse' : ''}`}>
+                <span className="w-2 h-2 bg-[#FFD23F] border border-black" /> 📊 {t('dashboard.recentActivity')}
               </h2>
               <div className="grid md:grid-cols-3 gap-4">
                 {[
-                  { icon: BookOpen, label: t('profile.coursesStarted'),   value: coursesStarted, color: '#3b82f6' },
-                  { icon: Trophy,   label: t('profile.challengesSolved'), value: '—', color: '#f59e0b' },
-                  { icon: Star,     label: t('profile.lessonsCompleted'), value: lessonsCompleted, color: '#22c55e' },
-                ].map(({ icon: Icon, label, value, color }) => (
-                  <div key={label} className={`flex items-center gap-3 p-3 rounded-xl ${isRTL ? 'flex-row-reverse text-right' : ''}`} style={{ backgroundColor: 'var(--bg-subtle)' }}>
-                    <div className="w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0" style={{ backgroundColor: `${color}20` }}>
-                      <Icon className="w-4 h-4" style={{ color }} />
-                    </div>
+                  { icon: BookOpen, label: t('profile.coursesStarted'),   value: coursesStarted, bg: '#74B9FF' },
+                  { icon: Trophy,   label: t('profile.challengesSolved'), value: '—', bg: '#FFD23F' },
+                  { icon: Star,     label: t('profile.lessonsCompleted'), value: lessonsCompleted, bg: '#88D498' },
+                ].map(({ icon: Icon, label, value, bg }) => (
+                  <div key={label} className={`flex items-center gap-3 p-3 bg-[#FFFDF5] border-[3px] border-black shadow-[3px_3px_0_0_#000] ${isRTL ? 'flex-row-reverse text-right' : ''}`}>
+                    <span className="w-9 h-9 border-[2px] border-black grid place-items-center shrink-0" style={{ backgroundColor: bg }}>
+                      <Icon className="w-4 h-4 text-black" />
+                    </span>
                     <div>
-                      <p className="text-lg font-bold" style={{ color: 'var(--text-primary)' }}>{value}</p>
-                      <p className="text-xs" style={{ color: 'var(--text-muted)' }}>{label}</p>
+                      <p className="font-black text-lg leading-none text-black" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>{value}</p>
+                      <p className="font-mono text-[10px] font-black uppercase tracking-widest text-black/60">{label}</p>
                     </div>
                   </div>
                 ))}
@@ -245,16 +251,18 @@ export default function ProfilePage() {
             className={`grid sm:grid-cols-2 gap-4 ${isRTL ? 'direction-rtl' : ''}`}
           >
             {friends.length === 0 ? (
-              <div className="col-span-full py-12 text-center space-y-4 bg-gray-50 dark:bg-gray-900/50 rounded-[2rem] border-2 border-dashed border-gray-100 dark:border-gray-800">
-                <Users className="w-12 h-12 text-gray-200 mx-auto" />
-                <p className="text-gray-400 font-bold uppercase tracking-widest text-xs">{t('profile.noFriends')}</p>
-                <button onClick={() => navigate.push('/app/arena/rankings')} className="btn-primary px-6 py-2">{t('profile.findFriends')}</button>
+              <div className="col-span-full bg-white border-[3px] border-black shadow-[5px_5px_0_0_#000] p-12 text-center space-y-4">
+                <span className="w-14 h-14 bg-[#FFD23F] border-[3px] border-black grid place-items-center mx-auto shadow-[3px_3px_0_0_#000] rotate-[-1deg]">
+                  <Users className="w-7 h-7 text-black" />
+                </span>
+                <p className="font-mono text-xs font-black uppercase tracking-widest text-black">{t('profile.noFriends')}</p>
+                <button onClick={() => navigate.push('/app/arena/rankings')} className="bg-black text-white border-[3px] border-black shadow-[3px_3px_0_0_#000] font-mono text-xs font-black uppercase tracking-widest px-6 py-2 hover:bg-[#FFD23F] hover:text-black active:translate-x-[1px] active:translate-y-[1px] active:shadow-none transition-all">{t('profile.findFriends')}</button>
               </div>
             ) : (
               friends.map(friend => (
-                <div key={friend.uid} className={`card p-4 flex items-center gap-4 group hover:border-brand-500 transition-all ${isRTL ? 'flex-row-reverse' : ''}`}>
+                <div key={friend.uid} className={`bg-white border-[3px] border-black shadow-[4px_4px_0_0_#000] p-4 flex items-center gap-4 hover:translate-x-[-1px] hover:translate-y-[-1px] hover:shadow-[5px_5px_0_0_#000] transition-all group ${isRTL ? 'flex-row-reverse' : ''}`}>
                   <div 
-                    className="w-12 h-12 rounded-xl overflow-hidden cursor-pointer active:scale-95 transition-transform shadow-sm"
+                    className="w-12 h-12 border-[3px] border-black overflow-hidden cursor-pointer active:scale-95 transition-transform shrink-0 bg-[#FFFDF5]"
                     onClick={() => navigate.push(`/app/profile/${friend.uid}`)}
                   >
                     <img 
@@ -265,16 +273,16 @@ export default function ProfilePage() {
                   </div>
                   <div className={`flex-1 min-w-0 ${isRTL ? 'text-right' : 'text-left'}`}>
                     <p 
-                      className="font-black text-gray-900 dark:text-white truncate cursor-pointer hover:text-brand-600 transition-colors"
+                      className="font-mono text-xs font-black uppercase tracking-widest truncate text-black cursor-pointer hover:underline"
                       onClick={() => navigate.push(`/app/profile/${friend.uid}`)}
                     >
                       {friend.displayName}
                     </p>
-                    <p className="text-[10px] font-black text-gray-400 uppercase">
-                      {t('profile.level')} {friend.level} &middot; {friend.totalXP} {t('common.xp')}
+                    <p className="font-mono text-[10px] font-bold uppercase text-black/60">
+                      {t('profile.level')} {friend.level} · {friend.totalXP} {t('common.xp')}
                     </p>
                   </div>
-                  <button className="p-2 rounded-lg text-gray-300 hover:text-red-500 hover:bg-red-50 transition-all opacity-0 group-hover:opacity-100">
+                  <button className="bg-white text-black border-[2px] border-black p-2 hover:bg-[#FF6B6B] hover:text-black opacity-0 group-hover:opacity-100 transition-all">
                     <UserMinus className="w-4 h-4" />
                   </button>
                 </div>
