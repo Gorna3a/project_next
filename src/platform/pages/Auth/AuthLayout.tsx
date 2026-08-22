@@ -16,7 +16,7 @@ export const AuthLayout = ({ children }: AuthLayoutProps) => {
   const pathname = usePathname();
   const navigate = useRouter();
   const { t, isRTL } = useLanguage();
-  const [isLogin, setIsLogin] = useState(pathname === "/login");
+  const [isLogin, setIsLogin] = useState(false);
 
   // Sync state with URL
   useEffect(() => {
@@ -49,7 +49,8 @@ export const AuthLayout = ({ children }: AuthLayoutProps) => {
           
           {/* Side: Login Form Area */}
           <div className="w-1/2 h-full flex items-center justify-center p-12 overflow-y-auto">
-            <motion.div 
+            <motion.div
+              suppressHydrationWarning
               animate={{ opacity: isLogin ? 1 : 0, x: isLogin ? 0 : (isRTL ? 20 : -20), filter: isLogin ? "blur(0px)" : "blur(10px)" }}
               transition={{ duration: 0.5 }}
               className="w-full max-w-sm space-y-8 pointer-events-auto"
@@ -65,7 +66,8 @@ export const AuthLayout = ({ children }: AuthLayoutProps) => {
 
           {/* Side: Signup Form Area */}
           <div className="w-1/2 h-full flex items-center justify-center p-12 overflow-y-auto">
-            <motion.div 
+            <motion.div
+              suppressHydrationWarning
               animate={{ opacity: !isLogin ? 1 : 0, x: !isLogin ? 0 : (isRTL ? -20 : 20), filter: !isLogin ? "blur(0px)" : "blur(10px)" }}
               transition={{ duration: 0.5 }}
               className="w-full max-w-sm space-y-8"

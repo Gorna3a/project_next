@@ -77,9 +77,9 @@ export default function CoursesPage() {
     return courses.filter(course => {
       const matchesSearch =
         !term ||
-        course.title.toLowerCase().includes(term) ||
-        course.description.toLowerCase().includes(term) ||
-        course.tags.some(tag => tag.toLowerCase().includes(term));
+        (course.title ?? "").toLowerCase().includes(term) ||
+        (course.description ?? "").toLowerCase().includes(term) ||
+        (course.tags ?? []).some(tag => (tag ?? "").toLowerCase().includes(term));
       const matchesLang = langTab === 'all' || course.language === langTab;
       const matchesLevel = levelFilter === 'all' || course.level === levelFilter;
       return matchesSearch && matchesLang && matchesLevel;
