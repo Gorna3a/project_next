@@ -1,5 +1,5 @@
 'use client';
-import LandingPage from '@/platform/pages/Landing/LandingPage';
+import LandingPage from '@/platform/pages/Landing/_archive/LandingPage.classic';
 
 export default function ClassicLanding() {
   return <LandingPage />;

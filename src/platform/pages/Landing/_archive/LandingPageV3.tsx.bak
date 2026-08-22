@@ -11,9 +11,9 @@ import {
   Star, ChevronRight,
 } from 'lucide-react';
 import { useState, useRef, useEffect } from 'react';
-import { useLanguage } from '../../../core/context/LanguageContext';
-import { useAuth } from '../../../core/hooks/useAuth';
-import { Logo } from '../../../shared/ui/Logo';
+import { useLanguage } from '../../../../core/context/LanguageContext';
+import { useAuth } from '../../../../core/hooks/useAuth';
+import { Logo } from '../../../../shared/ui/Logo';
 
 // ─── Pixel Sprite Decorations ─────────────────────────────────────────────────
 

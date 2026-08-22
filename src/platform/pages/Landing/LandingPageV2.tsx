@@ -238,21 +238,6 @@ export default function LandingPageV2() {
 
           <div className={`${isRTL ? 'mr-auto' : 'ml-auto'} flex items-center gap-3`}>
             <NbLanguageSwitcher />
-            {/* Theme switch links */}
-            <Link
-              href="/v3"
-              className="nb-btn nb-btn-outline hidden sm:inline-flex"
-              style={{ fontSize: '0.65rem', padding: '0.5rem 0.85rem' }}
-            >
-              ✦ Minimal
-            </Link>
-            <Link
-              href="/classic"
-              className="nb-btn nb-btn-outline hidden sm:inline-flex"
-              style={{ fontSize: '0.65rem', padding: '0.5rem 0.85rem' }}
-            >
-              ← Classic
-            </Link>
             {user ? (
               <Link href="/app" className="nb-btn nb-btn-black">
                 Dashboard <ChevronRight className="w-4 h-4" />
@@ -621,20 +606,6 @@ export default function LandingPageV2() {
           </div>
 
           <div className="flex items-center gap-4">
-            <Link
-              href="/v3"
-              className="nb-mono text-xs font-bold hover:underline"
-              style={{ color: '#00e5ff' }}
-            >
-              ✦ Minimal
-            </Link>
-            <Link
-              href="/classic"
-              className="nb-mono text-xs font-bold hover:underline"
-              style={{ color: '#ffe600' }}
-            >
-              ← Classic
-            </Link>
             <Link
               href="/kids"
               className="nb-mono text-xs font-bold hover:underline"

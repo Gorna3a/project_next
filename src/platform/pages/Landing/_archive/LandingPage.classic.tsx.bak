@@ -12,9 +12,9 @@ import {
   Globe,
 } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
-import { useTheme } from "../../../core/hooks/useTheme";
-import { useLanguage } from "../../../core/context/LanguageContext";
-import { Logo } from "../../../shared/ui/Logo";
+import { useTheme } from "../../../../core/hooks/useTheme";
+import { useLanguage } from "../../../../core/context/LanguageContext";
+import { Logo } from "../../../../shared/ui/Logo";
 
 // ─── Landing Language Switcher ───────────────────────────────────────────────
 
@@ -78,9 +78,9 @@ const LandingLanguageSwitcher = () => {
     </div>
   );
 };
-import { ThemePicker } from "../../../shared/ui/ThemePicker";
-import { UserMenu } from "../../../shared/ui/UserMenu";
-import { useAuth } from "../../../core/hooks/useAuth";
+import { ThemePicker } from "../../../../shared/ui/ThemePicker";
+import { UserMenu } from "../../../../shared/ui/UserMenu";
+import { useAuth } from "../../../../core/hooks/useAuth";
 
 // ─── Animation variants ───────────────────────────────────────────────────────
 
