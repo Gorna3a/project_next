@@ -10,7 +10,7 @@ export const MainLayout = ({ children }: { children?: ReactNode }) => {
   const [collapsed, setCollapsed] = useState(false);
   const { isRTL } = useLanguage();
 
-  const marginValue = collapsed ? 64 : 240;
+  const marginValue = collapsed ? 64 : 230;
 
   return (
     <div className="min-h-screen" style={{ backgroundColor: "var(--bg-base)" }}>

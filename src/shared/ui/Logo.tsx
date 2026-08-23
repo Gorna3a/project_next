@@ -18,9 +18,9 @@ interface LogoProps {
 }
 
 const sizeMap = {
-  sm: { width: 96, height: 66 },
-  md: { width: 128, height: 88 },
-  lg: { width: 176, height: 121 },
+  sm: { width: 84, height: 58 },
+  md: { width: 112, height: 77 },
+  lg: { width: 154, height: 106 },
 };
 
 export const Logo = ({ size = 'md', linkTo, className = '' }: LogoProps) => {
