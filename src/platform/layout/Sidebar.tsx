@@ -1,6 +1,5 @@
 import { type ComponentType } from "react";
 import { NavLink } from "../../shared/ui/NavLink";
-import { motion } from "framer-motion";
 import {
   LayoutDashboard,
   BookOpen,
@@ -76,11 +75,9 @@ export const Sidebar = ({ collapsed, onToggle }: SidebarProps) => {
   };
 
   return (
-    <motion.aside
-      animate={{ width: collapsed ? 64 : 230 }}
-      transition={{ duration: 0.2, ease: "easeInOut" }}
-      className={`sidebar fixed top-0 ${isRTL ? 'right-0' : 'left-0'} h-screen flex flex-col z-40 overflow-hidden`}
-      style={{ borderRight: isRTL ? 'none' : '4px solid var(--border)', borderLeft: isRTL ? '4px solid var(--border)' : 'none' }}
+    <aside
+      className={`sidebar ${collapsed ? 'collapsed' : ''}`}
+      style={{ width: collapsed ? 64 : 230, borderRight: isRTL ? 'none' : '4px solid var(--border)', borderLeft: isRTL ? '4px solid var(--border)' : 'none' } as any}
     >
       {/* Head — 64px, border 4px, surface2, LEDs, resized logo */}
       <div className="side-head">
@@ -146,7 +143,7 @@ export const Sidebar = ({ collapsed, onToggle }: SidebarProps) => {
           </button>
         </div>
       </div>
-    </motion.aside>
+    </aside>
   );
 };
 
