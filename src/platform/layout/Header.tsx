@@ -184,14 +184,15 @@ export const Header = ({ sidebarCollapsed }: HeaderProps) => {
   return (
     <motion.header
       animate={{ 
-        left: isRTL ? 0 : (sidebarCollapsed ? 64 : 240),
-        right: isRTL ? (sidebarCollapsed ? 64 : 240) : 0
+        left: isRTL ? 0 : (sidebarCollapsed ? 64 : 230),
+        right: isRTL ? (sidebarCollapsed ? 64 : 230) : 0
       }}
       transition={{ duration: 0.25, ease: "easeInOut" }}
-      className="fixed top-0 h-16 backdrop-blur-md border-b flex items-center px-6 gap-4 z-30 shadow-sm"
+      className="topbar fixed top-0 h-[56px] flex items-center px-4 z-30"
       style={{
-        backgroundColor: "var(--bg-header)",
+        backgroundColor: "var(--surface)",
         borderColor: "var(--border)",
+        borderBottom: '4px solid var(--border)',
       }}
     >
       <div className="flex-1" />
