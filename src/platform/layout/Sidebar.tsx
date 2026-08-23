@@ -1,5 +1,6 @@
 import { type ComponentType } from "react";
 import { NavLink } from "../../shared/ui/NavLink";
+import { motion, AnimatePresence } from "framer-motion";
 import {
   LayoutDashboard,
   BookOpen,
@@ -20,7 +21,6 @@ import {
 import { Logo } from "../../shared/ui/Logo";
 import { useAuth } from "../../core/context/AuthContext";
 import { useLanguage } from "../../core/context/LanguageContext";
-import { useTheme } from "../../core/context/ThemeContext";
 
 interface NavItem {
   to: string;
@@ -31,13 +31,12 @@ interface NavItem {
 export const Sidebar = ({ collapsed, onToggle }: SidebarProps) => {
   const { profile } = useAuth();
   const { t, isRTL, language, setLanguage } = useLanguage();
-  const { theme, setTheme } = useTheme();
   const isAdmin = profile?.role === "admin";
 
   const mainItems: NavItem[] = [
     { to: "/app", labelKey: "nav.dashboard", icon: LayoutDashboard },
     { to: "/app/courses", labelKey: "nav.courses", icon: BookOpen },
-    { to: "/app/ide", labelKey: "nav.ide", icon: Terminal },
+    { to: "/app/playground", labelKey: "nav.playground", icon: Terminal },
     { to: "/app/arena", labelKey: "nav.arena", icon: Sword },
     { to: "/app/arena/rankings", labelKey: "nav.arena", icon: Trophy },
     { to: "/app/profile", labelKey: "nav.community", icon: Users },
@@ -59,13 +58,35 @@ export const Sidebar = ({ collapsed, onToggle }: SidebarProps) => {
           href={item.to}
           end={item.to === "/app"}
           className={({ isActive }) =>
-            `nav-item ${isActive ? "active" : ""} ${collapsed ? "justify-center px-2" : ""}`
+            `flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 group relative
+             ${
+               isActive
+                 ? "bg-brand-50 dark:bg-brand-950/60 text-brand-700 dark:text-brand-400"
+                 : "text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-gray-100"
+             }`
           }
         >
-          <item.icon className="w-4 h-4 flex-shrink-0" />
-          {!collapsed && <span>{label}</span>}
+          <item.icon className="w-5 h-5 flex-shrink-0" />
+          <AnimatePresence>
+            {!collapsed && (
+              <motion.span
+                initial={{ opacity: 0, width: 0 }}
+                animate={{ opacity: 1, width: "auto" }}
+                exit={{ opacity: 0, width: 0 }}
+                transition={{ duration: 0.2 }}
+                className="overflow-hidden whitespace-nowrap"
+              >
+                {label}
+              </motion.span>
+            )}
+          </AnimatePresence>
+
+          {/* Tooltip when collapsed */}
           {collapsed && (
-            <div className={`absolute ${isRTL ? 'right-full mr-3' : 'left-full ml-3'} px-2 py-1 bg-black text-white text-xs border-[2px] border-black opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity whitespace-nowrap z-50 font-mono`}>
+            <div
+              className={`absolute ${isRTL ? 'right-full mr-3' : 'left-full ml-3'} px-2 py-1 bg-gray-900 dark:bg-gray-700 text-white text-xs rounded-lg
+                            opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity whitespace-nowrap z-50`}
+            >
               {label}
             </div>
           )}
@@ -75,75 +96,84 @@ export const Sidebar = ({ collapsed, onToggle }: SidebarProps) => {
   };
 
   return (
-    <aside
-      className={`sidebar ${collapsed ? 'collapsed' : ''}`}
-      style={{ width: collapsed ? 64 : 230, borderRight: isRTL ? 'none' : '4px solid var(--border)', borderLeft: isRTL ? '4px solid var(--border)' : 'none' } as any}
+    <motion.aside
+      animate={{ width: collapsed ? 64 : 240 }}
+      transition={{ duration: 0.25, ease: "easeInOut" }}
+      className={`fixed top-0 ${isRTL ? 'right-0 border-l' : 'left-0 border-r'} h-full flex flex-col z-40 overflow-hidden`}
+      style={{
+        backgroundColor: "var(--bg-sidebar)",
+        borderColor: "var(--border)",
+      }}
     >
-      {/* Head — 64px, border 4px, surface2, LEDs, resized logo */}
-      <div className="side-head">
-        <div className="logo-box" style={{ width: 44, height: 30 }}>
-          {collapsed ? (
-            <div className="w-full h-full grid place-items-center bg-black text-[var(--phosphor)] font-mono text-[8px] font-black">PC</div>
-          ) : (
-            <div style={{ transform: 'scale(0.82)', transformOrigin: 'center' }}>
-              <Logo linkTo="/app" size="sm" />
-            </div>
-          )}
-        </div>
-        {!collapsed && (
-          <>
-            <div style={{ fontFamily: "'Press Start 2P'", fontSize: 8, lineHeight: 1.1 }}>
-              PIXEL<br /><span style={{ color: 'var(--phosphor)' }}>CODE</span>
-            </div>
-            <div style={{ marginLeft: 'auto', display: 'flex', gap: 4 }}>
-              <span className="led" />
-              <span className="led" style={{ background: 'var(--phosphor)', animationDelay: '0.3s' } as any} />
-            </div>
-          </>
+      {/* Logo area */}
+      <div
+        className="h-16 flex items-center px-3 border-b flex-shrink-0"
+        style={{ borderColor: "var(--border)" }}
+      >
+        {collapsed ? (
+          <div className="w-7 h-7 grid grid-cols-2 gap-0.5 mx-auto">
+            <div className="bg-brand-500 rounded-[2px]" />
+            <div className="bg-brand-300 rounded-[2px]" />
+            <div className="bg-brand-300 rounded-[2px]" />
+            <div className="bg-brand-600 rounded-[2px]" />
+          </div>
+        ) : (
+          <Logo linkTo="/app" />
         )}
       </div>
 
-      <nav className="side-nav">
+      {/* Nav */}
+      <nav className="flex-1 overflow-y-auto overflow-x-hidden px-2 py-4">
         <ul className="space-y-1">{mainItems.map(renderItem)}</ul>
+
         {isAdmin && (
           <>
-            <div className="nav-divider" />
-            <ul className="space-y-1">{renderItem({ to: "/admin", labelKey: "nav.admin", icon: ShieldCheck })}</ul>
+            <div
+              className="my-4 border-t"
+              style={{ borderColor: "var(--border)" }}
+            />
+            <ul className="space-y-1">
+              {renderItem({ to: "/admin", labelKey: "nav.admin", icon: ShieldCheck })}
+            </ul>
           </>
         )}
-        <div className="nav-divider" />
+
+        <div
+          className="my-4 border-t"
+          style={{ borderColor: "var(--border)" }}
+        />
+
         <ul className="space-y-1">{bottomItems.map(renderItem)}</ul>
       </nav>
 
-      <div className="side-foot">
-        {!collapsed && (
-          <>
-            <div className="mono" style={{ fontSize: 8, fontWeight: 800, letterSpacing: '0.08em' }}>THEME</div>
-            <div className="theme-row">
-              <button onClick={() => setTheme('light' as any)} className={`theme-btn ${theme === 'light' ? 'on' : 'off'}`}>LIGHT</button>
-              <button onClick={() => setTheme('dark' as any)} className={`theme-btn ${theme === 'dark' ? 'on' : 'off'}`}>DARK</button>
-            </div>
-          </>
-        )}
-        <div className="flex items-center gap-2 mt-2">
-          <button
-            onClick={() => setLanguage(language === 'en' ? 'ar' : 'en')}
-            className="flex-1 flex items-center justify-center gap-1 py-1.5 border-[3px] border-black bg-white text-black font-mono text-[10px] font-black uppercase tracking-widest hover:bg-black hover:text-white transition-colors"
-            title={t('common.changeLanguage')}
-          >
-            <Globe className="w-3 h-3" />
-            {!collapsed && language.toUpperCase()}
-          </button>
-          <button
-            onClick={onToggle}
-            className="p-1.5 border-[3px] border-black bg-white text-black hover:bg-black hover:text-white transition-colors"
-            aria-label={collapsed ? t('common.expandSidebar') : t('common.collapseSidebar')}
-          >
-            {collapsed ? (isRTL ? <ChevronLeft className="w-3.5 h-3.5" /> : <ChevronRight className="w-3.5 h-3.5" />) : (isRTL ? <ChevronRight className="w-3.5 h-3.5" /> : <ChevronLeft className="w-3.5 h-3.5" />)}
-          </button>
-        </div>
+      {/* Sidebar footer */}
+      <div
+        className="p-2 border-t flex-shrink-0 flex items-center gap-2"
+        style={{ borderColor: "var(--border)" }}
+      >
+        <button
+          onClick={() => setLanguage(language === 'en' ? 'ar' : 'en')}
+          className="flex-1 flex items-center justify-center gap-2 py-2 rounded-xl bg-gray-50 dark:bg-gray-900 text-[10px] font-black uppercase tracking-widest text-gray-500 hover:text-brand-600 transition-colors border border-dashed border-gray-200 dark:border-gray-800"
+          title={t('common.changeLanguage')}
+        >
+          <Globe className="w-3.5 h-3.5" />
+          {!collapsed && <span>{language}</span>}
+        </button>
+
+        <button
+          onClick={onToggle}
+          className="p-2 rounded-xl text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-700 dark:hover:text-gray-200 transition-colors"
+          aria-label={collapsed ? t('common.expandSidebar') : t('common.collapseSidebar')}
+          title={collapsed ? t('common.expandSidebar') : t('common.collapseSidebar')}
+        >
+          {collapsed ? (
+            isRTL ? <ChevronLeft className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />
+          ) : (
+            isRTL ? <ChevronRight className="w-4 h-4" /> : <ChevronLeft className="w-4 h-4" />
+          )}
+        </button>
       </div>
-    </aside>
+    </motion.aside>
   );
 };
 
