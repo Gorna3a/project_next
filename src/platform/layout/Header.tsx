@@ -188,12 +188,19 @@ export const Header = ({ sidebarCollapsed }: HeaderProps) => {
         right: isRTL ? (sidebarCollapsed ? 64 : 230) : 0
       }}
       transition={{ duration: 0.25, ease: "easeInOut" }}
-      className="topbar fixed top-0 h-[56px] flex items-center px-4 z-30"
+      className="topbar"
       style={{
+        position: "fixed",
+        top: 0,
+        height: 56,
+        zIndex: 30,
+        display: "flex",
+        alignItems: "center",
+        gap: 16,
+        padding: "0 16px",
         backgroundColor: "var(--surface)",
-        borderColor: "var(--border)",
-        borderBottom: '4px solid var(--border)',
-      }}
+        borderBottom: "4px solid var(--border)",
+      } as any}
     >
       <div className="flex-1" />
 
