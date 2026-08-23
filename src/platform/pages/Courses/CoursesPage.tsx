@@ -1,5 +1,6 @@
 'use client';
 
+import '../Landing/pixel-landing.css';
 import { useEffect, useMemo, useState } from 'react';
 import { Search } from 'lucide-react';
 import { getAllCourses, type SanityCourse } from '../../../core/services/sanity';
