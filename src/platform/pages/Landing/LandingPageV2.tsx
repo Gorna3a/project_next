@@ -1,640 +1,401 @@
 'use client';
 
-import './neo-brutalism.css';
-import { motion, AnimatePresence } from 'framer-motion';
-import Image from 'next/image';
+import './pixel-landing.css';
+import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import oldComputer from '@/assets/old computer.png';
-import {
-  ArrowRight, ArrowLeft, Zap, Brain, Trophy,
-  GraduationCap, BookOpen, Sparkles, Globe,
-  ChevronRight, Cpu,
-} from 'lucide-react';
-import { useState, useRef, useEffect } from 'react';
-import { useLanguage } from '../../../core/context/LanguageContext';
 import { useAuth } from '../../../core/hooks/useAuth';
-import { Logo } from '../../../shared/ui/Logo';
-
-// ─── Floating Pixel Squares ───────────────────────────────────────────────────
-
-const FloatingPixels = () => {
-  const squares = [
-    { color: '#ffe600', size: 20, top: '12%', left: '5%',  dur: '5s',  delay: '0s' },
-    { color: '#ff2d55', size: 14, top: '25%', left: '90%', dur: '4s',  delay: '0.5s' },
-    { color: '#0055ff', size: 24, top: '60%', left: '8%',  dur: '6s',  delay: '1s' },
-    { color: '#00e676', size: 16, top: '75%', left: '85%', dur: '4.5s',delay: '0.3s' },
-    { color: '#b400ff', size: 12, top: '40%', left: '94%', dur: '7s',  delay: '2s' },
-    { color: '#ff6d00', size: 18, top: '88%', left: '15%', dur: '5.5s',delay: '1.5s' },
-    { color: '#00e5ff', size: 22, top: '5%',  left: '75%', dur: '6.5s',delay: '0.7s' },
-    { color: '#ff3ea5', size: 14, top: '50%', left: '2%',  dur: '3.5s',delay: '2.5s' },
-  ];
-
-  return (
-    <div className="absolute inset-0 pointer-events-none overflow-hidden">
-      {squares.map((s, i) => (
-        <div
-          key={i}
-          className="nb-pixel-sq"
-          style={{
-            background: s.color,
-            width: s.size,
-            height: s.size,
-            top: s.top,
-            left: s.left,
-            '--dur': s.dur,
-            '--delay': s.delay,
-          } as React.CSSProperties}
-        />
-      ))}
-    </div>
-  );
-};
-
-
-
-// ─── Marquee bar content ──────────────────────────────────────────────────────
-
-const MARQUEE_ITEMS = [
-  '★ LEARN TO CODE',
-  '★ PIXEL BY PIXEL',
-  '★ AI TUTORING',
-  '★ LIVE COMPILER',
-  '★ 13+ LANGUAGES',
-  '★ FREE FOREVER',
-  '★ DAILY CHALLENGES',
-  '★ CLASSROOMS',
-  '★ LEARN TO CODE',
-  '★ PIXEL BY PIXEL',
-  '★ AI TUTORING',
-  '★ LIVE COMPILER',
-  '★ 13+ LANGUAGES',
-  '★ FREE FOREVER',
-  '★ DAILY CHALLENGES',
-  '★ CLASSROOMS',
-];
-
-// ─── Features data ────────────────────────────────────────────────────────────
+import { useTheme } from '../../../core/context/ThemeContext';
 
 const FEATURES = [
-  { key: 'aiTutor',     icon: Brain,        bg: '#b400ff', fg: '#fffef7', accent: '#ffe600' },
-  { key: 'liveCompiler',icon: Zap,          bg: '#ffe600', fg: '#0d0d0d', accent: '#ff2d55' },
-  { key: 'challenges',  icon: Trophy,       bg: '#ff2d55', fg: '#fffef7', accent: '#ffe600' },
-  { key: 'classrooms',  icon: GraduationCap,bg: '#0055ff', fg: '#fffef7', accent: '#00e5ff' },
-  { key: 'courses',     icon: BookOpen,     bg: '#00e676', fg: '#0d0d0d', accent: '#0055ff' },
-  { key: 'kidsMode',    icon: Sparkles,     bg: '#ff3ea5', fg: '#fffef7', accent: '#ffe600' },
+  { n: '01 / 09', badge: 'CORE', bg: 'var(--phosphor)', fg: '#161616', iconBg: 'var(--yellow)', icon: '📚', title: 'Structured Courses', desc: '13+ languages, leveled paths from scratch. Bite-sized lessons, checks, and projects.', points: ['Python, JS, Go, Rust & more', 'Projects that ship'] },
+  { n: '02 / 09', badge: '● LIVE', bg: 'var(--yellow)', fg: '#161616', iconBg: 'var(--orange)', icon: '⚡', title: 'Interactive Playground', desc: 'Write and run code in the browser. Instant output, no install.', points: ['13 runtimes + live preview', 'Share with one link'] },
+  { n: '03 / 09', badge: 'XP', bg: 'var(--orange)', fg: '#fff', iconBg: 'var(--yellow)', icon: '⚔️', title: 'Challenges & Duels', desc: 'Daily puzzles and 1v1 duels. Earn XP, keep the streak, climb.', points: ['Daily challenge', 'Ranked duels'] },
+  { n: '04 / 09', badge: 'TEAMS', bg: 'var(--surface2)', fg: '#161616', iconBg: 'var(--phosphor)', icon: '🎓', title: 'Classrooms', desc: 'Join teacher-led groups, get assignments, and track class progress.', points: ['Invite by code', 'Teacher dashboard'] },
+  { n: '05 / 09', badge: 'REFS', bg: 'var(--surface)', fg: '#161616', iconBg: 'var(--grey)', icon: '📖', title: 'Library & Docs', desc: 'Curated references, cheatsheets, and docs — searchable and offline-ready.', points: ['Cheatsheets', 'Offline mode'] },
+  { n: '06 / 09', badge: 'AI', bg: '#161616', fg: 'var(--phosphor)', iconBg: 'var(--yellow)', icon: '🧠', title: 'AI Chat Tutor', desc: 'Stuck? Ask the tutor — explains, fixes, and hints without giving away the answer.', points: ['Hint → explain → fix', 'Works in playground'] },
+  { n: '07 / 09', badge: 'PROGRESS', bg: 'var(--phosphor)', fg: '#161616', iconBg: 'var(--surface)', icon: '📈', title: 'Levels & Streaks', desc: 'Earn XP, level up, keep the flame alive. Every line counts.', points: ['XP & levels', 'Daily streak & freeze'] },
+  { n: '08 / 09', badge: 'RANK', bg: 'var(--grey)', fg: '#fff', iconBg: 'var(--yellow)', icon: '🏆', title: 'Leaderboards', desc: 'Global, friends, and classroom boards. See where you stand.', points: ['Weekly & all-time', 'Class vs class'] },
+  { n: '09 / 09', badge: 'SAFE', bg: 'var(--yellow)', fg: '#161616', iconBg: '#161616', icon: '👾', title: 'Kids Mode', desc: 'Age-appropriate activities, blocks + code, parental controls. Big pixels, big joy.', points: ['Blocks & typing', 'Parent dashboard'] },
 ];
-
-// ─── Languages data ───────────────────────────────────────────────────────────
-
-const LANGUAGES = [
-  { name: 'Python',     emoji: '🐍', bg: '#0055ff', fg: '#fffef7' },
-  { name: 'JavaScript', emoji: '⚡', bg: '#ffe600', fg: '#0d0d0d' },
-  { name: 'TypeScript', emoji: '📘', bg: '#00e5ff', fg: '#0d0d0d' },
-  { name: 'Java',       emoji: '☕', bg: '#ff2d55', fg: '#fffef7' },
-  { name: 'C',          emoji: '⚙️', bg: '#0d0d0d', fg: '#ffe600' },
-  { name: 'C++',        emoji: '🔧', bg: '#b400ff', fg: '#fffef7' },
-  { name: 'Go',         emoji: '🐹', bg: '#00e676', fg: '#0d0d0d' },
-  { name: 'Rust',       emoji: '🦀', bg: '#ff6d00', fg: '#fffef7' },
-  { name: 'Kotlin',     emoji: '🎯', bg: '#b400ff', fg: '#fffef7' },
-  { name: 'Swift',      emoji: '🍎', bg: '#ff6d00', fg: '#fffef7' },
-  { name: 'C#',         emoji: '🎮', bg: '#0055ff', fg: '#fffef7' },
-  { name: 'Ruby',       emoji: '💎', bg: '#ff2d55', fg: '#fffef7' },
-  { name: 'PHP',        emoji: '🐘', bg: '#00e676', fg: '#0d0d0d' },
-];
-
-// ─── Language Switcher ────────────────────────────────────────────────────────
-
-const NbLanguageSwitcher = () => {
-  const { language, setLanguage } = useLanguage();
-  const [open, setOpen] = useState(false);
-  const ref = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const h = (e: MouseEvent) => {
-      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
-    };
-    document.addEventListener('mousedown', h);
-    return () => document.removeEventListener('mousedown', h);
-  }, []);
-
-  return (
-    <div className="relative" ref={ref}>
-      <button
-        onClick={() => setOpen(v => !v)}
-        className="nb-btn nb-btn-outline flex items-center gap-1.5"
-        style={{ fontSize: '0.65rem', padding: '0.5rem 0.8rem' }}
-      >
-        <Globe className="w-4 h-4" />
-        <span>{language.toUpperCase()}</span>
-      </button>
-      <AnimatePresence>
-        {open && (
-          <motion.div
-            initial={{ opacity: 0, y: -6 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -6 }}
-            transition={{ duration: 0.12 }}
-            className="absolute right-0 top-full mt-2 z-50"
-            style={{
-              background: '#fffef7',
-              border: '3px solid #0d0d0d',
-              boxShadow: '4px 4px 0 #0d0d0d',
-              minWidth: 140,
-              padding: '0.5rem',
-            }}
-          >
-            {[
-              { id: 'en', label: 'English', flag: '🇺🇸' },
-              { id: 'ar', label: 'العربية', flag: '🇸🇦' },
-            ].map(lang => (
-              <button
-                key={lang.id}
-                onClick={() => { setLanguage(lang.id as 'en' | 'ar'); setOpen(false); }}
-                className="nb-mono flex items-center gap-2 w-full px-3 py-2 text-xs font-bold"
-                style={{
-                  background: language === lang.id ? '#ffe600' : 'transparent',
-                  border: language === lang.id ? '2px solid #0d0d0d' : '2px solid transparent',
-                  color: '#0d0d0d',
-                  cursor: 'pointer',
-                }}
-              >
-                <span>{lang.flag}</span>
-                <span>{lang.label}</span>
-              </button>
-            ))}
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </div>
-  );
-};
-
-// ─── Sparkle decoration ───────────────────────────────────────────────────────
-
-const SparkleDecor = ({ style }: { style?: React.CSSProperties }) => (
-  <span
-    className="nb-sparkle select-none pointer-events-none"
-    style={{ fontSize: '1.2rem', ...style }}
-    aria-hidden
-  >
-    ✦
-  </span>
-);
-
-// ─── Main Page ────────────────────────────────────────────────────────────────
 
 export default function LandingPageV2() {
   const { user } = useAuth();
-  const { t, isRTL } = useLanguage();
+  const { theme, setTheme } = useTheme();
+  const dark = theme === 'dark';
+  const [deckIndex, setDeckIndex] = useState(0);
+  const trackRef = useRef<HTMLDivElement>(null);
+  const viewportRef = useRef<HTMLDivElement>(null);
+  const gridRef = useRef<HTMLDivElement>(null);
+
+  const toggleTheme = () => {
+    const next = theme === 'dark' ? 'light' : 'dark';
+    setTheme(next as any);
+  };
+
+  // Pixel dissolve grid
+  useEffect(() => {
+    const build = () => {
+      const grid = gridRef.current;
+      if (!grid) return;
+      grid.innerHTML = '';
+      const W = window.innerWidth;
+      const px = 12, gap = 4, cell = px + gap;
+      const cols = Math.ceil(W / cell) + 2;
+      const rows = 12;
+      grid.style.gridTemplateColumns = `repeat(${cols}, ${px}px)`;
+      (grid.style as any).gap = gap + 'px';
+      const curve = [0, 0, 0.03, 0.07, 0.14, 0.26, 0.42, 0.62, 0.78, 0.88, 0.96, 0.985];
+      for (let r = 0; r < rows; r++) {
+        const d = curve[r] ?? 1;
+        for (let c = 0; c < cols; c++) {
+          const el = document.createElement('div');
+          el.className = 'px';
+          const hash = ((c * 92821 ^ r * 3221) % 100) / 100;
+          const checker = (c + r) % 2 === 0;
+          let show = false;
+          if (d >= 0.99) show = hash > 0.04;
+          else if (d >= 0.85) show = hash < d && !(hash > 0.88 && checker);
+          else if (d >= 0.4) {
+            if (d < 0.62) show = checker ? hash < d * 1.25 : hash < d * 0.55;
+            else show = hash < d;
+          } else if (d > 0) show = hash < d * 0.9;
+          else show = false;
+          if (!show) el.classList.add('blank');
+          if (d === 0) el.classList.add('blank');
+          grid.appendChild(el);
+        }
+      }
+    };
+    build();
+    let to: any;
+    const onResize = () => { clearTimeout(to); to = setTimeout(build, 120); };
+    window.addEventListener('resize', onResize);
+    return () => window.removeEventListener('resize', onResize);
+  }, []);
+
+  // Deck logic
+  const perView = 3;
+  const maxIndex = Math.max(0, FEATURES.length - perView);
+  const go = (n: number) => setDeckIndex(Math.max(0, Math.min(maxIndex, n)));
+
+  useEffect(() => {
+    const viewport = viewportRef.current;
+    const track = trackRef.current;
+    if (!viewport || !track) return;
+    let sx = 0, dx = 0, dragging = false;
+    const onTouchStart = (e: TouchEvent) => { sx = e.touches[0].clientX; dragging = true; (track.style as any).transition = 'none'; };
+    const onTouchMove = (e: TouchEvent) => {
+      if (!dragging) return;
+      dx = e.touches[0].clientX - sx;
+      const w = viewport.clientWidth;
+      const gap = 16;
+      const cardW = (w - gap * (perView - 1)) / perView;
+      track.style.transform = `translateX(-${deckIndex * (cardW + gap) - dx}px)`;
+    };
+    const onTouchEnd = () => {
+      dragging = false; (track.style as any).transition = '';
+      if (Math.abs(dx) > 48) { if (dx < 0) go(deckIndex + 1); else go(deckIndex - 1); }
+      dx = 0;
+    };
+    const onMouseDown = (e: MouseEvent) => { sx = e.clientX; dragging = true; (track.style as any).transition = 'none'; e.preventDefault(); };
+    const onMouseMove = (e: MouseEvent) => {
+      if (!dragging) return;
+      dx = e.clientX - sx;
+      const w = viewport.clientWidth;
+      const gap = 16;
+      const cardW = (w - gap * (perView - 1)) / perView;
+      track.style.transform = `translateX(-${deckIndex * (cardW + gap) - dx}px)`;
+    };
+    const onMouseUp = () => {
+      if (!dragging) return;
+      dragging = false; (track.style as any).transition = '';
+      if (Math.abs(dx) > 48) { if (dx < 0) go(deckIndex + 1); else go(deckIndex - 1); }
+      dx = 0;
+    };
+    viewport.addEventListener('touchstart', onTouchStart as any, { passive: true } as any);
+    viewport.addEventListener('touchmove', onTouchMove as any, { passive: true } as any);
+    viewport.addEventListener('touchend', onTouchEnd as any);
+    viewport.addEventListener('mousedown', onMouseDown as any);
+    window.addEventListener('mousemove', onMouseMove as any);
+    window.addEventListener('mouseup', onMouseUp as any);
+    return () => {
+      viewport.removeEventListener('touchstart', onTouchStart as any);
+      viewport.removeEventListener('touchmove', onTouchMove as any);
+      viewport.removeEventListener('touchend', onTouchEnd as any);
+      viewport.removeEventListener('mousedown', onMouseDown as any);
+      window.removeEventListener('mousemove', onMouseMove as any);
+      window.removeEventListener('mouseup', onMouseUp as any);
+    };
+  }, [deckIndex]);
 
   return (
-    <div className={`nb-root nb-grid-bg ${isRTL ? 'text-right' : 'text-left'}`}>
-
-      {/* ── Navbar ── */}
-      <header className="nb-nav">
-        <div
-          className={`max-w-7xl mx-auto px-4 sm:px-6 h-20 flex items-center gap-6 ${isRTL ? 'flex-row-reverse' : ''}`}
-        >
-          <Logo />
-
-          <nav className={`hidden md:flex items-center gap-2 ${isRTL ? 'mr-6' : 'ml-6'}`}>
-            <a
-              href="#features"
-              className="nb-mono font-bold text-xs px-3.5 py-2"
-              style={{
-                border: '2px solid #0d0d0d',
-                background: '#fffef7',
-                color: '#0d0d0d',
-                boxShadow: '3px 3px 0 #0d0d0d',
-              }}
-            >
-              {t('landing.features')}
-            </a>
-            <a
-              href="#languages"
-              className="nb-mono font-bold text-xs px-3.5 py-2"
-              style={{
-                border: '2px solid #0d0d0d',
-                background: '#fffef7',
-                color: '#0d0d0d',
-                boxShadow: '3px 3px 0 #0d0d0d',
-              }}
-            >
-              {t('landing.languages')}
-            </a>
-            <Link
-              href="/about"
-              className="nb-mono font-bold text-xs px-3.5 py-2"
-              style={{
-                border: '2px solid #0d0d0d',
-                background: '#fffef7',
-                color: '#0d0d0d',
-                boxShadow: '3px 3px 0 #0d0d0d',
-              }}
-            >
-              {t('landing.about')}
-            </Link>
-          </nav>
-
-          <div className={`${isRTL ? 'mr-auto' : 'ml-auto'} flex items-center gap-3`}>
-            <NbLanguageSwitcher />
-            {user ? (
-              <Link href="/app" className="nb-btn nb-btn-black">
-                Dashboard <ChevronRight className="w-4 h-4" />
-              </Link>
-            ) : (
-              <Link href="/signup" className="nb-btn nb-btn-black">
-                Start Free <ChevronRight className="w-4 h-4" />
-              </Link>
-            )}
-          </div>
+    <div>
+      <nav className="nav">
+        <div style={{ display: 'flex', alignItems: 'center', gap: 11 }}>
+          <div className="logo">PC</div>
+          <div style={{ fontFamily: "'Press Start 2P'", fontSize: 10, lineHeight: 1 }}>PIXEL<br /><span style={{ color: 'var(--phosphor2)' }}>CODE</span></div>
         </div>
-      </header>
+        <div className="nav-links">
+          <a href="#features">Features</a>
+          <a href="#playground">Playground</a>
+          <a href="#classrooms">Classrooms</a>
+          <a href="#library">Library</a>
+        </div>
+        <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
+          <button className="theme-btn" onClick={toggleTheme}>{dark ? '☀ LIGHT' : '● DARK'}</button>
+          <Link href={user ? '/app' : '/signup'} className="btn btn-dark">Start Free →</Link>
+        </div>
+      </nav>
 
-      {/* ── Marquee bar ── */}
-      <div className="nb-marquee-bar">
-        <div className="nb-marquee-track">
-          {MARQUEE_ITEMS.map((item, i) => (
-            <span key={i} style={{ padding: '0 2rem', borderRight: '3px solid #ffe600' }}>
-              {item}
-            </span>
-          ))}
+      <div className="marquee">
+        <div className="track">
+          <span style={{ padding: '0 26px', borderRight: '4px solid var(--phosphor)' }}>★ FOR BEGINNERS</span>
+          <span style={{ padding: '0 26px', borderRight: '4px solid var(--phosphor)' }}>★ 13+ LANGUAGES</span>
+          <span style={{ padding: '0 26px', borderRight: '4px solid var(--phosphor)' }}>★ PLAYGROUND</span>
+          <span style={{ padding: '0 26px', borderRight: '4px solid var(--phosphor)' }}>★ DUELS & XP</span>
+          <span style={{ padding: '0 26px', borderRight: '4px solid var(--phosphor)' }}>★ CLASSROOMS</span>
+          <span style={{ padding: '0 26px', borderRight: '4px solid var(--phosphor)' }}>★ AI TUTOR</span>
+          <span style={{ padding: '0 26px', borderRight: '4px solid var(--phosphor)' }}>★ KIDS MODE</span>
         </div>
       </div>
 
-      {/* ── Hero ── */}
-      <section className="relative overflow-hidden" style={{ borderBottom: '3px solid #0d0d0d' }}>
-        <FloatingPixels />
-
-        <div
-          className={`max-w-7xl mx-auto px-4 sm:px-6 py-20 md:py-28 grid md:grid-cols-2 gap-12 items-center relative z-10 ${isRTL ? 'text-right' : 'text-left'}`}
-        >
-          {/* Copy */}
-          <motion.div
-            initial={{ opacity: 0, x: -30 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.5 }}
-            className="space-y-8"
-          >
-            {/* Badge */}
-            <motion.div
-              initial={{ opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.1 }}
-            >
-              <span
-                className="nb-badge"
-                style={{ background: '#ffe600', color: '#0d0d0d' }}
-              >
-                <Cpu className="w-4 h-4" />
-                {t('landing.nowWithAi')}
-                <SparkleDecor style={{ fontSize: '0.9rem', animationDelay: '0.5s' }} />
-              </span>
-            </motion.div>
-
-            {/* Headline */}
-            <motion.h1
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.15 }}
-              className="nb-pixel font-bold"
-              style={{ fontSize: 'clamp(1.5rem, 4vw, 2.6rem)', lineHeight: 1.5, color: '#0d0d0d' }}
-            >
-              <span
-                className="nb-glitch"
-                data-text="CODE"
-                style={{ color: '#0d0d0d' }}
-              >
-                CODE
-              </span>
-              {' '}
-              <span style={{ color: '#0055ff', display: 'inline-block', textDecoration: 'underline', textDecorationColor: '#ffe600', textDecorationThickness: 6 }}>PIXEL</span>
-              <br />
-              <span style={{ color: '#ff2d55' }}>BY</span>
-              {' '}
-              <span style={{ color: '#0d0d0d' }}>PIXEL</span>
-              {' '}
-              <SparkleDecor style={{ fontSize: '1.2rem', animationDelay: '0.8s' }} />
-            </motion.h1>
-
-            <motion.p
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.25 }}
-              className="nb-mono text-base font-bold leading-relaxed max-w-lg"
-              style={{ color: '#2a2a2a' }}
-            >
-              {t('landing.heroSub')}
-            </motion.p>
-
-            <motion.div
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.35 }}
-              className={`flex flex-wrap gap-4 ${isRTL ? 'flex-row-reverse' : ''}`}
-            >
-              <Link
-                href={user ? '/app' : '/signup'}
-                className="nb-btn nb-btn-yellow"
-                style={{ fontSize: '0.75rem', padding: '1rem 1.8rem' }}
-              >
-                {user ? t('landing.goDashboard') : t('landing.startFree')}
-                {isRTL ? <ArrowLeft className="w-4 h-4" /> : <ArrowRight className="w-4 h-4" />}
-              </Link>
-              <Link
-                href="/kids"
-                className="nb-btn nb-btn-red"
-                style={{ fontSize: '0.75rem', padding: '1rem 1.8rem' }}
-              >
-                👾 {t('landing.kidsMode')}
-              </Link>
-            </motion.div>
-
-            <motion.p
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.5 }}
-              className="nb-mono text-xs font-bold"
-              style={{ color: '#555' }}
-            >
-              ★ {t('landing.freeForever')}
-            </motion.p>
-          </motion.div>
-
-          {/* Old computer image */}
-          <motion.div
-            initial={{ opacity: 0, x: 40, rotate: 2 }}
-            animate={{ opacity: 1, x: 0, rotate: -1 }}
-            transition={{ duration: 0.6, delay: 0.2, ease: 'easeOut' }}
-            className="flex justify-center"
-          >
-            <motion.div
-              animate={{ y: [0, -6, 0] }}
-              transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
-            >
-              <Image
-                src={oldComputer}
-                alt="Old computer"
-                className="w-full max-w-md h-auto"
-                style={{ imageRendering: 'pixelated' }}
-                priority
-              />
-            </motion.div>
-          </motion.div>
-        </div>
-      </section>
-
-      {/* ── Stats bar ── */}
-      <motion.section
-        initial={{ opacity: 0 }}
-        whileInView={{ opacity: 1 }}
-        viewport={{ once: true }}
-        style={{ borderBottom: '3px solid #0d0d0d', background: '#0d0d0d' }}
-      >
-        <div className="max-w-7xl mx-auto px-6 py-10 grid grid-cols-3 gap-0">
-          {[
-            { value: '13+',    label: t('landing.stats.languages'), color: '#ffe600' },
-            { value: '10K+',   label: t('landing.stats.exercises'), color: '#ff2d55' },
-            { value: 'AI ✦',   label: t('landing.stats.aiTutoring'), color: '#00e676' },
-          ].map((stat, i) => (
-            <div
-              key={stat.label}
-              className="text-center py-6"
-              style={{
-                borderRight: i < 2 ? '3px solid #ffe600' : 'none',
-              }}
-            >
-              <div
-                className="nb-pixel font-bold"
-                style={{ fontSize: 'clamp(1.1rem, 3.5vw, 2rem)', color: stat.color, marginBottom: '0.5rem' }}
-              >
-                {stat.value}
-              </div>
-              <div
-                className="nb-mono text-xs font-bold uppercase tracking-widest"
-                style={{ color: '#ccc' }}
-              >
-                {stat.label}
-              </div>
+      <section className="grid-bg hero">
+        <span style={{ position: 'absolute', top: '18%', left: '4%', width: 18, height: 18, background: 'var(--phosphor)', border: '3px solid #161616', animation: 'float 5s ease-in-out infinite' }} />
+        <span style={{ position: 'absolute', top: '24%', right: '6%', width: 14, height: 14, background: 'var(--orange)', border: '3px solid #161616', animation: 'float 4s ease-in-out infinite .5s' }} />
+        <span style={{ position: 'absolute', bottom: '18%', left: '7%', width: 20, height: 20, background: 'var(--grey)', border: '3px solid #161616', animation: 'float 6s ease-in-out infinite 1s' }} />
+        <div className="wrap hero-grid">
+          <div>
+            <div className="badge">✦ BUILT FOR BEGINNERS — ZERO TO SHIPPING</div>
+            <h1 className="hero-title">Learn to code.<br />For <span className="block">real.</span></h1>
+            <p className="hero-sub">PixelCode is the friendly path from first line to real projects. Structured courses, a live playground, duels for XP, teacher classrooms, and an AI tutor that never sleeps — all in one chunky CRT.</p>
+            <div className="hero-actions">
+              <Link href={user ? '/app' : '/signup'} className="btn btn-ph">Start Learning Free →</Link>
+              <Link href="/app/ide" className="btn btn-ghost">Try Playground</Link>
             </div>
-          ))}
-        </div>
-      </motion.section>
-
-      {/* ── Features ── */}
-      <section id="features" className="max-w-7xl mx-auto px-4 sm:px-6 py-20">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          className="mb-14"
-        >
-          <div className="flex items-center gap-3 mb-3">
-            <SparkleDecor style={{ animationDelay: '0.2s' }} />
-            <h2
-              className="nb-pixel font-bold"
-              style={{ fontSize: 'clamp(1.1rem, 2.8vw, 1.8rem)', color: '#0d0d0d' }}
-            >
-              {t('landing.everythingYouNeed')}
-            </h2>
-            <SparkleDecor style={{ animationDelay: '0.9s' }} />
+            <div className="hero-meta"><span>★ No credit card</span><i /><span>13+ languages</span><i /><span>Kids mode included</span></div>
           </div>
-          <p className="nb-mono text-base font-bold" style={{ color: '#444', maxWidth: '550px' }}>
-            {t('landing.platformTools')}
-          </p>
-        </motion.div>
-
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {FEATURES.map(({ key, icon: Icon, bg, fg, accent }, idx) => (
-            <motion.div
-              key={key}
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: idx * 0.07 }}
-              className={`nb-card p-7 ${isRTL ? 'text-right' : 'text-left'}`}
-              style={{ background: bg, color: fg }}
-            >
-              {/* Icon */}
-              <div
-                className="w-14 h-14 flex items-center justify-center mb-6"
-                style={{
-                  border: '3px solid #0d0d0d',
-                  background: accent,
-                  color: '#0d0d0d',
-                  boxShadow: '4px 4px 0 #0d0d0d',
-                }}
-              >
-                <Icon className="w-7 h-7" />
-              </div>
-              <h3
-                className="nb-silkscreen font-bold mb-3"
-                style={{ fontSize: '1.05rem', letterSpacing: '0.02em' }}
-              >
-                {t(`landing.featuresList.${key}.title`)}
-              </h3>
-              <p
-                className="nb-mono text-sm font-medium leading-relaxed"
-                style={{ opacity: 0.95 }}
-              >
-                {t(`landing.featuresList.${key}.desc`)}
-              </p>
-            </motion.div>
-          ))}
+          <div className="computer-wrap">
+            <div className="computer-card">
+              <Image src={oldComputer} alt="Old computer" className="computer-img" width={460} height={340} style={{ imageRendering: 'pixelated' }} priority />
+              <div className="level-sticker"><b>LVL 04</b><span className="mono">1,240 XP ✦</span></div>
+            </div>
+          </div>
         </div>
       </section>
 
-      {/* ── Languages ── */}
-      <section
-        id="languages"
-        style={{
-          borderTop: '3px solid #0d0d0d',
-          borderBottom: '3px solid #0d0d0d',
-          background: '#fffef7',
-        }}
-      >
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-20">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="text-center mb-12"
-          >
-            <h2
-              className="nb-pixel font-bold mb-4"
-              style={{ fontSize: 'clamp(1.1rem, 2.8vw, 1.6rem)', color: '#0d0d0d' }}
-            >
-              {t('landing.heroTitle').split(',')[0]}
-            </h2>
-            <p className="nb-mono text-base font-bold" style={{ color: '#444' }}>
-              {t('landing.languages')}
-            </p>
-          </motion.div>
+      <section className="strip">
+        <div className="strip-inner">
+          <div className="strip-card"><div className="strip-num" style={{ color: 'var(--phosphor)' }}>13+</div><div className="mono strip-label">LANGUAGES</div><div className="mono strip-sub">Python → Rust</div></div>
+          <div className="strip-card"><div className="strip-num" style={{ color: 'var(--orange)' }}>200+</div><div className="mono strip-label">COURSES</div><div className="mono strip-sub">Zero to shipping</div></div>
+          <div className="strip-card"><div className="strip-num" style={{ color: 'var(--yellow)' }}>10K+</div><div className="mono strip-label">EXERCISES</div><div className="mono strip-sub">Hands-on only</div></div>
+          <div className="strip-card"><div className="strip-num" style={{ color: '#7AA8FF' }}>500K</div><div className="mono strip-label">LEARNERS</div><div className="mono strip-sub">And counting</div></div>
+        </div>
+      </section>
 
-          <motion.div
-            initial={{ opacity: 0 }}
-            whileInView={{ opacity: 1 }}
-            viewport={{ once: true }}
-            className="flex flex-wrap justify-center gap-3.5"
-          >
-            {LANGUAGES.map((lang, idx) => (
-              <motion.span
-                key={lang.name}
-                initial={{ opacity: 0, scale: 0.8 }}
-                whileInView={{ opacity: 1, scale: 1 }}
-                viewport={{ once: true }}
-                transition={{ delay: idx * 0.04 }}
-                className="nb-lang-pill"
-                style={{ background: lang.bg, color: lang.fg }}
-              >
-                <span>{lang.emoji}</span>
-                {lang.name}
-              </motion.span>
+      <section className="wrap section" id="features">
+        <div className="section-head"><span className="dot" style={{ background: 'var(--phosphor)' }} /><h2 className="h2">Everything a beginner needs</h2><span className="dot" style={{ background: 'var(--orange)' }} /><span className="eyebrow" style={{ marginLeft: 6 }}>— 9 TOOLS · ONE PLATFORM</span></div>
+        <p className="sub">Not just videos. Swipe the deck — every card is a tool that gets you writing code from day one.</p>
+        <div className="deck-wrap">
+          <div className="deck-head-row">
+            <span className="mono" style={{ fontSize: 11, fontWeight: 800, letterSpacing: '.08em' }}><span>{String(deckIndex + 1).padStart(2, '0')} / {String(Math.max(1, FEATURES.length - 2)).padStart(2, '0')}</span> · USE ← → OR SWIPE</span>
+            <div className="deck-controls">
+              <button className="deck-btn" onClick={() => go(deckIndex - 1)} aria-label="Previous">←</button>
+              <button className="deck-btn" onClick={() => go(deckIndex + 1)} aria-label="Next">→</button>
+            </div>
+          </div>
+          <div className="deck-viewport" ref={viewportRef}>
+            <div className="deck-track" ref={trackRef} style={{ transform: `translateX(-${deckIndex *  (typeof window !== 'undefined' ? ((viewportRef.current?.clientWidth || 1160) - 32) / 3 + 16 : 0)}px)` }}>
+              {FEATURES.map((f) => (
+                <div key={f.title} className="deck-card">
+                  <div className="fcard" style={{ background: f.bg, color: f.fg }}>
+                    <div className="fcard-top"><span className="fcard-num">{f.n}</span><span className="mono" style={{ fontSize: 9, background: f.fg === '#fff' ? '#161616' : '#161616', color: f.bg === '#161616' ? 'var(--phosphor)' : f.fg === '#fff' ? '#fff' : 'var(--phosphor)', padding: '3px 6px', border: '2px solid #161616' }}>{f.badge}</span></div>
+                    <div className="fcard-icon" style={{ background: f.iconBg }}>{f.icon}</div>
+                    <h3>{f.title}</h3>
+                    <p className="mono">{f.desc}</p>
+                    <ul>{f.points.map(p => <li key={p}>{p}</li>)}</ul>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+          <div className="deck-dots">
+            {Array.from({ length: Math.max(1, FEATURES.length - 2) }).map((_, i) => (
+              <button key={i} className={`deck-dot ${i === deckIndex ? 'active' : ''}`} onClick={() => go(i)} aria-label={`Go to ${i + 1}`} />
             ))}
-          </motion.div>
+          </div>
+          <div className="deck-progress"><i style={{ width: `${(deckIndex / Math.max(1, FEATURES.length - 3)) * 100}%` }} /></div>
         </div>
       </section>
 
-      {/* ── CTA ── */}
-      <section className="nb-cta-section relative overflow-hidden" style={{ background: '#0055ff' }}>
-        <FloatingPixels />
-        <div
-          className="max-w-7xl mx-auto px-4 sm:px-6 py-28 text-center relative z-10"
-        >
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="space-y-8"
-          >
-            <div className="flex justify-center gap-4 mb-4">
-              <SparkleDecor style={{ fontSize: '1.5rem', animationDelay: '0s' }} />
-              <SparkleDecor style={{ fontSize: '2rem', animationDelay: '0.6s' }} />
-              <SparkleDecor style={{ fontSize: '1.2rem', animationDelay: '1.2s' }} />
+      <section className="split" id="playground">
+        <div className="wrap split-grid">
+          <div>
+            <p className="mono" style={{ fontSize: 10, letterSpacing: '.16em', fontWeight: 800, color: 'var(--phosphor2)' }}>● PLAYGROUND — WRITE & RUN</p>
+            <h2 className="pixel" style={{ fontSize: 18, marginTop: 10, lineHeight: 1.4 }}>Your browser is the computer.</h2>
+            <p className="mono" style={{ fontSize: 12, color: 'var(--muted)', marginTop: 10, lineHeight: 1.7, fontWeight: 700 }}>No installs. No setup. Pick a language, write, hit Run — see phosphor output instantly. Share a link, ask the AI tutor inline.</p>
+            <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginTop: 14 }}>
+              <span className="mono" style={{ fontSize: 10, padding: '7px 10px', border: '3px solid #161616', background: 'var(--phosphor)', fontWeight: 800, boxShadow: '3px 3px 0 #161616' }}>▶ Instant run</span>
+              <span className="mono" style={{ fontSize: 10, padding: '7px 10px', border: '3px solid #161616', background: 'var(--surface)', fontWeight: 800, boxShadow: '3px 3px 0 #161616' }}>⤴ Share link</span>
+              <span className="mono" style={{ fontSize: 10, padding: '7px 10px', border: '3px solid #161616', background: 'var(--yellow)', fontWeight: 800, boxShadow: '3px 3px 0 #161616' }}>🧠 AI explain</span>
             </div>
-            <h2
-              className="nb-pixel font-bold"
-              style={{
-                fontSize: 'clamp(1.3rem, 3.8vw, 2.2rem)',
-                color: '#ffe600',
-                textShadow: '4px 4px 0 #0d0d0d',
-                lineHeight: 1.5,
-              }}
-            >
-              {t('landing.journeyToday')}
-            </h2>
-            <p className="nb-mono text-base font-bold max-w-md mx-auto" style={{ color: '#fffef7' }}>
-              {t('landing.joinMillions')}
-            </p>
-            <div className="flex justify-center gap-4 flex-wrap">
-              <Link
-                href={user ? '/app' : '/signup'}
-                className="nb-btn nb-btn-yellow"
-                style={{ fontSize: '0.75rem', padding: '1.1rem 2.2rem' }}
-              >
-                {user ? t('landing.goDashboard') : t('landing.startFree')}
-                {isRTL ? <ArrowLeft className="w-4 h-4" /> : <ArrowRight className="w-4 h-4" />}
-              </Link>
-              <Link
-                href="/kids"
-                className="nb-btn"
-                style={{
-                  fontSize: '0.75rem',
-                  padding: '1.1rem 2.2rem',
-                  background: '#ffe600',
-                  color: '#0d0d0d',
-                  border: '3px solid #0d0d0d',
-                  boxShadow: '5px 5px 0 #0d0d0d',
-                }}
-              >
-                👾 Kids Mode
-              </Link>
-            </div>
-          </motion.div>
+          </div>
+          <div className="window">
+            <div className="window-bar"><div className="dots"><span className="dot2" style={{ background: 'var(--orange)' }} /><span className="dot2" style={{ background: 'var(--yellow)' }} /><span className="dot2" style={{ background: 'var(--phosphor)' }} /><span className="mono window-title" style={{ marginLeft: 6 }}>playground.py — PixelCode</span></div><button className="run-btn">▶ RUN</button></div>
+            <div className="window-body code-bg"><span className="cmt"># welcome — first pixel</span><br /><span style={{ color: '#BFFF00' }}>def</span> <span style={{ color: '#FFE600' }}>greet</span>(name):<br />&nbsp;&nbsp;<span style={{ color: '#BFFF00' }}>return</span> <span style={{ color: '#FF8A3D' }}>f&quot;hello, &#123;name&#125; ✦&quot;</span><br /><br /><span style={{ color: '#BFFF00' }}>for</span> lang <span style={{ color: '#BFFF00' }}>in</span> [<span style={{ color: '#FF8A3D' }}>&quot;Python&quot;</span>, <span style={{ color: '#FF8A3D' }}>&quot;JS&quot;</span>, <span style={{ color: '#FF8A3D' }}>&quot;Go&quot;</span>]:<br />&nbsp;&nbsp;print(greet(lang))<br /><span className="cmt"># → hello, Python ✦</span></div>
+          </div>
         </div>
       </section>
 
-      {/* ── Footer ── */}
-      <footer className="nb-footer">
-        <div
-          className="max-w-7xl mx-auto px-6 py-8 flex flex-col md:flex-row items-center justify-between gap-6"
-        >
-          <Logo size="sm" />
-
-          <div className="nb-mono text-xs font-bold text-center" style={{ color: '#aaa' }}>
-            © {new Date().getFullYear()} PixelCode. All rights reserved.
+      <section className="wrap section">
+        <div className="split-grid">
+          <div>
+            <p className="mono" style={{ fontSize: 10, letterSpacing: '.14em', fontWeight: 800, color: 'var(--orange)' }}>● PROGRESS — LEVELS / STREAKS / BOARDS</p>
+            <h2 className="pixel" style={{ fontSize: 18, marginTop: 10 }}>Every line moves you up.</h2>
+            <p className="mono" style={{ fontSize: 12, color: 'var(--muted)', marginTop: 8, lineHeight: 1.65 }}>Earn XP for lessons, playground saves, and duel wins. Keep the flame with daily streaks. Watch your level climb.</p>
+            <div className="progress-bars">
+              <div className="pbar"><span className="mono" style={{ fontSize: 11, fontWeight: 800 }}>LVL 04 — 1,240 XP</span><div className="pbar-fill" style={{ maxWidth: 160 }}><div style={{ position: 'absolute', inset: '2px 28% 2px 2px', background: 'var(--phosphor)' }} /><i /></div><span className="mono" style={{ fontSize: 11, fontWeight: 800 }}>72%</span></div>
+              <div className="pbar" style={{ background: 'var(--yellow)' }}><span className="mono" style={{ fontSize: 11, fontWeight: 800 }}>🔥 12 day streak</span><span className="mono" style={{ fontSize: 10, fontWeight: 700 }}>Freeze: 2</span></div>
+              <div className="pbar" style={{ background: 'var(--surface2)' }}><span className="mono" style={{ fontSize: 11, fontWeight: 800 }}>Next: LVL 05 — 1,700 XP</span><span className="mono" style={{ fontSize: 10, fontWeight: 700 }}>460 XP to go</span></div>
+            </div>
           </div>
-
-          <div className="flex items-center gap-4">
-            <Link
-              href="/kids"
-              className="nb-mono text-xs font-bold hover:underline"
-              style={{ color: '#00e676' }}
-            >
-              Kids Mode 👾
-            </Link>
+          <div>
+            <div className="mono" style={{ fontSize: 10, letterSpacing: '.12em', fontWeight: 800, marginBottom: 10, display: 'flex', alignItems: 'center', gap: 8 }}><span style={{ width: 10, height: 10, background: 'var(--yellow)', border: '2px solid #161616', display: 'inline-block' }} /> LEADERBOARD — WEEKLY</div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+              <div className="leader" style={{ background: 'var(--yellow)' }}><div className="rank" style={{ background: 'var(--phosphor)' }}>1</div><div className="mono" style={{ fontSize: 12, fontWeight: 800 }}>you — 1,240 XP</div><span className="mono" style={{ marginLeft: 'auto', fontSize: 11, fontWeight: 800 }}>▲ +3</span></div>
+              <div className="leader"><div className="rank" style={{ background: 'var(--surface2)' }}>2</div><span className="mono" style={{ fontSize: 12, fontWeight: 700 }}>sarah.codes — 1,180 XP</span><span className="mono" style={{ marginLeft: 'auto', fontSize: 11 }}>—</span></div>
+              <div className="leader"><div className="rank" style={{ background: 'var(--surface2)' }}>3</div><span className="mono" style={{ fontSize: 12, fontWeight: 700 }}>pixel_joe — 1,102 XP</span><span className="mono" style={{ marginLeft: 'auto', fontSize: 11 }}>▼ 1</span></div>
+              <div className="leader" style={{ opacity: .7 }}><div className="rank">4</div><span className="mono" style={{ fontSize: 12 }}>mira.dev — 987 XP</span><span className="mono" style={{ marginLeft: 'auto', fontSize: 11 }}>—</span></div>
+            </div>
           </div>
         </div>
+      </section>
 
-        {/* Bottom pixel row decoration */}
-        <div
-          style={{
-            borderTop: '3px solid #ffe600',
-            display: 'flex',
-            height: 10,
-            overflow: 'hidden',
-          }}
-        >
-          {Array.from({ length: 60 }).map((_, i) => (
-            <div
-              key={i}
-              style={{
-                flex: 1,
-                background: i % 3 === 0 ? '#ffe600' : i % 3 === 1 ? '#ff2d55' : '#0055ff',
-              }}
-            />
-          ))}
+      <section className="split" id="classrooms">
+        <div className="wrap">
+          <div className="split-grid" style={{ alignItems: 'start' }}>
+            <div>
+              <p className="mono" style={{ fontSize: 10, letterSpacing: '.14em', fontWeight: 800, color: 'var(--phosphor2)' }}>● CLASSROOMS — LEARN TOGETHER</p>
+              <h2 className="pixel" style={{ fontSize: 16, marginTop: 10, lineHeight: 1.4 }}>Teacher-led. Student-paced.</h2>
+              <div className="classroom" style={{ marginTop: 14 }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 8 }}>
+                  <b className="silk" style={{ fontSize: 15 }}>CS101 — Intro to Code</b><span className="mono" style={{ fontSize: 10, padding: '4px 8px', border: '2px solid #161616', background: 'var(--phosphor)', fontWeight: 800 }}>CODE: PX-482</span>
+                </div>
+                <p className="mono" style={{ fontSize: 11, color: 'var(--muted)', marginTop: 6 }}>24 students · 12 assignments · Avg 78% completion</p>
+                <div style={{ marginTop: 10, display: 'flex', gap: 8, flexWrap: 'wrap' }}><span className="mono" style={{ fontSize: 10, padding: '6px 10px', border: '3px solid #161616', background: 'var(--surface)', fontWeight: 800 }}>Assignments</span><span className="mono" style={{ fontSize: 10, padding: '6px 10px', border: '3px solid #161616', background: 'var(--yellow)', fontWeight: 800 }}>Progress board</span></div>
+              </div>
+            </div>
+            <div id="library">
+              <p className="mono" style={{ fontSize: 10, letterSpacing: '.14em', fontWeight: 800, color: 'var(--grey)' }}>● LIBRARY — CURATED DOCS</p>
+              <h2 className="pixel" style={{ fontSize: 16, marginTop: 10 }}>Answers, not rabbit holes.</h2>
+              <div className="doc-grid" style={{ marginTop: 14 }}>
+                <div className="doc-card"><b>Cheatsheets</b><p className="mono" style={{ fontSize: 11, color: 'var(--muted)', marginTop: 4 }}>One-page refs for every lang.</p></div>
+                <div className="doc-card"><b>Glossary</b><p className="mono" style={{ fontSize: 11, color: 'var(--muted)', marginTop: 4 }}>Jargon, explained simply.</p></div>
+                <div className="doc-card"><b>Examples</b><p className="mono" style={{ fontSize: 11, color: 'var(--muted)', marginTop: 4 }}>Copy-paste runnable snippets.</p></div>
+              </div>
+            </div>
+          </div>
         </div>
+      </section>
+
+      <section className="kids">
+        <div className="wrap kids-grid">
+          <div>
+            <p className="mono" style={{ fontSize: 10, letterSpacing: '.14em', fontWeight: 800, color: '#161616' }}>👾 KIDS MODE — AGES 8–14</p>
+            <h2 className="pixel" style={{ fontSize: 20, marginTop: 10, color: '#161616', lineHeight: 1.3 }}>Big pixels. Big joy. Safe.</h2>
+            <p className="mono" style={{ fontSize: 12, fontWeight: 700, color: '#2B2416', marginTop: 8, lineHeight: 1.6 }}>Blocks meet typing. Guided puzzles, playful characters, and parental controls. Same progress system, age-appropriate pace.</p>
+            <div style={{ display: 'flex', gap: 10, marginTop: 14, flexWrap: 'wrap' }}>
+              <Link href="/kids" className="btn btn-dark">Enter Kids Mode →</Link>
+              <span className="mono" style={{ fontSize: 11, padding: '10px 12px', border: '3px solid #161616', background: 'var(--surface)', fontWeight: 800, boxShadow: '3px 3px 0 #161616' }}>Parent dashboard</span>
+            </div>
+          </div>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+            <div className="kids-card"><div style={{ fontSize: 22 }}>🧱</div><b className="silk">Blocks</b><p className="mono" style={{ fontSize: 11, color: 'var(--muted)', marginTop: 4 }}>Drag, snap, run.</p></div>
+            <div className="kids-card"><div style={{ fontSize: 22 }}>🎨</div><b className="silk">Draw with code</b><p className="mono" style={{ fontSize: 11, color: 'var(--muted)', marginTop: 4 }}>Plot pixels, see art.</p></div>
+            <div className="kids-card"><div style={{ fontSize: 22 }}>🛡️</div><b className="silk">Safe chat</b><p className="mono" style={{ fontSize: 11, color: 'var(--muted)', marginTop: 4 }}>Filtered AI hints.</p></div>
+            <div className="kids-card" style={{ background: '#161616', color: 'var(--phosphor)' }}><div style={{ fontSize: 22 }}>⭐</div><b className="silk">Earn stars</b><p className="mono" style={{ fontSize: 11, opacity: .8, marginTop: 4 }}>Stickers & levels.</p></div>
+          </div>
+        </div>
+      </section>
+
+      <section className="wrap languages">
+        <h2 className="pixel" style={{ fontSize: 18 }}>13+ Languages. One playground.</h2>
+        <p className="mono" style={{ fontSize: 12, fontWeight: 700, color: 'var(--muted)', marginTop: 6 }}>Start anywhere — switch anytime. Your XP follows you.</p>
+        <div className="pills">
+          <span className="pill" style={{ background: '#161616', color: 'var(--phosphor)' }}>🐍 Python</span>
+          <span className="pill" style={{ background: 'var(--yellow)', color: '#161616' }}>⚡ JavaScript</span>
+          <span className="pill" style={{ background: 'var(--surface2)' }}>📘 TypeScript</span>
+          <span className="pill" style={{ background: 'var(--orange)', color: '#fff' }}>☕ Java</span>
+          <span className="pill" style={{ background: '#161616', color: 'var(--yellow)' }}>⚙️ C</span>
+          <span className="pill" style={{ background: 'var(--grey)', color: '#fff' }}>🔧 C++</span>
+          <span className="pill" style={{ background: 'var(--phosphor)' }}>🐹 Go</span>
+          <span className="pill" style={{ background: 'var(--orange)', color: '#fff' }}>🦀 Rust</span>
+          <span className="pill" style={{ background: '#161616', color: 'var(--yellow)' }}>🎯 Kotlin</span>
+          <span className="pill" style={{ background: 'var(--orange)', color: '#fff' }}>🍎 Swift</span>
+          <span className="pill" style={{ background: 'var(--grey)', color: '#fff' }}>🎮 C#</span>
+          <span className="pill" style={{ background: 'var(--orange)', color: '#fff' }}>💎 Ruby</span>
+          <span className="pill" style={{ background: 'var(--phosphor)' }}>🐘 PHP</span>
+        </div>
+      </section>
+
+      <section className="cta" id="cta">
+        <div className="cta-grid" />
+        <div className="wrap" style={{ position: 'relative' }}>
+          <h2>Start your first pixel.</h2>
+          <p className="mono">Free forever. No credit card. CRT included.</p>
+          <div style={{ display: 'flex', justifyContent: 'center', gap: 12, flexWrap: 'wrap', marginTop: 18 }}>
+            <Link href={user ? '/app' : '/signup'} className="btn btn-dark">Create Free Account →</Link>
+            <Link href="/kids" className="btn" style={{ background: 'var(--surface)', border: '3px solid #161616', boxShadow: '4px 4px 0 #161616' }}>👾 Try Kids Mode</Link>
+          </div>
+        </div>
+      </section>
+
+      <div className="pixel-dissolve" aria-hidden="true">
+        <div className="pixel-grid" ref={gridRef} />
+      </div>
+      <footer className="footer">
+        <div className="footer-grid">
+          <div>
+            <div className="footer-brand-title">PIXELCODE</div>
+            <p className="mono footer-brand-desc">Learn to code the retro way. Brutally simple, weirdly fun, built for beginners and the teachers who guide them.</p>
+            <div className="footer-icons">
+              <span className="footer-icon" style={{ background: '#BFFF00', color: '#161616' }}>◐</span>
+              <span className="footer-icon" style={{ background: '#FF6B1A', color: '#fff' }}>✦</span>
+              <span className="footer-icon" style={{ background: '#FFE600', color: '#161616' }}>≡</span>
+            </div>
+          </div>
+          <div>
+            <div className="footer-col-title">PLATFORM</div>
+            <nav className="footer-links mono">
+              <a href="#features">Courses</a>
+              <a href="#playground">Playground</a>
+              <a href="#features">Challenges</a>
+              <a href="#features">Duels & Leaderboards</a>
+              <a href="#classrooms">Classrooms</a>
+              <a href="#features">Kids Mode</a>
+            </nav>
+          </div>
+          <div>
+            <div className="footer-col-title">SUPPORT</div>
+            <nav className="footer-links mono">
+              <a href="#library">Library / Docs</a>
+              <a href="#features">AI Tutor Help</a>
+              <a href="#classrooms">Teachers</a>
+              <a href="#cta">Pricing</a>
+              <a href="#cta">Contact — hello@pixelcode.camp</a>
+            </nav>
+          </div>
+        </div>
+        <div className="footer-bottom mono">
+          <span>© 2024 PIXELCODE · BEIGE COMPUTER CLUB</span>
+          <span>MADE WITH ◆ PIXELS AND CRTs</span>
+        </div>
+        <div className="footer-robot" aria-hidden="true">
+          <div className="footer-bubble">LET&apos;S CODE?</div>
+          <div className="footer-robot-img"><span style={{ fontSize: 32 }}>🤖</span></div>
+        </div>
+        <div className="footer-stripe"><div style={{ flex: 1, background: 'var(--footer-dot)' }} /><div style={{ flex: 1, background: 'var(--orange)' }} /><div style={{ flex: 1, background: 'var(--footer-bg)' }} /></div>
       </footer>
     </div>
   );

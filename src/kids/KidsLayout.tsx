@@ -8,7 +8,7 @@ import { UserMenu } from "../shared/ui/UserMenu";
 
 // Theme switching is disabled for now (neobrutalism is the fixed default
 // until a dark-brutalism palette is chosen). Flip to true to re-enable.
-const THEME_PICKER_ENABLED = false;
+const THEME_PICKER_ENABLED = true;
 
 const navItems = [
   { to: "/kids", label: "Home", emoji: "🏠", end: true },
