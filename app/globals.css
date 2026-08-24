@@ -5,6 +5,7 @@
 @tailwind utilities;
 
 :root {
+    /* — Beige CRT tokens — single source (pixel-retro.css mirrors these as --bg/--surface etc) — */
     --bg-base: #D6CFBC;
     --bg-surface: #EFE9D9;
     --bg-elevated: #EFE9D9;
@@ -28,9 +29,15 @@
     --phosphor: #A6E000;
     --phosphor2: #7AA800;
     --border-radius: 0px;
-    --box-shadow-x: 4px;
-    --box-shadow-y: 4px;
+    --box-shadow-x: 6px;
+    --box-shadow-y: 6px;
     --shadow: var(--box-shadow-x) var(--box-shadow-y) 0px 0px var(--border);
+    --shadow-sm: 4px 4px 0px 0px var(--border);
+    /* aliases so legacy var(--surface) etc resolve to globals */
+    --bg: var(--bg-base);
+    --surface: var(--bg-surface);
+    --surface-2: var(--bg-subtle);
+    --fg: var(--text-primary);
 }
 
 @layer base {
@@ -57,27 +64,36 @@
         justify-content: center;
         gap: 0.5rem;
         padding: 0.625rem 1.25rem;
-        border-radius: 0.75rem;
+        border: 3px solid var(--border);
+        border-radius: 0;
         background-color: var(--accent);
-        color: white;
-        font-weight: 500;
-        font-size: 0.875rem;
-        transition: all 0.2s ease;
+        color: var(--accent-text);
+        font-family: 'JetBrains Mono', monospace;
+        font-weight: 800;
+        font-size: 0.75rem;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        box-shadow: 4px 4px 0 var(--border);
+        transition: transform 0.12s ease, box-shadow 0.12s ease, background 0.12s ease;
         cursor: pointer;
-        border: none;
     }
 
     .btn-primary:hover {
         background-color: var(--accent-hover);
+        transform: translate(-1px, -1px);
+        box-shadow: 6px 6px 0 var(--border);
     }
 
     .btn-primary:active {
-        transform: scale(0.98);
+        transform: translate(1px, 1px);
+        box-shadow: 2px 2px 0 var(--border);
     }
 
     .btn-primary:disabled {
         opacity: 0.5;
         cursor: not-allowed;
+        transform: none;
+        box-shadow: 4px 4px 0 var(--border);
     }
 
     .btn-secondary {
@@ -86,28 +102,35 @@
         justify-content: center;
         gap: 0.5rem;
         padding: 0.625rem 1.25rem;
-        border-radius: 0.75rem;
-        border: 1px solid var(--border);
+        border: 3px solid var(--border);
+        border-radius: 0;
         background-color: var(--bg-surface);
-        color: var(--text-secondary);
-        font-weight: 500;
-        font-size: 0.875rem;
-        transition: all 0.2s ease;
+        color: var(--text-primary);
+        font-family: 'JetBrains Mono', monospace;
+        font-weight: 800;
+        font-size: 0.75rem;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        box-shadow: 4px 4px 0 var(--border);
+        transition: transform 0.12s ease, box-shadow 0.12s ease, background 0.12s ease;
         cursor: pointer;
     }
 
     .btn-secondary:hover {
-        background-color: var(--bg-elevated);
-        color: var(--text-primary);
+        background-color: var(--bg-subtle);
+        transform: translate(-1px, -1px);
+        box-shadow: 6px 6px 0 var(--border);
     }
 
     .btn-secondary:active {
-        transform: scale(0.98);
+        transform: translate(1px, 1px);
+        box-shadow: 2px 2px 0 var(--border);
     }
 
     .btn-secondary:disabled {
         opacity: 0.5;
         cursor: not-allowed;
+        transform: none;
     }
 
     .btn-ghost {
@@ -116,51 +139,57 @@
         justify-content: center;
         gap: 0.5rem;
         padding: 0.5rem 1rem;
-        border-radius: 0.5rem;
+        border-radius: 0;
         background: transparent;
         color: var(--text-secondary);
-        font-weight: 500;
-        font-size: 0.875rem;
-        transition: all 0.2s ease;
+        font-family: 'JetBrains Mono', monospace;
+        font-weight: 700;
+        font-size: 0.75rem;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+        transition: background 0.12s ease, color 0.12s ease;
         cursor: pointer;
-        border: none;
+        border: 2px solid transparent;
     }
 
     .btn-ghost:hover {
         background-color: var(--bg-subtle);
         color: var(--text-primary);
-    }
-
-    .btn-ghost:active {
-        transform: scale(0.98);
+        border-color: var(--border);
     }
 
     .card {
         background-color: var(--bg-surface);
-        border: 1px solid var(--border);
-        border-radius: 1rem;
-        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
+        border: 4px solid var(--border);
+        border-radius: 0;
+        box-shadow: var(--shadow);
     }
 
     .input {
         width: 100%;
         padding: 0.625rem 1rem;
-        border-radius: 0.75rem;
-        border: 1px solid var(--border);
+        border: 3px solid var(--border);
+        border-radius: 0;
         background-color: var(--bg-surface);
         color: var(--text-primary);
+        font-family: 'JetBrains Mono', monospace;
         font-size: 0.875rem;
-        transition: all 0.2s ease;
+        font-weight: 600;
+        box-shadow: 3px 3px 0 var(--border);
+        transition: transform 0.12s ease, box-shadow 0.12s ease, border-color 0.12s ease;
         outline: none;
     }
 
     .input::placeholder {
         color: var(--text-muted);
+        font-weight: 500;
     }
 
     .input:focus {
-        border-color: var(--accent);
-        box-shadow: 0 0 0 3px var(--accent-subtle);
+        border-color: var(--border);
+        background: white;
+        transform: translate(-1px, -1px);
+        box-shadow: 5px 5px 0 var(--border);
     }
 
     .sidebar-link {

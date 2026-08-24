@@ -8,7 +8,6 @@ import { useAuth } from '../../../core/hooks/useAuth';
 import { useLanguage } from '../../../core/context/LanguageContext';
 import { AvatarPicker } from '../../../shared/ui/AvatarPicker';
 import { socialService } from '../../../core/services/socialService';
-import './pixel-retro.css';
 
 const XP_PER_LEVEL = 1000;
 
@@ -160,7 +159,6 @@ export default function DashboardPage() {
         <div style={{ width: 98, height: 98, background: 'var(--surface)', border: '3px solid var(--border)', display: 'grid', placeItems: 'center', fontSize: 32 }}>🤖</div>
       </div>
       {toast && <div className="toast show" style={{ position: 'fixed', bottom: 18, left: '50%', transform: 'translateX(-50%)', background: 'var(--border)', color: 'var(--phosphor)', border: '4px solid var(--border)', boxShadow: '6px 6px 0 #000', padding: '12px 16px', fontFamily: "'Press Start 2P'", fontSize: 7, zIndex: 50 }}>✦ {toast}</div>}
-      <style>{`@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&family=JetBrains+Mono:wght@700;800&family=Space+Grotesk:wght@500;700&display=swap');`}</style>
     </>
   );
 }

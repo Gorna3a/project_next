@@ -24,11 +24,11 @@
   --nb-shadow-sm: 4px 4px 0 #161616;
 }
 :root[data-theme="dark"] {
-  --nb-ink: #1A1F14;
+  --nb-ink: #DDE6C8;
   --nb-paper: #1C1E1A;
   --nb-bg: #0F100E;
   --nb-surface: #1C1E1A;
-  --nb-surface2: #242720;
+  --nb-surface2: #252822;
   --nb-phosphor: #BFFF00;
   --nb-phosphor2: #9ED500;
   --nb-orange: #FF6B1A;
@@ -38,6 +38,13 @@
   --nb-radius: 0px;
   --nb-shadow: 6px 6px 0 #000;
   --nb-shadow-sm: 4px 4px 0 #000;
+  --bg: #0F100E;
+  --surface: #1C1E1A;
+  --surface-2: #252822;
+  --fg: #DDE6C8;
+  --border: #2E312A;
+  --shadow: 6px 6px 0 #000;
+  --shadow-sm: 4px 4px 0 #000;
 }
 
 /* ── Base ─────────────────────────────────────────────────────────── */
