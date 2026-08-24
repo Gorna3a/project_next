@@ -87,10 +87,10 @@ export default function DashboardPage() {
         </div>
 
         <div className="stats">
-          <div className="stat"><span className="tag">TOTAL XP</span><b>{xp.toLocaleString()}</b><span className="mono" style={{ fontSize: 8, opacity: 0.5 }}>ALL TIME</span></div>
-          <div className="stat"><span className="tag">LEVEL</span><b>{String(level).padStart(2, '0')}</b><span className="mono" style={{ fontSize: 8, opacity: 0.5 }}>ROOKIE</span></div>
-          <div className="stat"><span className="tag">STREAK</span><b>{streak}</b><span className="mono" style={{ fontSize: 8, opacity: 0.7 }}>DAYS</span></div>
-          <div className="stat"><span className="tag">RANK</span><b>#12</b><span className="mono" style={{ fontSize: 8, opacity: 0.6 }}>GLOBAL</span></div>
+          <div className="stat" style={{ animation: 'pcIn .4s both', animationDelay: '60ms' }}><span className="tag">TOTAL XP</span><b>{xp.toLocaleString()}</b><span className="mono" style={{ fontSize: 8, opacity: 0.5 }}>ALL TIME</span></div>
+          <div className="stat" style={{ animation: 'pcIn .4s both', animationDelay: '120ms' }}><span className="tag">LEVEL</span><b>{String(level).padStart(2, '0')}</b><span className="mono" style={{ fontSize: 8, opacity: 0.5 }}>ROOKIE</span></div>
+          <div className="stat" style={{ animation: 'pcIn .4s both', animationDelay: '180ms' }}><span className="tag">STREAK</span><b>{streak}</b><span className="mono" style={{ fontSize: 8, opacity: 0.7 }}>DAYS</span></div>
+          <div className="stat" style={{ animation: 'pcIn .4s both', animationDelay: '240ms' }}><span className="tag">RANK</span><b>#12</b><span className="mono" style={{ fontSize: 8, opacity: 0.6 }}>GLOBAL</span></div>
         </div>
 
         {requests.length > 0 && (

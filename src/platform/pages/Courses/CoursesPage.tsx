@@ -141,8 +141,10 @@ export default function CoursesPage() {
           </div>
         ) : (
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-            {filtered.map(course => (
-              <CourseCard key={course._id} course={course} progress={getProgress(course._id)} />
+            {filtered.map((course, i) => (
+              <div key={course._id} style={{ animation: `pcIn .45s cubic-bezier(.22,.8,.22,1) both`, animationDelay: `${Math.min(i * 60, 240)}ms` }} className="will-change-transform">
+                <CourseCard course={course} progress={getProgress(course._id)} />
+              </div>
             ))}
           </div>
         )

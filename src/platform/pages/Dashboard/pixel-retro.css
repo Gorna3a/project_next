@@ -134,3 +134,18 @@
   .level-box{width:100%}
   .robot-corner{width:76px;right:6px;bottom:6px}
 }
+/* ── Dashboard polish — keep Beige CRT, add craft ────────────── */
+.stat,.q,.row,.panel,.mini,.crt,.level-box{transition:transform .12s, box-shadow .12s, background .12s}
+.stat:hover{transform:translate(-2px,-2px);box-shadow:6px 6px 0 var(--border)}
+.stat:focus-visible,.q:focus-visible,.row:focus-visible{outline:3px solid var(--phosphor);outline-offset:2px}
+.mini:hover .icon-box{transform:rotate(-1deg) translate(-1px,-1px);box-shadow:4px 4px 0 var(--border)}
+.q:focus-visible{transform:translate(-3px,-3px);box-shadow:var(--shadow)}
+.row:active,.q:active{transform:translate(1px,1px);box-shadow:2px 2px 0 var(--border)}
+.robot-corner:hover{animation-play-state:paused;filter:drop-shadow(6px 6px 0 #000)}
+.badge{letter-spacing:.04em}
+@keyframes pcIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion: reduce){
+  .mascot-mini,.robot-corner,.led{animation:none !important}
+  .stat:hover,.q:hover,.row:hover,.mini:hover .icon-box{transform:none !important;box-shadow:var(--shadow-sm) !important}
+  [style*="pcIn"]{animation:none !important;opacity:1 !important;transform:none !important}
+}

@@ -75,6 +75,20 @@ export default function LandingPageV2() {
     return () => window.removeEventListener('resize', onResize);
   }, []);
 
+  // Reveal on scroll (respects prefers-reduced-motion via CSS)
+  useEffect(() => {
+    if (typeof window === 'undefined' || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    const els = document.querySelectorAll('.section, .split, .kids, .languages, .cta');
+    els.forEach(el => el.classList.add('reveal'));
+    const obs = new IntersectionObserver((entries) => {
+      entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('in'); });
+    }, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
+    els.forEach(el => obs.observe(el));
+    // hero in immediately
+    document.querySelector('.hero')?.classList.add('in');
+    return () => obs.disconnect();
+  }, []);
+
   // Deck logic
   const perView = 3;
   const maxIndex = Math.max(0, FEATURES.length - perView);
@@ -158,6 +172,13 @@ export default function LandingPageV2() {
           <span style={{ padding: '0 26px', borderRight: '4px solid var(--phosphor)' }}>★ CLASSROOMS</span>
           <span style={{ padding: '0 26px', borderRight: '4px solid var(--phosphor)' }}>★ AI TUTOR</span>
           <span style={{ padding: '0 26px', borderRight: '4px solid var(--phosphor)' }}>★ KIDS MODE</span>
+          <span style={{ padding: '0 26px', borderRight: '4px solid var(--phosphor)' }} aria-hidden>★ FOR BEGINNERS</span>
+          <span style={{ padding: '0 26px', borderRight: '4px solid var(--phosphor)' }} aria-hidden>★ 13+ LANGUAGES</span>
+          <span style={{ padding: '0 26px', borderRight: '4px solid var(--phosphor)' }} aria-hidden>★ PLAYGROUND</span>
+          <span style={{ padding: '0 26px', borderRight: '4px solid var(--phosphor)' }} aria-hidden>★ DUELS & XP</span>
+          <span style={{ padding: '0 26px', borderRight: '4px solid var(--phosphor)' }} aria-hidden>★ CLASSROOMS</span>
+          <span style={{ padding: '0 26px', borderRight: '4px solid var(--phosphor)' }} aria-hidden>★ AI TUTOR</span>
+          <span style={{ padding: '0 26px', borderRight: '4px solid var(--phosphor)' }} aria-hidden>★ KIDS MODE</span>
         </div>
       </div>
 
