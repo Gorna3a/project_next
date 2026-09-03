@@ -12,8 +12,8 @@ const FEATURES = [
   { n: '01 / 09', badge: 'CORE', bg: 'var(--phosphor)', fg: '#161616', iconBg: 'var(--yellow)', icon: '📚', title: 'Structured Courses', desc: '13+ languages, leveled paths from scratch. Bite-sized lessons, checks, and projects.', points: ['Python, JS, Go, Rust & more', 'Projects that ship'] },
   { n: '02 / 09', badge: '● LIVE', bg: 'var(--yellow)', fg: '#161616', iconBg: 'var(--orange)', icon: '⚡', title: 'Interactive Playground', desc: 'Write and run code in the browser. Instant output, no install.', points: ['13 runtimes + live preview', 'Share with one link'] },
   { n: '03 / 09', badge: 'XP', bg: 'var(--orange)', fg: '#fff', iconBg: 'var(--yellow)', icon: '⚔️', title: 'Challenges & Duels', desc: 'Daily puzzles and 1v1 duels. Earn XP, keep the streak, climb.', points: ['Daily challenge', 'Ranked duels'] },
-  { n: '04 / 09', badge: 'TEAMS', bg: 'var(--surface2)', fg: '#161616', iconBg: 'var(--phosphor)', icon: '🎓', title: 'Classrooms', desc: 'Join teacher-led groups, get assignments, and track class progress.', points: ['Invite by code', 'Teacher dashboard'] },
-  { n: '05 / 09', badge: 'REFS', bg: 'var(--surface)', fg: '#161616', iconBg: 'var(--grey)', icon: '📖', title: 'Library & Docs', desc: 'Curated references, cheatsheets, and docs — searchable and offline-ready.', points: ['Cheatsheets', 'Offline mode'] },
+  { n: '04 / 09', badge: 'TEAMS', bg: '#CFC8B5', fg: '#161616', iconBg: 'var(--phosphor)', icon: '🎓', title: 'Classrooms', desc: 'Join teacher-led groups, get assignments, and track class progress.', points: ['Invite by code', 'Teacher dashboard'] },
+  { n: '05 / 09', badge: 'REFS', bg: '#EFE9D9', fg: '#161616', iconBg: 'var(--grey)', icon: '📖', title: 'Library & Docs', desc: 'Curated references, cheatsheets, and docs — searchable and offline-ready.', points: ['Cheatsheets', 'Offline mode'] },
   { n: '06 / 09', badge: 'AI', bg: '#161616', fg: 'var(--phosphor)', iconBg: 'var(--yellow)', icon: '🧠', title: 'AI Chat Tutor', desc: 'Stuck? Ask the tutor — explains, fixes, and hints without giving away the answer.', points: ['Hint → explain → fix', 'Works in playground'] },
   { n: '07 / 09', badge: 'PROGRESS', bg: 'var(--phosphor)', fg: '#161616', iconBg: 'var(--surface)', icon: '📈', title: 'Levels & Streaks', desc: 'Earn XP, level up, keep the flame alive. Every line counts.', points: ['XP & levels', 'Daily streak & freeze'] },
   { n: '08 / 09', badge: 'RANK', bg: 'var(--grey)', fg: '#fff', iconBg: 'var(--yellow)', icon: '🏆', title: 'Leaderboards', desc: 'Global, friends, and classroom boards. See where you stand.', points: ['Weekly & all-time', 'Class vs class'] },
@@ -350,13 +350,13 @@ export default function LandingPageV2() {
           <span className="pill" style={{ background: 'var(--orange)', color: '#fff' }}>☕ Java</span>
           <span className="pill" style={{ background: '#161616', color: 'var(--yellow)' }}>⚙️ C</span>
           <span className="pill" style={{ background: 'var(--grey)', color: '#fff' }}>🔧 C++</span>
-          <span className="pill" style={{ background: 'var(--phosphor)' }}>🐹 Go</span>
+          <span className="pill" style={{ background: 'var(--phosphor)', color: '#161616' }}>🐹 Go</span>
           <span className="pill" style={{ background: 'var(--orange)', color: '#fff' }}>🦀 Rust</span>
           <span className="pill" style={{ background: '#161616', color: 'var(--yellow)' }}>🎯 Kotlin</span>
           <span className="pill" style={{ background: 'var(--orange)', color: '#fff' }}>🍎 Swift</span>
           <span className="pill" style={{ background: 'var(--grey)', color: '#fff' }}>🎮 C#</span>
           <span className="pill" style={{ background: 'var(--orange)', color: '#fff' }}>💎 Ruby</span>
-          <span className="pill" style={{ background: 'var(--phosphor)' }}>🐘 PHP</span>
+          <span className="pill" style={{ background: 'var(--phosphor)', color: '#161616' }}>🐘 PHP</span>
         </div>
       </section>
 

@@ -29,6 +29,7 @@ a{color:inherit;text-decoration:none} button{font:inherit;cursor:pointer} img{im
 .btn-dark{background:#161616;color:var(--phosphor);box-shadow:4px 4px 0 var(--phosphor);border-color:#161616}
 .btn-orange{background:var(--orange);color:#fff;box-shadow:4px 4px 0 #161616}
 .btn-ghost{background:var(--surface);color:#161616;box-shadow:4px 4px 0 #161616}
+[data-theme="dark"] .btn-ghost{background:#1E211C;color:var(--fg);box-shadow:4px 4px 0 #000}
 .theme-btn{font-family:'Press Start 2P';font-size:8px;padding:8px 12px;border:3px solid #161616;background:var(--phosphor);color:#161616;box-shadow:3px 3px 0 #161616}
 @media(max-width:920px){.nav-links{display:none}}
 .marquee{background:#161616;color:var(--phosphor);border-bottom:4px solid #161616;overflow:hidden;padding:11px 0;font-family:'Press Start 2P';font-size:8px;letter-spacing:.08em;display:flex}
