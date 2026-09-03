@@ -363,7 +363,7 @@ export default function LandingPageV2() {
       <section className="cta" id="cta">
         <div className="cta-grid" />
         <div className="wrap" style={{ position: 'relative' }}>
-          <h2>Start your first pixel.</h2>
+          <h2>Start your first course here.</h2>
           <p className="mono">Free forever. No credit card. CRT included.</p>
           <div style={{ display: 'flex', justifyContent: 'center', gap: 12, flexWrap: 'wrap', marginTop: 18 }}>
             <Link href={user ? '/app' : '/signup'} className="btn btn-dark">Create Free Account →</Link>
