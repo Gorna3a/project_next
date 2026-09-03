@@ -257,9 +257,9 @@ export default function LandingPageV2() {
             <h2 className="pixel" style={{ fontSize: 18, marginTop: 10, lineHeight: 1.4 }}>Your browser is the computer.</h2>
             <p className="mono" style={{ fontSize: 12, color: 'var(--muted)', marginTop: 10, lineHeight: 1.7, fontWeight: 700 }}>No installs. No setup. Pick a language, write, hit Run — see phosphor output instantly. Share a link, ask the AI tutor inline.</p>
             <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginTop: 14 }}>
-              <span className="mono" style={{ fontSize: 10, padding: '7px 10px', border: '3px solid #161616', background: 'var(--phosphor)', fontWeight: 800, boxShadow: '3px 3px 0 #161616' }}>▶ Instant run</span>
+              <span className="mono" style={{ fontSize: 10, padding: '7px 10px', border: '3px solid #161616', background: 'var(--phosphor)', color: '#161616', fontWeight: 800, boxShadow: '3px 3px 0 #161616' }}>▶ Instant run</span>
               <span className="mono" style={{ fontSize: 10, padding: '7px 10px', border: '3px solid #161616', background: 'var(--surface)', fontWeight: 800, boxShadow: '3px 3px 0 #161616' }}>⤴ Share link</span>
-              <span className="mono" style={{ fontSize: 10, padding: '7px 10px', border: '3px solid #161616', background: 'var(--yellow)', fontWeight: 800, boxShadow: '3px 3px 0 #161616' }}>🧠 AI explain</span>
+              <span className="mono" style={{ fontSize: 10, padding: '7px 10px', border: '3px solid #161616', background: 'var(--yellow)', color: '#161616', fontWeight: 800, boxShadow: '3px 3px 0 #161616' }}>🧠 AI explain</span>
             </div>
           </div>
           <div className="window">
@@ -277,14 +277,14 @@ export default function LandingPageV2() {
             <p className="mono" style={{ fontSize: 12, color: 'var(--muted)', marginTop: 8, lineHeight: 1.65 }}>Earn XP for lessons, playground saves, and duel wins. Keep the flame with daily streaks. Watch your level climb.</p>
             <div className="progress-bars">
               <div className="pbar"><span className="mono" style={{ fontSize: 11, fontWeight: 800 }}>LVL 04 — 1,240 XP</span><div className="pbar-fill" style={{ maxWidth: 160 }}><div style={{ position: 'absolute', inset: '2px 28% 2px 2px', background: 'var(--phosphor)' }} /><i /></div><span className="mono" style={{ fontSize: 11, fontWeight: 800 }}>72%</span></div>
-              <div className="pbar" style={{ background: 'var(--yellow)' }}><span className="mono" style={{ fontSize: 11, fontWeight: 800 }}>🔥 12 day streak</span><span className="mono" style={{ fontSize: 10, fontWeight: 700 }}>Freeze: 2</span></div>
+              <div className="pbar" style={{ background: 'var(--yellow)', color: '#161616' }}><span className="mono" style={{ fontSize: 11, fontWeight: 800 }}>🔥 12 day streak</span><span className="mono" style={{ fontSize: 10, fontWeight: 700 }}>Freeze: 2</span></div>
               <div className="pbar" style={{ background: 'var(--surface2)' }}><span className="mono" style={{ fontSize: 11, fontWeight: 800 }}>Next: LVL 05 — 1,700 XP</span><span className="mono" style={{ fontSize: 10, fontWeight: 700 }}>460 XP to go</span></div>
             </div>
           </div>
           <div>
             <div className="mono" style={{ fontSize: 10, letterSpacing: '.12em', fontWeight: 800, marginBottom: 10, display: 'flex', alignItems: 'center', gap: 8 }}><span style={{ width: 10, height: 10, background: 'var(--yellow)', border: '2px solid #161616', display: 'inline-block' }} /> LEADERBOARD — WEEKLY</div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-              <div className="leader" style={{ background: 'var(--yellow)' }}><div className="rank" style={{ background: 'var(--phosphor)' }}>1</div><div className="mono" style={{ fontSize: 12, fontWeight: 800 }}>you — 1,240 XP</div><span className="mono" style={{ marginLeft: 'auto', fontSize: 11, fontWeight: 800 }}>▲ +3</span></div>
+              <div className="leader" style={{ background: 'var(--yellow)', color: '#161616' }}><div className="rank" style={{ background: 'var(--phosphor)' }}>1</div><div className="mono" style={{ fontSize: 12, fontWeight: 800 }}>you — 1,240 XP</div><span className="mono" style={{ marginLeft: 'auto', fontSize: 11, fontWeight: 800 }}>▲ +3</span></div>
               <div className="leader"><div className="rank" style={{ background: 'var(--surface2)' }}>2</div><span className="mono" style={{ fontSize: 12, fontWeight: 700 }}>sarah.codes — 1,180 XP</span><span className="mono" style={{ marginLeft: 'auto', fontSize: 11 }}>—</span></div>
               <div className="leader"><div className="rank" style={{ background: 'var(--surface2)' }}>3</div><span className="mono" style={{ fontSize: 12, fontWeight: 700 }}>pixel_joe — 1,102 XP</span><span className="mono" style={{ marginLeft: 'auto', fontSize: 11 }}>▼ 1</span></div>
               <div className="leader" style={{ opacity: .7 }}><div className="rank">4</div><span className="mono" style={{ fontSize: 12 }}>mira.dev — 987 XP</span><span className="mono" style={{ marginLeft: 'auto', fontSize: 11 }}>—</span></div>
@@ -304,7 +304,7 @@ export default function LandingPageV2() {
                   <b className="silk" style={{ fontSize: 15 }}>CS101 — Intro to Code</b><span className="mono" style={{ fontSize: 10, padding: '4px 8px', border: '2px solid #161616', background: 'var(--phosphor)', fontWeight: 800 }}>CODE: PX-482</span>
                 </div>
                 <p className="mono" style={{ fontSize: 11, color: 'var(--muted)', marginTop: 6 }}>24 students · 12 assignments · Avg 78% completion</p>
-                <div style={{ marginTop: 10, display: 'flex', gap: 8, flexWrap: 'wrap' }}><span className="mono" style={{ fontSize: 10, padding: '6px 10px', border: '3px solid #161616', background: 'var(--surface)', fontWeight: 800 }}>Assignments</span><span className="mono" style={{ fontSize: 10, padding: '6px 10px', border: '3px solid #161616', background: 'var(--yellow)', fontWeight: 800 }}>Progress board</span></div>
+                <div style={{ marginTop: 10, display: 'flex', gap: 8, flexWrap: 'wrap' }}><span className="mono" style={{ fontSize: 10, padding: '6px 10px', border: '3px solid #161616', background: 'var(--surface)', fontWeight: 800 }}>Assignments</span><span className="mono" style={{ fontSize: 10, padding: '6px 10px', border: '3px solid #161616', background: 'var(--yellow)', color: '#161616', fontWeight: 800 }}>Progress board</span></div>
               </div>
             </div>
             <div id="library">
