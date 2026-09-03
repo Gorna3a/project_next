@@ -301,7 +301,7 @@ export default function LandingPageV2() {
               <h2 className="pixel" style={{ fontSize: 16, marginTop: 10, lineHeight: 1.4 }}>Teacher-led. Student-paced.</h2>
               <div className="classroom" style={{ marginTop: 14 }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 8 }}>
-                  <b className="silk" style={{ fontSize: 15 }}>CS101 — Intro to Code</b><span className="mono" style={{ fontSize: 10, padding: '4px 8px', border: '2px solid #161616', background: 'var(--phosphor)', fontWeight: 800 }}>CODE: PX-482</span>
+                  <b className="silk" style={{ fontSize: 15 }}>CS101 — Intro to Code</b><span className="mono" style={{ fontSize: 10, padding: '4px 8px', border: '2px solid #161616', background: 'var(--phosphor)', color: '#161616', fontWeight: 800 }}>CODE: PX-482</span>
                 </div>
                 <p className="mono" style={{ fontSize: 11, color: 'var(--muted)', marginTop: 6 }}>24 students · 12 assignments · Avg 78% completion</p>
                 <div style={{ marginTop: 10, display: 'flex', gap: 8, flexWrap: 'wrap' }}><span className="mono" style={{ fontSize: 10, padding: '6px 10px', border: '3px solid #161616', background: 'var(--surface)', fontWeight: 800 }}>Assignments</span><span className="mono" style={{ fontSize: 10, padding: '6px 10px', border: '3px solid #161616', background: 'var(--yellow)', color: '#161616', fontWeight: 800 }}>Progress board</span></div>
