@@ -9,7 +9,7 @@ import { useAuth } from '../../../core/hooks/useAuth';
 import { useLanguage } from '../../../core/context/LanguageContext';
 
 export default function LoginPage() {
-  const { signIn, signInWithGoogle, signInWithGithub, error, clearError, linkEmail, linkProvider, clearLink } = useAuth();
+  const { signIn, signInWithGoogle, signInWithGithub, error, clearError } = useAuth();
   const { t, isRTL } = useLanguage();
   const navigate = useRouter();
 
@@ -17,8 +17,6 @@ export default function LoginPage() {
   const [password, setPassword] = useState('');
   const [showPass, setShowPass] = useState(false);
   const [loading,  setLoading]  = useState(false);
-  const [linkPassword, setLinkPassword] = useState('');
-  const [linkLoading, setLinkLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -26,7 +24,7 @@ export default function LoginPage() {
     setLoading(true);
     try {
       await signIn(email, password);
-      navigate.push('/app/ide');
+      navigate.push('/app');
     } catch {
       // error surfaced via auth context
     } finally {
@@ -34,39 +32,27 @@ export default function LoginPage() {
     }
   };
 
-  const handleGoogle = async (linkPass?: string) => {
+  const handleGoogle = async () => {
     clearError();
     setLoading(true);
     try {
-      const signedIn = await signInWithGoogle(linkPass);
-      if (signedIn) navigate.push('/app/ide');
+      const signedIn = await signInWithGoogle();
+      if (signedIn) navigate.push('/app');
     } catch {
     } finally {
       setLoading(false);
     }
   };
 
-  const handleGithub = async (linkPass?: string) => {
+  const handleGithub = async () => {
     clearError();
     setLoading(true);
     try {
-      const signedIn = await signInWithGithub(linkPass);
-      if (signedIn) navigate.push('/app/ide');
+      const signedIn = await signInWithGithub();
+      if (signedIn) navigate.push('/app');
     } catch {
     } finally {
       setLoading(false);
-    }
-  };
-
-  const submitLink = async () => {
-    setLinkLoading(true);
-    try {
-      if (linkProvider === 'github') await handleGithub(linkPassword);
-      else await handleGoogle(linkPassword);
-      setLinkPassword('');
-    } catch {
-    } finally {
-      setLinkLoading(false);
     }
   };
 
@@ -77,55 +63,20 @@ export default function LoginPage() {
         <motion.div
           initial={{ opacity: 0, y: -8 }}
           animate={{ opacity: 1, y: 0 }}
-          className="p-4 rounded-2xl bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-400 text-sm font-bold flex items-center gap-3"
+          className="p-3 text-sm font-bold flex items-center gap-3"
+          style={{ backgroundColor: "var(--orange)", color: "#161616", border: "3px solid var(--border)", boxShadow: "4px 4px 0 var(--border)" }}
         >
-          <div className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse" />
+          <div className="w-2 h-2 animate-pulse" style={{ background: "#161616" }} />
           {error}
-        </motion.div>
-      )}
-
-      {/* Link-account prompt (OAuth collided with an existing password account) */}
-      {linkEmail && (
-        <motion.div
-          initial={{ opacity: 0, y: -8 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="p-4 rounded-2xl bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 text-sm font-bold flex flex-col gap-3"
-        >
-          <p className="text-amber-700 dark:text-amber-300">
-            An account with <span className="font-black">{linkEmail}</span> already exists. Enter its password to connect your {linkProvider === 'github' ? 'GitHub' : 'Google'} account.
-          </p>
-          <div className="flex gap-2">
-            <input
-              type="password"
-              value={linkPassword}
-              onChange={(e) => setLinkPassword(e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && submitLink()}
-              placeholder={t('auth.password')}
-              className="input flex-1 py-2.5 rounded-xl bg-gray-50 dark:bg-gray-900 border-gray-100 dark:border-gray-800"
-            />
-            <button
-              onClick={submitLink}
-              disabled={linkLoading || !linkPassword}
-              className="btn-primary px-4 rounded-xl font-bold text-xs disabled:opacity-50"
-            >
-              {linkLoading ? 'Connecting…' : 'Connect'}
-            </button>
-            <button
-              onClick={() => { clearLink(); setLinkPassword(''); }}
-              className="px-3 rounded-xl font-bold text-xs text-gray-500 hover:text-gray-700"
-            >
-              Cancel
-            </button>
-          </div>
         </motion.div>
       )}
 
       {/* Social sign-in */}
       <div className={`grid grid-cols-2 gap-4 ${isRTL ? 'flex-row-reverse' : ''}`}>
         <button
-          onClick={() => handleGoogle()}
+          onClick={handleGoogle}
           disabled={loading}
-          className="btn-secondary justify-center gap-3 py-3 rounded-2xl hover:border-brand-500 transition-all font-bold text-xs"
+          className="btn-secondary justify-center gap-3 py-3 w-full"
         >
           <svg className="w-5 h-5" viewBox="0 0 24 24">
             <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
@@ -136,9 +87,9 @@ export default function LoginPage() {
           Google
         </button>
         <button
-          onClick={() => handleGithub()}
+          onClick={handleGithub}
           disabled={loading}
-          className="btn-secondary justify-center gap-3 py-3 rounded-2xl hover:border-brand-500 transition-all font-bold text-xs"
+          className="btn-secondary justify-center gap-3 py-3 w-full"
         >
           <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
             <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z"/>
@@ -150,10 +101,13 @@ export default function LoginPage() {
       {/* Divider */}
       <div className="relative">
         <div className="absolute inset-0 flex items-center">
-          <div className="w-full border-t border-gray-100 dark:border-gray-800" />
+          <div className="w-full" style={{ borderTop: "3px solid var(--border)" }} />
         </div>
         <div className="relative flex justify-center">
-          <span className="px-4 text-[10px] font-black uppercase tracking-widest text-gray-400 bg-white dark:bg-gray-950">
+          <span
+            className="px-3 py-1 text-[10px] font-black uppercase tracking-widest"
+            style={{ color: "var(--text-secondary)", backgroundColor: "var(--bg-surface)", border: "2px solid var(--border)", fontFamily: "'JetBrains Mono', monospace" }}
+          >
             {t('auth.orUseEmail')}
           </span>
         </div>
@@ -173,7 +127,7 @@ export default function LoginPage() {
               onChange={e => setEmail(e.target.value)}
               required
               autoComplete="email"
-              className={`input py-3.5 rounded-2xl bg-gray-50 dark:bg-gray-900 border-gray-100 dark:border-gray-800 focus:bg-white dark:focus:bg-gray-950 ${isRTL ? 'pr-12 pl-4' : 'pl-12 pr-4'}`}
+              className={`input py-3.5 ${isRTL ? 'pr-12 pl-4' : 'pl-12 pr-4'}`}
             />
           </div>
 
@@ -189,7 +143,7 @@ export default function LoginPage() {
               required
               minLength={6}
               autoComplete="current-password"
-              className={`input py-3.5 rounded-2xl bg-gray-50 dark:bg-gray-900 border-gray-100 dark:border-gray-800 focus:bg-white dark:focus:bg-gray-950 ${isRTL ? 'pr-12 pl-12' : 'pl-12 pr-12'}`}
+              className={`input py-3.5 ${isRTL ? 'pr-12 pl-12' : 'pl-12 pr-12'}`}
             />
             <button
               type="button"
@@ -205,7 +159,7 @@ export default function LoginPage() {
         <button
           type="submit"
           disabled={loading}
-          className="btn-primary w-full py-4 rounded-2xl justify-center font-black text-sm uppercase tracking-widest shadow-lg shadow-brand-500/20 active:scale-[0.98] transition-all"
+          className="btn-primary w-full py-4"
         >
           {loading
             ? <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
@@ -213,8 +167,8 @@ export default function LoginPage() {
         </button>
       </form>
 
-      <div className="pt-4 text-center">
-        <p className="text-sm font-bold text-gray-500 dark:text-gray-400">
+      <div className="pt-2 text-center">
+        <p className="text-sm font-bold" style={{ color: "var(--text-secondary)", fontFamily: "'JetBrains Mono', monospace" }}>
           {t('auth.dontHaveAccount')}{' '}
           <Link
             href="/signup"
