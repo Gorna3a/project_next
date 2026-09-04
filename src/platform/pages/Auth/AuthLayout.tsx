@@ -20,10 +20,11 @@ export const AuthLayout = ({ children }: AuthLayoutProps) => {
   const pathname = usePathname();
   const { t, isRTL } = useLanguage();
   const isLogin = pathname === "/login";
+  const compact = !isLogin; // signup stacks 4 fields — tighten chrome so it fits one screen
 
   return (
     <div
-      className={`min-h-screen flex flex-col items-center justify-center p-4 sm:p-8 font-sans relative overflow-hidden ${isRTL ? 'text-right' : 'text-left'}`}
+      className={`min-h-screen flex flex-col items-center justify-center ${compact ? 'p-3 sm:p-4' : 'p-4 sm:p-8'} font-sans relative overflow-hidden ${isRTL ? 'text-right' : 'text-left'}`}
       style={{ backgroundColor: "var(--bg-base)", color: "var(--text-primary)" }}
       dir={isRTL ? "rtl" : "ltr"}
     >
@@ -82,7 +83,7 @@ export const AuthLayout = ({ children }: AuthLayoutProps) => {
         </div>
 
         {/* phosphor boot strip */}
-        <div className="px-4 py-3" style={{ background: "#0F110F", borderBottom: "4px solid var(--border)" }}>
+        <div className={`px-4 ${compact ? 'py-2' : 'py-3'}`} style={{ background: "#0F110F", borderBottom: "4px solid var(--border)" }}>
           <p className="text-xs font-bold tracking-wider" style={{ color: "#BFFF00", fontFamily: "'JetBrains Mono', monospace" }}>
             {">"} {isLogin ? "RESUME GAME" : "NEW SAVE FILE"}
             <span className="crt-cursor">▊</span>
@@ -93,9 +94,9 @@ export const AuthLayout = ({ children }: AuthLayoutProps) => {
         </div>
 
         {/* body */}
-        <div className="p-6 sm:p-8">
-          <div className="flex justify-center mb-6">
-            <Logo size="md" />
+        <div className={compact ? 'p-5' : 'p-6 sm:p-8'}>
+          <div className={`flex justify-center ${compact ? 'mb-3' : 'mb-6'}`}>
+            <Logo size={compact ? 'sm' : 'md'} />
           </div>
           <h1
             className="text-sm leading-relaxed"
@@ -104,7 +105,7 @@ export const AuthLayout = ({ children }: AuthLayoutProps) => {
             {isLogin ? t('auth.welcomeBack') : t('auth.createAccount')}
           </h1>
           <p
-            className="text-xs font-bold mt-2 mb-6"
+            className={`text-xs font-bold mt-2 ${compact ? 'mb-4' : 'mb-6'}`}
             style={{ color: "var(--text-secondary)", fontFamily: "'JetBrains Mono', monospace" }}
           >
             {isLogin ? t('auth.loginSub') : t('auth.signupSub')}
@@ -114,7 +115,7 @@ export const AuthLayout = ({ children }: AuthLayoutProps) => {
 
           {/* mode switch — plain route link, no animation */}
           <div
-            className="mt-6 flex items-center justify-between gap-3 px-3 py-2.5"
+            className={`${compact ? 'mt-4' : 'mt-6'} flex items-center justify-between gap-3 px-3 py-2`}
             style={{ backgroundColor: "var(--bg-subtle)", border: "3px solid var(--border)" }}
           >
             <span
@@ -132,7 +133,7 @@ export const AuthLayout = ({ children }: AuthLayoutProps) => {
 
       {/* footer strip */}
       <p
-        className="relative mt-6 text-[10px] font-bold tracking-[0.2em] uppercase"
+        className={`relative ${compact ? 'mt-3' : 'mt-6'} text-[10px] font-bold tracking-[0.2em] uppercase`}
         style={{ color: "var(--text-muted)", fontFamily: "'JetBrains Mono', monospace" }}
       >
         ★ insert coin to continue ★

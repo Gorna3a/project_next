@@ -95,7 +95,7 @@ export default function SignupPage() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       {/* Error banner */}
       {displayError && (
         <motion.div
@@ -116,7 +116,7 @@ export default function SignupPage() {
         <button
           onClick={handleGoogle}
           disabled={loading}
-          className="btn-secondary justify-center gap-3 py-3 w-full"
+          className="btn-secondary justify-center gap-3 py-2.5 w-full"
         >
           <svg className="w-5 h-5" viewBox="0 0 24 24">
             <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
@@ -129,7 +129,7 @@ export default function SignupPage() {
         <button
           onClick={handleGithub}
           disabled={loading}
-          className="btn-secondary justify-center gap-3 py-3 w-full"
+          className="btn-secondary justify-center gap-3 py-2.5 w-full"
         >
           <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
             <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z" />
@@ -154,7 +154,7 @@ export default function SignupPage() {
       </div>
 
       {/* Registration form */}
-      <form onSubmit={handleSubmit} className="space-y-4">
+      <form onSubmit={handleSubmit} className="space-y-3">
         {/* Display name */}
         <div className="relative group">
           <div className={`absolute inset-y-0 ${isRTL ? 'right-0 pr-4' : 'left-0 pl-4'} flex items-center pointer-events-none`}>
@@ -167,7 +167,7 @@ export default function SignupPage() {
             onChange={e => setName(e.target.value)}
             required
             autoComplete="name"
-            className={`input py-3.5 ${isRTL ? 'pr-12 pl-4' : 'pl-12 pr-4'}`}
+            className={`input py-2.5 ${isRTL ? 'pr-12 pl-4' : 'pl-12 pr-4'}`}
           />
         </div>
 
@@ -183,7 +183,7 @@ export default function SignupPage() {
             onChange={e => setEmail(e.target.value)}
             required
             autoComplete="email"
-            className={`input py-3.5 ${isRTL ? 'pr-12 pl-4' : 'pl-12 pr-4'}`}
+            className={`input py-2.5 ${isRTL ? 'pr-12 pl-4' : 'pl-12 pr-4'}`}
           />
         </div>
 
@@ -200,7 +200,7 @@ export default function SignupPage() {
               onChange={e => setPassword(e.target.value)}
               required
               autoComplete="new-password"
-              className={`input py-3.5 ${isRTL ? 'pr-12 pl-12' : 'pl-12 pr-12'}`}
+              className={`input py-2.5 ${isRTL ? 'pr-12 pl-12' : 'pl-12 pr-12'}`}
             />
             <button
               type="button"
@@ -214,7 +214,7 @@ export default function SignupPage() {
 
           {/* Strength indicator */}
           {password.length > 0 && (
-            <div className="space-y-1.5 px-1">
+            <div className="space-y-1 px-1">
               <div className={`flex gap-1.5 ${isRTL ? 'flex-row-reverse' : ''}`}>
                 {([1, 2, 3] as const).map(i => (
                   <div
@@ -246,14 +246,14 @@ export default function SignupPage() {
             onChange={e => setConfirm(e.target.value)}
             required
             autoComplete="new-password"
-            className={`input py-3.5 ${isRTL ? 'pr-12 pl-4' : 'pl-12 pr-4'}`}
+            className={`input py-2.5 ${isRTL ? 'pr-12 pl-4' : 'pl-12 pr-4'}`}
           />
         </div>
 
         <button
           type="submit"
           disabled={loading}
-          className="btn-primary w-full py-4"
+          className="btn-primary w-full py-3"
         >
           {loading
             ? <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
@@ -261,8 +261,8 @@ export default function SignupPage() {
         </button>
       </form>
 
-      <div className="pt-2 text-center">
-        <p className="text-sm font-bold" style={{ color: "var(--text-secondary)", fontFamily: "'JetBrains Mono', monospace" }}>
+      <div className="pt-1 text-center">
+        <p className="text-xs font-bold" style={{ color: "var(--text-secondary)", fontFamily: "'JetBrains Mono', monospace" }}>
           {t('auth.alreadyHaveAccount')}{' '}
           <Link
             href="/login"
