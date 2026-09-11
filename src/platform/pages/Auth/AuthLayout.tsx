@@ -1,8 +1,9 @@
 'use client';
 
-import { type ReactNode } from "react";
+import { type ReactNode, useRef } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { motion, AnimatePresence } from "framer-motion";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import { Logo } from "../../../shared/ui/Logo";
 import { useLanguage } from "../../../core/context/LanguageContext";
@@ -11,16 +12,25 @@ interface AuthLayoutProps {
   children?: ReactNode;
 }
 
+// Route order for slide direction: login=0, signup=1
+const ROUTE_ORDER: Record<string, number> = { "/login": 0, "/signup": 1 };
+
 // ─── CRT boot terminal auth shell ────────────────────────────────────────────
-// One centered beige-monitor card per route. No sliding panel, no crossfade:
-// /login and /signup are separate screens, like swapping a cartridge.
-// Login = RESUME GAME · Signup = NEW SAVE FILE.
+// Shared layout inside (auth) route group — stays mounted across /login ↔ /signup
+// so AnimatePresence can animate the form swap with a smooth horizontal slide.
 
 export const AuthLayout = ({ children }: AuthLayoutProps) => {
   const pathname = usePathname();
   const { t, isRTL } = useLanguage();
   const isLogin = pathname === "/login";
-  const compact = !isLogin; // signup stacks 4 fields — tighten chrome so it fits one screen
+  const compact = !isLogin;
+
+  // track previous route to determine slide direction
+  const prevRoute = useRef(pathname);
+  const dir = (ROUTE_ORDER[pathname] ?? 0) >= (ROUTE_ORDER[prevRoute.current] ?? 0) ? 1 : -1;
+  prevRoute.current = pathname;
+
+  const slidedir = isRTL ? -dir : dir;
 
   return (
     <div
@@ -67,12 +77,20 @@ export const AuthLayout = ({ children }: AuthLayoutProps) => {
             <span className="w-3 h-3 inline-block" style={{ background: "var(--orange)", border: "2px solid var(--border)" }} />
             <span className="w-3 h-3 inline-block" style={{ background: "var(--yellow)", border: "2px solid var(--border)" }} />
             <span className="w-3 h-3 inline-block" style={{ background: "var(--bg-surface)", border: "2px solid var(--border)" }} />
-            <span
-              className="text-[10px] font-extrabold tracking-widest ml-1"
-              style={{ color: "var(--accent-text)", fontFamily: "'Press Start 2P', monospace" }}
-            >
-              {isLogin ? "LOGIN.EXE" : "SIGNUP.EXE"}
-            </span>
+            {/* crossfade title */}
+            <AnimatePresence mode="wait">
+              <motion.span
+                key={pathname}
+                initial={{ opacity: 0, y: -6 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: 6 }}
+                transition={{ duration: 0.2, ease: "easeInOut" }}
+                className="text-[10px] font-extrabold tracking-widest ml-1"
+                style={{ color: "var(--accent-text)", fontFamily: "'Press Start 2P', monospace" }}
+              >
+                {isLogin ? "LOGIN.EXE" : "SIGNUP.EXE"}
+              </motion.span>
+            </AnimatePresence>
           </div>
           <span
             className="text-[10px] font-bold px-2 py-0.5"
@@ -84,50 +102,71 @@ export const AuthLayout = ({ children }: AuthLayoutProps) => {
 
         {/* phosphor boot strip */}
         <div className={`px-4 ${compact ? 'py-2' : 'py-3'}`} style={{ background: "#0F110F", borderBottom: "4px solid var(--border)" }}>
-          <p className="text-xs font-bold tracking-wider" style={{ color: "#BFFF00", fontFamily: "'JetBrains Mono', monospace" }}>
-            {">"} {isLogin ? "RESUME GAME" : "NEW SAVE FILE"}
-            <span className="crt-cursor">▊</span>
-          </p>
+          <AnimatePresence mode="wait">
+            <motion.p
+              key={pathname}
+              initial={{ opacity: 0, x: slidedir * 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -slidedir * 20 }}
+              transition={{ duration: 0.25, ease: "easeInOut" }}
+              className="text-xs font-bold tracking-wider"
+              style={{ color: "#BFFF00", fontFamily: "'JetBrains Mono', monospace" }}
+            >
+              {">"} {isLogin ? "RESUME GAME" : "NEW SAVE FILE"}
+              <span className="crt-cursor">▊</span>
+            </motion.p>
+          </AnimatePresence>
           <p className="text-[10px] mt-1 tracking-widest" style={{ color: "#6B7A60", fontFamily: "'JetBrains Mono', monospace" }}>
             AUTH MODULE — READY · NO CARTRIDGE REQUIRED
           </p>
         </div>
 
-        {/* body */}
+        {/* body — slides horizontally on route change */}
         <div className={compact ? 'p-5' : 'p-6 sm:p-8'}>
           <div className={`flex justify-center ${compact ? 'mb-3' : 'mb-6'}`}>
             <Logo size={compact ? 'sm' : 'md'} />
           </div>
-          <h1
-            className="text-sm leading-relaxed"
-            style={{ fontFamily: "'Press Start 2P', monospace", color: "var(--text-primary)" }}
-          >
-            {isLogin ? t('auth.welcomeBack') : t('auth.createAccount')}
-          </h1>
-          <p
-            className={`text-xs font-bold mt-2 ${compact ? 'mb-4' : 'mb-6'}`}
-            style={{ color: "var(--text-secondary)", fontFamily: "'JetBrains Mono', monospace" }}
-          >
-            {isLogin ? t('auth.loginSub') : t('auth.signupSub')}
-          </p>
 
-          {children}
-
-          {/* mode switch — plain route link, no animation */}
-          <div
-            className={`${compact ? 'mt-4' : 'mt-6'} flex items-center justify-between gap-3 px-3 py-2`}
-            style={{ backgroundColor: "var(--bg-subtle)", border: "3px solid var(--border)" }}
-          >
-            <span
-              className="text-[11px] font-bold uppercase tracking-widest"
-              style={{ color: "var(--text-primary)", fontFamily: "'JetBrains Mono', monospace" }}
+          <AnimatePresence mode="wait" initial={false}>
+            <motion.div
+              key={pathname}
+              initial={{ opacity: 0, x: slidedir * 60 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -slidedir * 60 }}
+              transition={{ duration: 0.35, ease: [0.4, 0, 0.2, 1] }}
             >
-              {isLogin ? t('auth.newHere') : t('auth.oneOfUs')}
-            </span>
-            <Link href={isLogin ? "/signup" : "/login"} className="btn-secondary !py-2 !px-4 !text-[11px]">
-              {isLogin ? t('auth.signUp') : t('auth.signIn')}
-            </Link>
-          </div>
+              <h1
+                className="text-sm leading-relaxed"
+                style={{ fontFamily: "'Press Start 2P', monospace", color: "var(--text-primary)" }}
+              >
+                {isLogin ? t('auth.welcomeBack') : t('auth.createAccount')}
+              </h1>
+              <p
+                className={`text-xs font-bold mt-2 ${compact ? 'mb-4' : 'mb-6'}`}
+                style={{ color: "var(--text-secondary)", fontFamily: "'JetBrains Mono', monospace" }}
+              >
+                {isLogin ? t('auth.loginSub') : t('auth.signupSub')}
+              </p>
+
+              {children}
+
+              {/* mode switch */}
+              <div
+                className={`${compact ? 'mt-4' : 'mt-6'} flex items-center justify-between gap-3 px-3 py-2`}
+                style={{ backgroundColor: "var(--bg-subtle)", border: "3px solid var(--border)" }}
+              >
+                <span
+                  className="text-[11px] font-bold uppercase tracking-widest"
+                  style={{ color: "var(--text-primary)", fontFamily: "'JetBrains Mono', monospace" }}
+                >
+                  {isLogin ? t('auth.newHere') : t('auth.oneOfUs')}
+                </span>
+                <Link href={isLogin ? "/signup" : "/login"} className="btn-secondary !py-2 !px-4 !text-[11px]">
+                  {isLogin ? t('auth.signUp') : t('auth.signIn')}
+                </Link>
+              </div>
+            </motion.div>
+          </AnimatePresence>
         </div>
       </div>
 
