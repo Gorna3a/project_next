@@ -1,36 +1,38 @@
 'use client';
 
-import { type ReactNode, useRef } from "react";
+import { useEffect, useRef } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import { Logo } from "../../../shared/ui/Logo";
 import { useLanguage } from "../../../core/context/LanguageContext";
-
-interface AuthLayoutProps {
-  children?: ReactNode;
-}
-
-// Route order for slide direction: login=0, signup=1
-const ROUTE_ORDER: Record<string, number> = { "/login": 0, "/signup": 1 };
+import LoginPage from "./LoginPage";
+import SignupPage from "./SignupPage";
 
 // ─── CRT boot terminal auth shell ────────────────────────────────────────────
-// Shared layout inside (auth) route group — stays mounted across /login ↔ /signup
-// so AnimatePresence can animate the form swap with a smooth horizontal slide.
+// Single-page state-based approach — both forms always mounted, AnimatePresence
+// slides the active form in/out as one solid unit. No route-change dependency.
 
-export const AuthLayout = ({ children }: AuthLayoutProps) => {
+export const AuthLayout = () => {
   const pathname = usePathname();
+  const router = useRouter();
   const { t, isRTL } = useLanguage();
-  const isLogin = pathname === "/login";
+
+  // derive active mode from URL (login or signup)
+  const isLogin = pathname !== "/signup";
   const compact = !isLogin;
 
-  // track previous route to determine slide direction
-  const prevRoute = useRef(pathname);
-  const dir = (ROUTE_ORDER[pathname] ?? 0) >= (ROUTE_ORDER[prevRoute.current] ?? 0) ? 1 : -1;
-  prevRoute.current = pathname;
+  // previous mode for slide direction
+  const prevMode = useRef(isLogin);
+  const dir = (isLogin ? 0 : 1) >= (prevMode.current ? 0 : 1) ? 1 : -1;
+  useEffect(() => { prevMode.current = isLogin; }, [isLogin]);
 
   const slidedir = isRTL ? -dir : dir;
+
+  const switchTo = (target: "login" | "signup") => {
+    router.push(target === "login" ? "/login" : "/signup");
+  };
 
   return (
     <div
@@ -80,7 +82,7 @@ export const AuthLayout = ({ children }: AuthLayoutProps) => {
             {/* crossfade title */}
             <AnimatePresence mode="wait">
               <motion.span
-                key={pathname}
+                key={isLogin ? "login" : "signup"}
                 initial={{ opacity: 0, y: -6 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: 6 }}
@@ -104,7 +106,7 @@ export const AuthLayout = ({ children }: AuthLayoutProps) => {
         <div className={`px-4 ${compact ? 'py-2' : 'py-3'}`} style={{ background: "#0F110F", borderBottom: "4px solid var(--border)" }}>
           <AnimatePresence mode="wait">
             <motion.p
-              key={pathname}
+              key={isLogin ? "login" : "signup"}
               initial={{ opacity: 0, x: slidedir * 20 }}
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: -slidedir * 20 }}
@@ -121,51 +123,90 @@ export const AuthLayout = ({ children }: AuthLayoutProps) => {
           </p>
         </div>
 
-        {/* body — slides horizontally on route change */}
+        {/* body — both forms mounted, slide active one in */}
         <div className={compact ? 'p-5' : 'p-6 sm:p-8'}>
           <div className={`flex justify-center ${compact ? 'mb-3' : 'mb-6'}`}>
             <Logo size={compact ? 'sm' : 'md'} />
           </div>
 
-          <AnimatePresence mode="wait" initial={false}>
-            <motion.div
-              key={pathname}
-              initial={{ opacity: 0, x: slidedir * 60 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -slidedir * 60 }}
-              transition={{ duration: 0.35, ease: [0.4, 0, 0.2, 1] }}
-            >
-              <h1
-                className="text-sm leading-relaxed"
-                style={{ fontFamily: "'Press Start 2P', monospace", color: "var(--text-primary)" }}
+          <AnimatePresence mode="wait">
+            {isLogin ? (
+              <motion.div
+                key="login-form"
+                initial={{ opacity: 0, x: slidedir * 60 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -slidedir * 60 }}
+                transition={{ duration: 0.35, ease: [0.4, 0, 0.2, 1] }}
               >
-                {isLogin ? t('auth.welcomeBack') : t('auth.createAccount')}
-              </h1>
-              <p
-                className={`text-xs font-bold mt-2 ${compact ? 'mb-4' : 'mb-6'}`}
-                style={{ color: "var(--text-secondary)", fontFamily: "'JetBrains Mono', monospace" }}
-              >
-                {isLogin ? t('auth.loginSub') : t('auth.signupSub')}
-              </p>
-
-              {children}
-
-              {/* mode switch */}
-              <div
-                className={`${compact ? 'mt-4' : 'mt-6'} flex items-center justify-between gap-3 px-3 py-2`}
-                style={{ backgroundColor: "var(--bg-subtle)", border: "3px solid var(--border)" }}
-              >
-                <span
-                  className="text-[11px] font-bold uppercase tracking-widest"
-                  style={{ color: "var(--text-primary)", fontFamily: "'JetBrains Mono', monospace" }}
+                <h1
+                  className="text-sm leading-relaxed"
+                  style={{ fontFamily: "'Press Start 2P', monospace", color: "var(--text-primary)" }}
                 >
-                  {isLogin ? t('auth.newHere') : t('auth.oneOfUs')}
-                </span>
-                <Link href={isLogin ? "/signup" : "/login"} className="btn-secondary !py-2 !px-4 !text-[11px]">
-                  {isLogin ? t('auth.signUp') : t('auth.signIn')}
-                </Link>
-              </div>
-            </motion.div>
+                  {t('auth.welcomeBack')}
+                </h1>
+                <p
+                  className="text-xs font-bold mt-2 mb-6"
+                  style={{ color: "var(--text-secondary)", fontFamily: "'JetBrains Mono', monospace" }}
+                >
+                  {t('auth.loginSub')}
+                </p>
+
+                <LoginPage />
+
+                <div
+                  className="mt-6 flex items-center justify-between gap-3 px-3 py-2"
+                  style={{ backgroundColor: "var(--bg-subtle)", border: "3px solid var(--border)" }}
+                >
+                  <span
+                    className="text-[11px] font-bold uppercase tracking-widest"
+                    style={{ color: "var(--text-primary)", fontFamily: "'JetBrains Mono', monospace" }}
+                  >
+                    {t('auth.newHere')}
+                  </span>
+                  <button onClick={() => switchTo("signup")} className="btn-secondary !py-2 !px-4 !text-[11px]">
+                    {t('auth.signUp')}
+                  </button>
+                </div>
+              </motion.div>
+            ) : (
+              <motion.div
+                key="signup-form"
+                initial={{ opacity: 0, x: slidedir * 60 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -slidedir * 60 }}
+                transition={{ duration: 0.35, ease: [0.4, 0, 0.2, 1] }}
+              >
+                <h1
+                  className="text-sm leading-relaxed"
+                  style={{ fontFamily: "'Press Start 2P', monospace", color: "var(--text-primary)" }}
+                >
+                  {t('auth.createAccount')}
+                </h1>
+                <p
+                  className="text-xs font-bold mt-2 mb-4"
+                  style={{ color: "var(--text-secondary)", fontFamily: "'JetBrains Mono', monospace" }}
+                >
+                  {t('auth.signupSub')}
+                </p>
+
+                <SignupPage />
+
+                <div
+                  className="mt-4 flex items-center justify-between gap-3 px-3 py-2"
+                  style={{ backgroundColor: "var(--bg-subtle)", border: "3px solid var(--border)" }}
+                >
+                  <span
+                    className="text-[11px] font-bold uppercase tracking-widest"
+                    style={{ color: "var(--text-primary)", fontFamily: "'JetBrains Mono', monospace" }}
+                  >
+                    {t('auth.oneOfUs')}
+                  </span>
+                  <button onClick={() => switchTo("login")} className="btn-secondary !py-2 !px-4 !text-[11px]">
+                    {t('auth.signIn')}
+                  </button>
+                </div>
+              </motion.div>
+            )}
           </AnimatePresence>
         </div>
       </div>

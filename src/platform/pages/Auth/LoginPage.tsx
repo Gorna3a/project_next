@@ -1,7 +1,6 @@
 'use client';
 
 import { useState } from 'react';
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { motion } from 'framer-motion';
 import { Eye, EyeOff, Mail, Lock } from 'lucide-react';
@@ -167,17 +166,6 @@ export default function LoginPage() {
         </button>
       </form>
 
-      <div className="pt-2 text-center">
-        <p className="text-sm font-bold" style={{ color: "var(--text-secondary)", fontFamily: "'JetBrains Mono', monospace" }}>
-          {t('auth.dontHaveAccount')}{' '}
-          <Link
-            href="/signup"
-            className="text-brand-600 dark:text-brand-400 hover:text-brand-700 transition-colors underline underline-offset-4"
-          >
-            {t('auth.joinClub')}
-          </Link>
-        </p>
-      </div>
     </div>
   );
 }

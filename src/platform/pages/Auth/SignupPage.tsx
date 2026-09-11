@@ -1,7 +1,6 @@
 'use client';
 
 import { useState } from 'react';
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { motion } from 'framer-motion';
 import { Eye, EyeOff, Mail, Lock, User } from 'lucide-react';
@@ -261,17 +260,6 @@ export default function SignupPage() {
         </button>
       </form>
 
-      <div className="pt-1 text-center">
-        <p className="text-xs font-bold" style={{ color: "var(--text-secondary)", fontFamily: "'JetBrains Mono', monospace" }}>
-          {t('auth.alreadyHaveAccount')}{' '}
-          <Link
-            href="/login"
-            className="text-brand-600 dark:text-brand-400 hover:text-brand-700 transition-colors underline underline-offset-4"
-          >
-            {t('auth.loginLink')}
-          </Link>
-        </p>
-      </div>
     </div>
   );
 }
