@@ -11,19 +11,17 @@ import LoginPage from "./LoginPage";
 import SignupPage from "./SignupPage";
 
 // ─── CRT boot terminal auth shell ────────────────────────────────────────────
-// Single-page state-based approach — both forms always mounted, AnimatePresence
-// slides the active form in/out as one solid unit. No route-change dependency.
+// Single-page state-based — entire card content (title bar + boot strip + form)
+// slides as one solid unit. No route-change dependency.
 
 export const AuthLayout = () => {
   const pathname = usePathname();
   const router = useRouter();
   const { t, isRTL } = useLanguage();
 
-  // derive active mode from URL (login or signup)
   const isLogin = pathname !== "/signup";
   const compact = !isLogin;
 
-  // previous mode for slide direction
   const prevMode = useRef(isLogin);
   const dir = (isLogin ? 0 : 1) >= (prevMode.current ? 0 : 1) ? 1 : -1;
   useEffect(() => { prevMode.current = isLogin; }, [isLogin]);
@@ -65,150 +63,129 @@ export const AuthLayout = () => {
         <span className="hidden sm:block uppercase tracking-widest">{t('auth.backToHome')}</span>
       </Link>
 
-      {/* ── CRT card ── */}
+      {/* ── CRT card (overflow clips the slide) ── */}
       <div
-        className="relative w-full max-w-md"
+        className="relative w-full max-w-md overflow-hidden"
         style={{ backgroundColor: "var(--bg-surface)", border: "4px solid var(--border)", boxShadow: "8px 8px 0 var(--border)" }}
       >
-        {/* title bar */}
-        <div
-          className="flex items-center justify-between px-4 py-2.5"
-          style={{ backgroundColor: "var(--accent)", borderBottom: "4px solid var(--border)" }}
-        >
-          <div className="flex items-center gap-2">
-            <span className="w-3 h-3 inline-block" style={{ background: "var(--orange)", border: "2px solid var(--border)" }} />
-            <span className="w-3 h-3 inline-block" style={{ background: "var(--yellow)", border: "2px solid var(--border)" }} />
-            <span className="w-3 h-3 inline-block" style={{ background: "var(--bg-surface)", border: "2px solid var(--border)" }} />
-            {/* crossfade title */}
-            <AnimatePresence mode="wait">
-              <motion.span
-                key={isLogin ? "login" : "signup"}
-                initial={{ opacity: 0, y: -6 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: 6 }}
-                transition={{ duration: 0.2, ease: "easeInOut" }}
-                className="text-[10px] font-extrabold tracking-widest ml-1"
-                style={{ color: "var(--accent-text)", fontFamily: "'Press Start 2P', monospace" }}
-              >
-                {isLogin ? "LOGIN.EXE" : "SIGNUP.EXE"}
-              </motion.span>
-            </AnimatePresence>
-          </div>
-          <span
-            className="text-[10px] font-bold px-2 py-0.5"
-            style={{ color: "var(--accent-text)", border: "2px solid var(--border)", fontFamily: "'JetBrains Mono', monospace" }}
+        {/* entire card content slides as one unit */}
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={isLogin ? "login" : "signup"}
+            initial={{ opacity: 0, x: slidedir * 60 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -slidedir * 60 }}
+            transition={{ duration: 0.35, ease: [0.4, 0, 0.2, 1] }}
           >
-            v1.0
-          </span>
-        </div>
-
-        {/* phosphor boot strip */}
-        <div className={`px-4 ${compact ? 'py-2' : 'py-3'}`} style={{ background: "#0F110F", borderBottom: "4px solid var(--border)" }}>
-          <AnimatePresence mode="wait">
-            <motion.p
-              key={isLogin ? "login" : "signup"}
-              initial={{ opacity: 0, x: slidedir * 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -slidedir * 20 }}
-              transition={{ duration: 0.25, ease: "easeInOut" }}
-              className="text-xs font-bold tracking-wider"
-              style={{ color: "#BFFF00", fontFamily: "'JetBrains Mono', monospace" }}
+            {/* title bar */}
+            <div
+              className="flex items-center justify-between px-4 py-2.5"
+              style={{ backgroundColor: "var(--accent)", borderBottom: "4px solid var(--border)" }}
             >
-              {">"} {isLogin ? "RESUME GAME" : "NEW SAVE FILE"}
-              <span className="crt-cursor">▊</span>
-            </motion.p>
-          </AnimatePresence>
-          <p className="text-[10px] mt-1 tracking-widest" style={{ color: "#6B7A60", fontFamily: "'JetBrains Mono', monospace" }}>
-            AUTH MODULE — READY · NO CARTRIDGE REQUIRED
-          </p>
-        </div>
-
-        {/* body — both forms mounted, slide active one in */}
-        <div className={compact ? 'p-5' : 'p-6 sm:p-8'}>
-          <div className={`flex justify-center ${compact ? 'mb-3' : 'mb-6'}`}>
-            <Logo size={compact ? 'sm' : 'md'} />
-          </div>
-
-          <AnimatePresence mode="wait">
-            {isLogin ? (
-              <motion.div
-                key="login-form"
-                initial={{ opacity: 0, x: slidedir * 60 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -slidedir * 60 }}
-                transition={{ duration: 0.35, ease: [0.4, 0, 0.2, 1] }}
+              <div className="flex items-center gap-2">
+                <span className="w-3 h-3 inline-block" style={{ background: "var(--orange)", border: "2px solid var(--border)" }} />
+                <span className="w-3 h-3 inline-block" style={{ background: "var(--yellow)", border: "2px solid var(--border)" }} />
+                <span className="w-3 h-3 inline-block" style={{ background: "var(--bg-surface)", border: "2px solid var(--border)" }} />
+                <span
+                  className="text-[10px] font-extrabold tracking-widest ml-1"
+                  style={{ color: "var(--accent-text)", fontFamily: "'Press Start 2P', monospace" }}
+                >
+                  {isLogin ? "LOGIN.EXE" : "SIGNUP.EXE"}
+                </span>
+              </div>
+              <span
+                className="text-[10px] font-bold px-2 py-0.5"
+                style={{ color: "var(--accent-text)", border: "2px solid var(--border)", fontFamily: "'JetBrains Mono', monospace" }}
               >
-                <h1
-                  className="text-sm leading-relaxed"
-                  style={{ fontFamily: "'Press Start 2P', monospace", color: "var(--text-primary)" }}
-                >
-                  {t('auth.welcomeBack')}
-                </h1>
-                <p
-                  className="text-xs font-bold mt-2 mb-6"
-                  style={{ color: "var(--text-secondary)", fontFamily: "'JetBrains Mono', monospace" }}
-                >
-                  {t('auth.loginSub')}
-                </p>
+                v1.0
+              </span>
+            </div>
 
-                <LoginPage />
+            {/* phosphor boot strip */}
+            <div className={`px-4 ${compact ? 'py-2' : 'py-3'}`} style={{ background: "#0F110F", borderBottom: "4px solid var(--border)" }}>
+              <p className="text-xs font-bold tracking-wider" style={{ color: "#BFFF00", fontFamily: "'JetBrains Mono', monospace" }}>
+                {">"} {isLogin ? "RESUME GAME" : "NEW SAVE FILE"}
+                <span className="crt-cursor">▊</span>
+              </p>
+              <p className="text-[10px] mt-1 tracking-widest" style={{ color: "#6B7A60", fontFamily: "'JetBrains Mono', monospace" }}>
+                AUTH MODULE — READY · NO CARTRIDGE REQUIRED
+              </p>
+            </div>
 
-                <div
-                  className="mt-6 flex items-center justify-between gap-3 px-3 py-2"
-                  style={{ backgroundColor: "var(--bg-subtle)", border: "3px solid var(--border)" }}
-                >
-                  <span
-                    className="text-[11px] font-bold uppercase tracking-widest"
-                    style={{ color: "var(--text-primary)", fontFamily: "'JetBrains Mono', monospace" }}
+            {/* body */}
+            <div className={compact ? 'p-5' : 'p-6 sm:p-8'}>
+              <div className={`flex justify-center ${compact ? 'mb-3' : 'mb-6'}`}>
+                <Logo size={compact ? 'sm' : 'md'} />
+              </div>
+
+              {isLogin ? (
+                <>
+                  <h1
+                    className="text-sm leading-relaxed"
+                    style={{ fontFamily: "'Press Start 2P', monospace", color: "var(--text-primary)" }}
                   >
-                    {t('auth.newHere')}
-                  </span>
-                  <button onClick={() => switchTo("signup")} className="btn-secondary !py-2 !px-4 !text-[11px]">
-                    {t('auth.signUp')}
-                  </button>
-                </div>
-              </motion.div>
-            ) : (
-              <motion.div
-                key="signup-form"
-                initial={{ opacity: 0, x: slidedir * 60 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -slidedir * 60 }}
-                transition={{ duration: 0.35, ease: [0.4, 0, 0.2, 1] }}
-              >
-                <h1
-                  className="text-sm leading-relaxed"
-                  style={{ fontFamily: "'Press Start 2P', monospace", color: "var(--text-primary)" }}
-                >
-                  {t('auth.createAccount')}
-                </h1>
-                <p
-                  className="text-xs font-bold mt-2 mb-4"
-                  style={{ color: "var(--text-secondary)", fontFamily: "'JetBrains Mono', monospace" }}
-                >
-                  {t('auth.signupSub')}
-                </p>
-
-                <SignupPage />
-
-                <div
-                  className="mt-4 flex items-center justify-between gap-3 px-3 py-2"
-                  style={{ backgroundColor: "var(--bg-subtle)", border: "3px solid var(--border)" }}
-                >
-                  <span
-                    className="text-[11px] font-bold uppercase tracking-widest"
-                    style={{ color: "var(--text-primary)", fontFamily: "'JetBrains Mono', monospace" }}
+                    {t('auth.welcomeBack')}
+                  </h1>
+                  <p
+                    className="text-xs font-bold mt-2 mb-6"
+                    style={{ color: "var(--text-secondary)", fontFamily: "'JetBrains Mono', monospace" }}
                   >
-                    {t('auth.oneOfUs')}
-                  </span>
-                  <button onClick={() => switchTo("login")} className="btn-secondary !py-2 !px-4 !text-[11px]">
-                    {t('auth.signIn')}
-                  </button>
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </div>
+                    {t('auth.loginSub')}
+                  </p>
+
+                  <LoginPage />
+
+                  <div
+                    className="mt-6 flex items-center justify-between gap-3 px-3 py-2"
+                    style={{ backgroundColor: "var(--bg-subtle)", border: "3px solid var(--border)" }}
+                  >
+                    <span
+                      className="text-[11px] font-bold uppercase tracking-widest"
+                      style={{ color: "var(--text-primary)", fontFamily: "'JetBrains Mono', monospace" }}
+                    >
+                      {t('auth.newHere')}
+                    </span>
+                    <button onClick={() => switchTo("signup")} className="btn-secondary !py-2 !px-4 !text-[11px]">
+                      {t('auth.signUp')}
+                    </button>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <h1
+                    className="text-sm leading-relaxed"
+                    style={{ fontFamily: "'Press Start 2P', monospace", color: "var(--text-primary)" }}
+                  >
+                    {t('auth.createAccount')}
+                  </h1>
+                  <p
+                    className="text-xs font-bold mt-2 mb-4"
+                    style={{ color: "var(--text-secondary)", fontFamily: "'JetBrains Mono', monospace" }}
+                  >
+                    {t('auth.signupSub')}
+                  </p>
+
+                  <SignupPage />
+
+                  <div
+                    className="mt-4 flex items-center justify-between gap-3 px-3 py-2"
+                    style={{ backgroundColor: "var(--bg-subtle)", border: "3px solid var(--border)" }}
+                  >
+                    <span
+                      className="text-[11px] font-bold uppercase tracking-widest"
+                      style={{ color: "var(--text-primary)", fontFamily: "'JetBrains Mono', monospace" }}
+                    >
+                      {t('auth.oneOfUs')}
+                    </span>
+                    <button onClick={() => switchTo("login")} className="btn-secondary !py-2 !px-4 !text-[11px]">
+                      {t('auth.signIn')}
+                    </button>
+                  </div>
+                </>
+              )}
+            </div>
+          </motion.div>
+        </AnimatePresence>
       </div>
 
       {/* footer strip */}
