@@ -111,14 +111,14 @@ export default function DashboardPage() {
             <div className="section-label">▣ QUICK ACTIONS</div>
             <div className="qgrid">
               <Link href="/app/courses" className="q yellow"><div className="q-icon"><BookOpen className="w-4 h-4" /></div><div style={{ fontWeight: 800 }}>Courses</div><div className="mono" style={{ fontSize: 9, opacity: 0.6 }}>LEARN →</div></Link>
-              <Link href="/app/ide" className="q green"><div className="q-icon"><Terminal className="w-4 h-4" /></div><div style={{ fontWeight: 800 }}>Code Studio</div><div className="mono" style={{ fontSize: 9, opacity: 0.6 }}>CODE →</div></Link>
+              <Link href="/app/playground" className="q green"><div className="q-icon"><Terminal className="w-4 h-4" /></div><div style={{ fontWeight: 800 }}>Playground</div><div className="mono" style={{ fontSize: 9, opacity: 0.6 }}>RUN →</div></Link>
               <Link href="/app/arena/training" className="q orange"><div className="q-icon"><Trophy className="w-4 h-4" /></div><div style={{ fontWeight: 800 }}>Arena</div><div className="mono" style={{ fontSize: 9, opacity: 0.6 }}>BATTLE →</div></Link>
               <Link href="/app/chat" className="q purple"><div className="q-icon"><Bot className="w-4 h-4" /></div><div style={{ fontWeight: 800 }}>Smart Chat</div><div className="mono" style={{ fontSize: 9, opacity: 0.6 }}>ASK →</div></Link>
             </div>
             <div style={{ marginTop: 14 }} className="list">
               <div className="mono" style={{ padding: '10px 12px', borderBottom: '4px solid var(--border)', background: 'var(--border)', color: 'var(--phosphor)', fontSize: 7, fontFamily: "'Press Start 2P'" }}>◼ RECENT ACTIVITY</div>
               <Link href="/app/courses" className="row"><span className="row-icon yellow"><BookOpen className="w-3.5 h-3.5" /></span><div><div style={{ fontWeight: 800, fontSize: 13 }}>{t('dashboard.activityEmpty')}</div><div className="mono" style={{ fontSize: 9, opacity: 0.5 }}>{t('dashboard.getStarted')} →</div></div><span className="arrow">›</span></Link>
-              <Link href="/app/ide" className="row"><span className="row-icon green"><Zap className="w-3.5 h-3.5" /></span><div><div style={{ fontWeight: 800, fontSize: 13 }}>{t('dashboard.playgroundPromo')}</div><div className="mono" style={{ fontSize: 9, opacity: 0.5 }}>{t('dashboard.openPlayground')} →</div></div><span className="arrow">›</span></Link>
+              <Link href="/app/playground" className="row"><span className="row-icon green"><Zap className="w-3.5 h-3.5" /></span><div><div style={{ fontWeight: 800, fontSize: 13 }}>{t('dashboard.playgroundPromo')}</div><div className="mono" style={{ fontSize: 9, opacity: 0.5 }}>{t('dashboard.openPlayground')} →</div></div><span className="arrow">›</span></Link>
               <Link href="/app/arena/training" className="row"><span className="row-icon orange"><Star className="w-3.5 h-3.5" /></span><div><div style={{ fontWeight: 800, fontSize: 13 }}>{t('dashboard.challengePromo')}</div><div className="mono" style={{ fontSize: 9, opacity: 0.5 }}>{t('dashboard.browseChallenges')} →</div></div><span className="arrow">›</span></Link>
             </div>
           </div>

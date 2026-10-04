@@ -193,7 +193,7 @@ export default function LandingPageV2() {
             <p className="hero-sub">PixelCode is the friendly path from first line to real projects. Structured courses, a live playground, duels for XP, teacher classrooms, and an AI tutor that never sleeps — all in one chunky CRT.</p>
             <div className="hero-actions">
               <Link href={user ? '/app' : '/signup'} className="btn btn-ph">Start Learning Free →</Link>
-              <Link href="/app/ide" className="btn btn-ghost">Try Playground</Link>
+              <Link href="/app/playground" className="btn btn-ghost">Try Playground</Link>
             </div>
             <div className="hero-meta"><span>★ No credit card</span><i /><span>13+ languages</span><i /><span>Kids mode included</span></div>
           </div>

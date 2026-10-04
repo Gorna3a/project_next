@@ -9,7 +9,6 @@ export const ROUTES = {
     COURSE_DETAIL: '/app/courses/:slug',
     LESSON: '/app/lesson/:lessonSlug',
     PLAYGROUND: '/app/playground',
-    IDE: '/app/ide',
     ARENA: '/app/arena',
     TRAINING: '/app/arena/training',
     TRAINING_DETAIL: '/app/arena/training/:slug',
