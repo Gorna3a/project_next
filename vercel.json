@@ -1,0 +1,23 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "services": {
+    "app": {
+      "root": ".",
+      "framework": "nextjs"
+    },
+    "pixelcode-studio": {
+      "root": "pixelcode-studio",
+      "framework": "sanity"
+    }
+  },
+  "rewrites": [
+    {
+      "source": "/studio/(.*)",
+      "destination": { "service": "pixelcode-studio" }
+    },
+    {
+      "source": "/(.*)",
+      "destination": { "service": "app" }
+    }
+  ]
+}

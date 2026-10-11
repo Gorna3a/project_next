@@ -7,6 +7,11 @@ export default defineConfig({
   name: "pixelcode-studio",
   title: "PixelCode Studio",
 
+  // Served under /studio by the Vercel deployment (see root vercel.json).
+  // The service receives the original request path, so the Studio must
+  // route and link under this prefix. Local dev moves to :3333/studio too.
+  basePath: "/studio",
+
   // ─── Sanity project — initialized via:
   // npm create sanity@latest -- --project vfejjthj --dataset production --template clean
   projectId: process.env.SANITY_STUDIO_PROJECT_ID || "vfejjthj",
