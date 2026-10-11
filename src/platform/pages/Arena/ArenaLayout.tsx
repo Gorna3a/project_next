@@ -5,7 +5,6 @@ import { NavLink } from '../../../shared/ui/NavLink';
 
 const navItems = [
   { href: '/app/arena', label: 'Arena Hub', icon: null, end: true },
-  { href: '/app/arena/training', label: 'Training', icon: null },
   { href: '/app/arena/duels', label: 'Duel Zone', icon: null },
   { href: '/app/arena/rankings', label: 'Rankings', icon: null },
 ];

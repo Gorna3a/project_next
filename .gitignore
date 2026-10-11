@@ -35,3 +35,6 @@ next-env.d.ts
 dev.log
 dev.err
 
+# local agent tooling (skills, sessions) — not part of the product
+.opencode/
+

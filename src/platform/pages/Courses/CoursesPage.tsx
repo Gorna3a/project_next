@@ -65,8 +65,8 @@ export default function CoursesPage() {
         (course.title ?? "").toLowerCase().includes(term) ||
         (course.description ?? "").toLowerCase().includes(term) ||
         (course.tags ?? []).some(tag => (tag ?? "").toLowerCase().includes(term));
-      const matchesLang = langTab === 'all' || course.language === langTab;
-      const matchesLevel = levelFilter === 'all' || course.level === levelFilter;
+      const matchesLang = langTab === 'all' || (course.programmingLanguage ?? course.language) === langTab;
+      const matchesLevel = levelFilter === 'all' || course.difficulty === levelFilter;
       return matchesSearch && matchesLang && matchesLevel;
     });
   }, [courses, search, langTab, levelFilter]);

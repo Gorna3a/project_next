@@ -40,7 +40,7 @@ export default function ArenaHub() {
             <Link href="/app/arena/duels" className={`px-8 py-4 rounded-2xl bg-white text-indigo-600 font-black text-lg shadow-xl hover:scale-105 transition-all flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
               <Sword className="w-5 h-5" /> {t('arena.findDuel')}
             </Link>
-            <Link href="/app/arena/training" className={`px-8 py-4 rounded-2xl bg-indigo-500 text-white font-black text-lg hover:bg-indigo-400 transition-all flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
+            <Link href="/app/training" className={`px-8 py-4 rounded-2xl bg-indigo-500 text-white font-black text-lg hover:bg-indigo-400 transition-all flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
               <Target className="w-5 h-5" /> {t('arena.training')}
             </Link>
           </div>

@@ -119,10 +119,11 @@ Never refuse to help with legitimate programming questions.`,
 export const complete = async (
   prompt: string,
   systemPrompt?: string,
+  temperature: number = 0.7,
 ): Promise<string> => {
   const body: Record<string, unknown> = {
     contents: [{ role: "user", parts: [{ text: prompt }] }],
-    generationConfig: { temperature: 0.7, maxOutputTokens: 2048 },
+    generationConfig: { temperature, maxOutputTokens: 2048 },
   };
 
   if (systemPrompt) {
@@ -151,7 +152,80 @@ export const complete = async (
   return json?.candidates?.[0]?.content?.parts?.[0]?.text ?? "";
 };
 
-// ─── Challenge hint ───────────────────────────────────────────────────────────
+// ─── Challenge solution grading ───────────────────────────────────────────────
+// Same model as the chatbot. The AI decides correctness, shows the canonical
+// solution, and explains why a wrong attempt fails. Low temperature keeps
+// verdicts as deterministic as possible. Never throws on unparseable output
+// — callers must treat that as "incorrect, show the raw text".
+
+export interface GradeVerdict {
+  correct: boolean;
+  /** Markdown: what is wrong and why (empty when correct) */
+  feedback: string;
+  /** Canonical correct code */
+  solution: string;
+  /** True when the model reply could not be parsed as a verdict */
+  unparsed: boolean;
+}
+
+export const gradeSolution = async (args: {
+  title: string;
+  language: string;
+  task: string;
+  reference: string;
+  attempt: string;
+}): Promise<GradeVerdict> => {
+  const raw = await complete(
+    `Challenge: ${args.title} (${args.language})
+Task:
+${args.task}
+
+Reference solution (canonical, for your eyes only — quote it back as "solution"):
+\`\`\`
+${args.reference}
+\`\`\`
+
+Student attempt:
+\`\`\`
+${args.attempt}
+\`\`\`
+
+Decide: does the attempt satisfy the task? Be strict but fair — ignore
+whitespace/formatting differences, but reject logically wrong code.
+CRITICAL: the "feedback" field must NEVER contain the corrected code, a full
+solution, or a code block that solves the task. Explain the mistake
+conceptually (wrong variable, wrong operator, off-by-one, missing call) and
+point at the general area, so the student must still write the fix themselves.
+Reply with ONLY this JSON, no fences, no extra text:
+{"correct": true|false, "feedback": "<markdown: what is wrong and why, or empty string when correct>", "solution": "<the canonical correct code>"}`,
+    `You are a strict programming-exercise grader. You always reply with a single
+JSON object and nothing else. You never leak the solution inside "feedback".`,
+    0.2,
+  );
+
+  const cleaned = raw
+    .trim()
+    .replace(/^```(?:json)?\s*/i, "")
+    .replace(/\s*```$/, "");
+  try {
+    const parsed = JSON.parse(cleaned) as {
+      correct?: unknown;
+      feedback?: unknown;
+      solution?: unknown;
+    };
+    return {
+      correct: parsed.correct === true,
+      feedback: typeof parsed.feedback === "string" ? parsed.feedback : "",
+      solution:
+        typeof parsed.solution === "string" && parsed.solution.trim()
+          ? parsed.solution
+          : args.reference,
+      unparsed: false,
+    };
+  } catch {
+    return { correct: false, feedback: raw, solution: args.reference, unparsed: true };
+  }
+};
 
 export const generateHint = async (
   question: string,

@@ -4,148 +4,112 @@ import { useState, useEffect, useRef } from 'react';
 import Link from "next/link";
 import { useRouter, useParams } from "next/navigation";
 import { motion, AnimatePresence, type Variants } from 'framer-motion';
-import { PortableText, type PortableTextComponents } from '@portabletext/react';
 import {
   ArrowLeft, ArrowRight, CheckCircle2, ChevronRight,
-  Clock, BookOpen, Trophy,
+  Clock, BookOpen, Trophy, FlaskConical, Eye, EyeOff,
 } from 'lucide-react';
-import { getLesson, type SanityLesson, type SanityQuiz } from '../../../core/services/sanity';
+import {
+  getLesson,
+  type SanityLesson,
+  type SanityLessonLite,
+  type QuizQuestion,
+  type WorkshopStep,
+  type CodeBlockObj,
+  type TestCaseObj,
+} from '../../../core/services/sanity';
 import {
   getCourseProgress, completeLesson, recordQuizResult, startCourse,
 } from '../../../core/services/progress';
 import { useAuth } from '../../../core/context/AuthContext';
 import { useLanguage } from '../../../core/context/LanguageContext';
+import { Markdown } from '../../../shared/ui/Markdown';
 
+// ─── Small building blocks ────────────────────────────────────────────────────
 
-// ─── Portable Text custom components ─────────────────────────────────────────
-
-const ptComponents: PortableTextComponents = {
-  block: {
-    h1: ({ children }) => (
-      <h1 className="text-2xl font-bold mt-8 mb-4" style={{ color: 'var(--text-primary)' }}>
-        {children}
-      </h1>
-    ),
-    h2: ({ children }) => (
-      <h2 className="text-xl font-bold mt-6 mb-3" style={{ color: 'var(--text-primary)' }}>
-        {children}
-      </h2>
-    ),
-    h3: ({ children }) => (
-      <h3 className="text-lg font-semibold mt-5 mb-2" style={{ color: 'var(--text-primary)' }}>
-        {children}
-      </h3>
-    ),
-    normal: ({ children }) => (
-      <p className="text-sm leading-7 mb-4" style={{ color: 'var(--text-secondary)' }}>
-        {children}
-      </p>
-    ),
-    blockquote: ({ children }) => (
-      <blockquote
-        className="border-l-4 pl-4 my-4 italic text-sm"
-        style={{
-          borderColor: 'var(--accent)',
-          color: 'var(--text-secondary)',
-          backgroundColor: 'var(--accent-subtle)',
-        }}
-      >
-        <div className="py-2">{children}</div>
-      </blockquote>
-    ),
-  },
-  marks: {
-    code: ({ children }) => (
-      <code
-        className="px-1.5 py-0.5 rounded text-xs font-mono"
-        style={{
-          backgroundColor: 'var(--bg-elevated)',
-          color: 'var(--accent-text)',
-          border: '1px solid var(--border)',
-        }}
-      >
-        {children}
-      </code>
-    ),
-    strong: ({ children }) => (
-      <strong className="font-semibold" style={{ color: 'var(--text-primary)' }}>
-        {children}
-      </strong>
-    ),
-  },
-  types: {
-    // Fenced code block
-    code: ({ value }: { value: { code: string; language?: string } }) => (
+const CodeView = ({ block, title }: { block?: CodeBlockObj; title?: string }) => {
+  if (!block?.code?.trim()) return null;
+  return (
+    <div className="my-4 rounded-xl overflow-hidden border" style={{ borderColor: 'var(--border)' }}>
       <div
-        className="my-5 rounded-xl overflow-hidden border"
-        style={{ borderColor: 'var(--border)' }}
+        className="flex items-center justify-between px-4 py-2 border-b"
+        style={{ backgroundColor: 'var(--bg-elevated)', borderColor: 'var(--border)' }}
       >
-        {/* macOS-style window chrome */}
-        <div
-          className="flex items-center justify-between px-4 py-2 border-b"
-          style={{ backgroundColor: 'var(--bg-elevated)', borderColor: 'var(--border)' }}
-        >
-          <div className="flex items-center gap-1.5">
-            <div className="w-3 h-3 rounded-full bg-red-500" />
-            <div className="w-3 h-3 rounded-full bg-yellow-500" />
-            <div className="w-3 h-3 rounded-full bg-green-500" />
-          </div>
-          {value.language && (
-            <span className="text-xs font-mono" style={{ color: 'var(--text-muted)' }}>
-              {value.language}
-            </span>
-          )}
+        <div className="flex items-center gap-1.5">
+          <div className="w-3 h-3 rounded-full bg-red-500" />
+          <div className="w-3 h-3 rounded-full bg-yellow-500" />
+          <div className="w-3 h-3 rounded-full bg-green-500" />
         </div>
-        <pre
-          className="p-4 text-sm overflow-x-auto font-mono leading-6"
-          style={{ backgroundColor: '#0a0a0f', color: '#e8e8ff' }}
-        >
-          <code>{value.code}</code>
-        </pre>
+        <span className="text-xs font-mono" style={{ color: 'var(--text-muted)' }}>
+          {title ?? block.language ?? 'code'}
+        </span>
       </div>
-    ),
-    // Info / warning / tip callout
-    callout: ({ value }: { value: { variant: string; text: string } }) => {
-      const styles: Record<string, { bg: string; border: string; emoji: string }> = {
-        info:    { bg: 'rgba(56,189,248,0.08)',  border: '#38bdf8', emoji: 'ℹ️' },
-        warning: { bg: 'rgba(251,191,36,0.08)',  border: '#fbbf24', emoji: '⚠️' },
-        tip:     { bg: 'rgba(34,197,94,0.08)',   border: '#22c55e', emoji: '💡' },
-      };
-      const s = styles[value.variant] ?? styles.info;
-      return (
-        <div
-          className="my-4 p-4 rounded-xl border-l-4 text-sm"
-          style={{ backgroundColor: s.bg, borderColor: s.border, color: 'var(--text-secondary)' }}
-        >
-          <span className="mr-2">{s.emoji}</span>
-          {value.text}
-        </div>
-      );
-    },
-  },
+      <pre
+        className="p-4 text-sm overflow-x-auto font-mono leading-6"
+        style={{ backgroundColor: '#0a0a0f', color: '#e8e8ff' }}
+      >
+        <code>{block.code}</code>
+      </pre>
+    </div>
+  );
 };
 
-// ─── Quiz card ────────────────────────────────────────────────────────────────
+const TestsList = ({ tests }: { tests?: TestCaseObj[] }) => {
+  if (!tests?.length) return null;
+  return (
+    <div className="space-y-1.5">
+      {tests.map((test) => (
+        <div
+          key={test._key}
+          className="flex items-start gap-2 text-xs px-3 py-2 rounded-xl"
+          style={{ backgroundColor: 'var(--bg-elevated)', color: 'var(--text-secondary)' }}
+        >
+          <FlaskConical className="w-3.5 h-3.5 flex-shrink-0 mt-0.5" style={{ color: 'var(--text-muted)' }} />
+          <div>
+            <span className="font-mono font-bold" style={{ color: 'var(--text-muted)' }}>{test.type}</span>
+            <span className="ml-2">{test.message}</span>
+            {test.required && <span className="ml-2 font-bold text-red-400">required</span>}
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+};
+
+// ─── Quiz card (v2: single | multiple | true-false | code-output) ─────────────
 
 interface QuizCardProps {
-  quiz:     SanityQuiz;
+  question: QuizQuestion;
   index:    number;
-  onAnswer: (quizKey: string, correct: boolean) => void;
+  onAnswer: (questionKey: string, correct: boolean) => void;
   answered: Record<string, boolean | null>;
 }
 
-const QuizCard = ({ quiz, index, onAnswer, answered }: QuizCardProps) => {
+const QuizCard = ({ question, index, onAnswer, answered }: QuizCardProps) => {
   const { t, isRTL } = useLanguage();
 
-  const [selected, setSelected] = useState<number | null>(null);
+  const [selected, setSelected] = useState<number[]>([]);
 
-  const result    = answered[quiz._key];
+  const result    = answered[question._key];
   const submitted = result !== undefined && result !== null;
+  const multi     = question.questionType === 'multiple';
+  const correctSet = new Set(
+    (question.options ?? []).map((o, i) => (o.correct ? i : -1)).filter(i => i >= 0),
+  );
+
+  const submit = (selection: number[]) => {
+    const sel = new Set(selection);
+    const correct = sel.size === correctSet.size && [...sel].every(i => correctSet.has(i));
+    onAnswer(question._key, correct);
+  };
 
   const handleSelect = (i: number) => {
     if (submitted) return;
-    setSelected(i);
-    onAnswer(quiz._key, i === quiz.correctIndex);
+    if (multi) {
+      setSelected(prev => prev.includes(i) ? prev.filter(x => x !== i) : [...prev, i]);
+    } else {
+      setSelected([i]);
+      submit([i]);
+    }
   };
 
   return (
@@ -155,7 +119,6 @@ const QuizCard = ({ quiz, index, onAnswer, answered }: QuizCardProps) => {
       transition={{ delay: index * 0.1, duration: 0.3, ease: 'easeOut' as const }}
       className={`card p-5 space-y-4 ${isRTL ? "text-right" : "text-left"}`}
     >
-      {/* Question */}
       <div className={`flex items-start gap-3 ${isRTL ? "flex-row-reverse" : ""}`}>
         <div
           className="w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0 mt-0.5"
@@ -163,16 +126,21 @@ const QuizCard = ({ quiz, index, onAnswer, answered }: QuizCardProps) => {
         >
           {index + 1}
         </div>
-        <p className="text-sm font-medium leading-relaxed" style={{ color: 'var(--text-primary)' }}>
-          {quiz.question}
-        </p>
+        <div className="flex-1 min-w-0">
+          <span
+            className="inline-block mb-2 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-widest"
+            style={{ backgroundColor: 'var(--bg-elevated)', color: 'var(--text-muted)' }}
+          >
+            {question.questionType ?? 'single'} • {question.points ?? 1}pt
+          </span>
+          <Markdown content={question.prompt} rtl={isRTL} />
+        </div>
       </div>
 
-      {/* Options */}
       <div className={`space-y-2 ${isRTL ? "pr-9" : "pl-9"}`}>
-        {quiz.options.map((opt, i) => {
-          const isCorrect  = i === quiz.correctIndex;
-          const isSelected = i === selected;
+        {(question.options ?? []).map((opt, i) => {
+          const isCorrect  = correctSet.has(i);
+          const isSelected = selected.includes(i);
 
           let bg        = 'var(--bg-elevated)';
           let border    = 'var(--border)';
@@ -190,7 +158,7 @@ const QuizCard = ({ quiz, index, onAnswer, answered }: QuizCardProps) => {
 
           return (
             <button
-              key={i}
+              key={opt._key}
               onClick={() => handleSelect(i)}
               disabled={submitted}
               className={`w-full ${isRTL ? "text-right" : "text-left"} px-4 py-3 rounded-xl text-xs font-medium transition-all duration-200`}
@@ -201,14 +169,27 @@ const QuizCard = ({ quiz, index, onAnswer, answered }: QuizCardProps) => {
                 cursor: submitted ? 'default' : 'pointer',
               }}
             >
-              <span className={`font-bold ${isRTL ? "ml-2" : "mr-2"}`}>{String.fromCharCode(65 + i)}.</span>
-              {opt}
+              <span className={`font-bold ${isRTL ? "ml-2" : "mr-2"}`}>
+                {multi ? (isSelected ? '☑' : '☐') : `${String.fromCharCode(65 + i)}.`}
+              </span>
+              {opt.text}
             </button>
           );
         })}
       </div>
 
-      {/* Explanation revealed after answering */}
+      {multi && !submitted && (
+        <div className={`${isRTL ? "pr-9" : "pl-9"}`}>
+          <button
+            onClick={() => submit(selected)}
+            disabled={selected.length === 0}
+            className="btn-primary text-xs disabled:opacity-50"
+          >
+            {t('courses.submitAnswer')}
+          </button>
+        </div>
+      )}
+
       <AnimatePresence>
         {submitted && (
           <motion.div
@@ -218,21 +199,87 @@ const QuizCard = ({ quiz, index, onAnswer, answered }: QuizCardProps) => {
             className={`${isRTL ? "pr-9" : "pl-9"} overflow-hidden`}
           >
             <div
-              className="text-xs p-3 rounded-xl"
+              className="text-xs p-3 rounded-xl space-y-1"
               style={{
                 backgroundColor: result ? 'rgba(34,197,94,0.08)' : 'rgba(239,68,68,0.08)',
                 color: 'var(--text-secondary)',
               }}
             >
-              <span className={`font-semibold ${isRTL ? "ml-1" : "mr-1"}`}>
-                {result ? `✅ ${t('courses.correct')}!` : `❌ ${t('courses.incorrect')}.`}
-              </span>
-              {quiz.explanation}
+              <p>
+                <span className={`font-semibold ${isRTL ? "ml-1" : "mr-1"}`}>
+                  {result ? `✅ ${t('courses.correct')}!` : `❌ ${t('courses.incorrect')}.`}
+                </span>
+                {question.explanation}
+              </p>
+              {question.hint && <p className="opacity-80">💡 {question.hint}</p>}
             </div>
           </motion.div>
         )}
       </AnimatePresence>
     </motion.div>
+  );
+};
+
+// ─── Workshop step card ───────────────────────────────────────────────────────
+
+const StepCard = ({ step, index }: { step: WorkshopStep; index: number }) => {
+  const { isRTL, t } = useLanguage();
+  const [showSolution, setShowSolution] = useState(false);
+  const [open, setOpen] = useState(index === 0);
+
+  return (
+    <div className="card overflow-hidden">
+      <button
+        onClick={() => setOpen(o => !o)}
+        className={`w-full flex items-center gap-3 px-5 py-4 ${isRTL ? 'flex-row-reverse text-right' : 'text-left'}`}
+      >
+        <div
+          className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0"
+          style={{ backgroundColor: 'var(--accent-subtle)', color: 'var(--accent-text)' }}
+        >
+          {step.number ?? index + 1}
+        </div>
+        <span className="flex-1 text-sm font-bold" style={{ color: 'var(--text-primary)' }}>
+          {step.title}
+        </span>
+        <ChevronRight className={`w-4 h-4 transition-transform ${open ? 'rotate-90' : ''} ${isRTL ? 'rotate-180' : ''}`} />
+      </button>
+
+      {open && (
+        <div className="px-5 pb-5 space-y-4">
+          {step.instructions && (
+            <div>
+              <p className="text-xs font-bold uppercase tracking-widest mb-1" style={{ color: 'var(--text-muted)' }}>
+                {t('courses.instructions')}
+              </p>
+              <Markdown content={step.instructions} rtl={isRTL} />
+            </div>
+          )}
+
+          {(step.hints?.length ?? 0) > 0 && (
+            <div className="rounded-xl p-3 text-xs space-y-1" style={{ backgroundColor: 'rgba(251,191,36,0.08)', color: 'var(--text-secondary)' }}>
+              {(step.hints ?? []).map((hint, i) => (
+                <p key={i}>💡 <strong>Hint {i + 1}:</strong> {hint}</p>
+              ))}
+            </div>
+          )}
+
+          <CodeView block={step.starter} title="Starter code" />
+          <TestsList tests={step.tests} />
+
+          <div>
+            <button
+              onClick={() => setShowSolution(s => !s)}
+              className="btn-ghost text-xs inline-flex items-center gap-1.5"
+            >
+              {showSolution ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+              {showSolution ? t('courses.hideSolution') : t('courses.showSolution')}
+            </button>
+            {showSolution && <CodeView block={step.solution} title="Solution" />}
+          </div>
+        </div>
+      )}
+    </div>
   );
 };
 
@@ -243,13 +290,22 @@ const fadeUp: Variants = {
   show:   { opacity: 1, y: 0, transition: { duration: 0.4, ease: 'easeOut' as const } },
 };
 
+const KIND_LABEL: Record<string, string> = {
+  theory: '📘 Theory',
+  workshop: '🛠 Workshop',
+  lab: '🧪 Lab',
+  review: '📝 Review',
+  quiz: '❓ Quiz',
+  'certification-project': '🎓 Certification Project',
+};
+
 // ─── Main LessonPage ──────────────────────────────────────────────────────────
 
 export default function LessonPage() {
   const { t, isRTL } = useLanguage();
 
   const params = useParams();
-  const lessonSlug = params.lessonSlug as string;
+  const lessonId = params.lessonSlug as string;
   const { user }       = useAuth();
   const navigate       = useRouter();
   const contentRef     = useRef<HTMLDivElement>(null);
@@ -261,20 +317,21 @@ export default function LessonPage() {
   const [quizAnswers,     setQuizAnswers]     = useState<Record<string, boolean | null>>({});
   const [showCelebration, setShowCelebration] = useState(false);
   const [allQuizzesDone,  setAllQuizzesDone]  = useState(false);
+  const [showReference,   setShowReference]   = useState(false);
 
   // ── Fetch lesson ────────────────────────────────────────────────────────────
 
   useEffect(() => {
-    if (!lessonSlug) return;
+    if (!lessonId) return;
 
     const fetchLesson = async () => {
       setLoading(true);
       try {
-        const data = await getLesson(lessonSlug);
+        const data = await getLesson(lessonId);
         setLesson(data);
         if (data && user) {
           try {
-            const prog = await getCourseProgress(user.uid, data.course._id);
+            const prog = await getCourseProgress(user.uid, data.module.course._id);
             setIsCompleted(prog?.completedLessons.includes(data._id) ?? false);
           } catch (e) {
             console.error('Firebase progress fetch failed:', e);
@@ -292,15 +349,16 @@ export default function LessonPage() {
     setQuizAnswers({});
     setShowCelebration(false);
     setAllQuizzesDone(false);
+    setShowReference(false);
     contentRef.current?.scrollTo({ top: 0 });
-  }, [lessonSlug, user]);
+  }, [lessonId, user]);
 
   // ── Track quiz completion ───────────────────────────────────────────────────
 
   useEffect(() => {
-    const quizzes = lesson?.quizzes || [];
-    if (!quizzes.length) return;
-    const done = quizzes.every(
+    const questions = lesson?.questions || [];
+    if (!questions.length) return;
+    const done = questions.every(
       q => quizAnswers[q._key] !== undefined && quizAnswers[q._key] !== null,
     );
     setAllQuizzesDone(done);
@@ -308,13 +366,12 @@ export default function LessonPage() {
 
   // ── Handlers ────────────────────────────────────────────────────────────────
 
-  const handleQuizAnswer = async (quizKey: string, correct: boolean) => {
-    setQuizAnswers(prev => ({ ...prev, [quizKey]: correct }));
+  const handleQuizAnswer = async (questionKey: string, correct: boolean) => {
+    setQuizAnswers(prev => ({ ...prev, [questionKey]: correct }));
     if (user && lesson) {
       try {
-        const quiz = (lesson.quizzes || []).find(q => q._key === quizKey);
-        const quizXp = quiz?.xp ?? 5;
-        await recordQuizResult(user.uid, lesson.course._id, quizKey, correct, quizXp);
+        const question = (lesson.questions || []).find(q => q._key === questionKey);
+        await recordQuizResult(user.uid, lesson.module.course._id, questionKey, correct, question?.points ?? 1);
       } catch (e) { console.error('Failed to record quiz result:', e); }
     }
   };
@@ -323,9 +380,10 @@ export default function LessonPage() {
     if (!user || !lesson || isCompleted) return;
     setCompleting(true);
     try {
-      // Ensure course progress document exists
-      try { await startCourse(user.uid, lesson.course._id); } catch(e) {}
-      try { await completeLesson(user.uid, lesson.course._id, lesson._id, lesson.course.totalLessons, lesson.xp ?? 10); } catch(e) {}
+      const courseId = lesson.module.course._id;
+      const total = lesson.module.lessonCount || 1;
+      try { await startCourse(user.uid, courseId); } catch(e) { console.error(e); }
+      try { await completeLesson(user.uid, courseId, lesson._id, total, 10); } catch(e) { console.error(e); }
       setIsCompleted(true);
       setShowCelebration(true);
       setTimeout(() => setShowCelebration(false), 3000);
@@ -335,7 +393,7 @@ export default function LessonPage() {
   };
 
   const handleNavigateNext = () => {
-    navigate.push(`/app/courses/${lesson?.course.slug}`);
+    navigate.push(`/app/courses/${lesson?.module.course.slug}`);
   };
 
   // ── Loading state ───────────────────────────────────────────────────────────
@@ -370,6 +428,8 @@ export default function LessonPage() {
   }
 
   const correctCount = Object.values(quizAnswers).filter(Boolean).length;
+  const questions = lesson.questions ?? [];
+  const estimated = lesson.estimatedMinutes ?? (lesson.estimatedHours != null ? lesson.estimatedHours * 60 : null);
 
   // ── Render ──────────────────────────────────────────────────────────────────
 
@@ -415,10 +475,10 @@ export default function LessonPage() {
       {/* ── Breadcrumb ── */}
       <div className={`flex items-center gap-2 text-sm ${isRTL ? "flex-row-reverse" : ""}`} style={{ color: 'var(--text-muted)' }}>
         <Link
-          href={`/app/courses/${lesson.course.slug}`}
+          href={`/app/courses/${lesson.module.course.slug}`}
           className={`btn-ghost inline-flex items-center gap-1.5 text-xs ${isRTL ? "-mr-2 flex-row-reverse" : "-ml-2"}`}
         >
-          {isRTL ? <ArrowRight className="w-3.5 h-3.5" /> : <ArrowLeft className="w-3.5 h-3.5" />} {lesson.course.title}
+          {isRTL ? <ArrowRight className="w-3.5 h-3.5" /> : <ArrowLeft className="w-3.5 h-3.5" />} {lesson.module.course.title}
         </Link>
         <ChevronRight className={`w-3.5 h-3.5 ${isRTL ? "rotate-180" : ""}`} />
         <span style={{ color: 'var(--text-secondary)' }}>{lesson.title}</span>
@@ -428,6 +488,12 @@ export default function LessonPage() {
       <div className="card p-6">
         <div className={`flex items-start justify-between gap-4 flex-wrap ${isRTL ? "flex-row-reverse" : ""}`}>
           <div className={isRTL ? "text-right" : "text-left"}>
+            <span
+              className="inline-block mb-2 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-widest"
+              style={{ backgroundColor: 'var(--accent-subtle)', color: 'var(--accent-text)' }}
+            >
+              {KIND_LABEL[lesson.kind ?? ''] ?? lesson.kind}
+            </span>
             <h1 className="text-2xl font-bold mb-2" style={{ color: 'var(--text-primary)' }}>
               {lesson.title}
             </h1>
@@ -435,12 +501,16 @@ export default function LessonPage() {
               className={`flex items-center gap-4 text-xs ${isRTL ? "flex-row-reverse" : ""}`}
               style={{ color: 'var(--text-muted)' }}
             >
-              <span className={`flex items-center gap-1 ${isRTL ? "flex-row-reverse" : ""}`}>
-                <Clock className="w-3.5 h-3.5" /> ~{lesson.estimatedMinutes} {t('courses.estimatedTime')}
-              </span>
-              <span className={`flex items-center gap-1 ${isRTL ? "flex-row-reverse" : ""}`}>
-                <BookOpen className="w-3.5 h-3.5" /> {(lesson.quizzes || []).length} {t('courses.quizzes')}
-              </span>
+              {estimated != null && (
+                <span className={`flex items-center gap-1 ${isRTL ? "flex-row-reverse" : ""}`}>
+                  <Clock className="w-3.5 h-3.5" /> ~{estimated} {t('courses.estimatedTime')}
+                </span>
+              )}
+              {questions.length > 0 && (
+                <span className={`flex items-center gap-1 ${isRTL ? "flex-row-reverse" : ""}`}>
+                  <BookOpen className="w-3.5 h-3.5" /> {questions.length} {t('courses.quizzes')}
+                </span>
+              )}
               {isCompleted && (
                 <span className={`flex items-center gap-1 text-green-500 ${isRTL ? "flex-row-reverse" : ""}`}>
                   <CheckCircle2 className="w-3.5 h-3.5" /> {t('common.completed')}
@@ -472,27 +542,121 @@ export default function LessonPage() {
         </div>
       </div>
 
-      {/* ── Lesson body ── */}
-      <div ref={contentRef} className="card p-8">
-        <div className={`prose-custom max-w-none ${isRTL ? "text-right" : "text-left"}`}>
-          <PortableText value={lesson.body || []} components={ptComponents} />
+      {/* ── Lesson body (Markdown) ── */}
+      {lesson.body?.trim() && (
+        <div ref={contentRef} className="card p-8">
+          <Markdown content={lesson.body} rtl={isRTL} />
         </div>
-      </div>
+      )}
 
-      {/* ── Quizzes ── */}
-      {(lesson.quizzes || []).length > 0 && (
+      {/* ── Workshop steps ── */}
+      {(lesson.steps?.length ?? 0) > 0 && (
+        <div className="space-y-3">
+          <h2 className="font-semibold text-sm uppercase tracking-wider" style={{ color: 'var(--text-muted)' }}>
+            {t('courses.workshopSteps')} — {lesson.steps.length}
+          </h2>
+          {lesson.steps.map((step, i) => (
+            <StepCard key={step._key} step={step} index={i} />
+          ))}
+        </div>
+      )}
+
+      {/* ── Lab: starter, hints, tests, reference solution ── */}
+      {lesson.kind === 'lab' && (
+        <div className="card p-6 space-y-4">
+          <h2 className="font-semibold text-sm uppercase tracking-wider" style={{ color: 'var(--text-muted)' }}>
+            🧪 {t('courses.labWorkspace')}
+          </h2>
+          <CodeView block={lesson.starter} title="Starter code" />
+          {(lesson.hints?.length ?? 0) > 0 && (
+            <div className="rounded-xl p-3 text-xs space-y-1" style={{ backgroundColor: 'rgba(251,191,36,0.08)', color: 'var(--text-secondary)' }}>
+              {(lesson.hints ?? []).map((hint, i) => (
+                <p key={i}>💡 <strong>Hint {i + 1}:</strong> {hint}</p>
+              ))}
+            </div>
+          )}
+          <TestsList tests={lesson.tests} />
+          {lesson.referenceSolution?.code && (
+            <div>
+              <button
+                onClick={() => setShowReference(s => !s)}
+                className="btn-ghost text-xs inline-flex items-center gap-1.5"
+              >
+                {showReference ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+                {showReference ? t('courses.hideSolution') : t('courses.showSolution')}
+              </button>
+              {showReference && <CodeView block={lesson.referenceSolution} title="Reference solution" />}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* ── Certification project: rubric ── */}
+      {lesson.kind === 'certification-project' && (lesson.rubric?.length ?? 0) > 0 && (
+        <div className="card p-6 space-y-4">
+          <h2 className="font-semibold text-sm uppercase tracking-wider" style={{ color: 'var(--text-muted)' }}>
+            🎓 {t('courses.rubric')}
+          </h2>
+          <div className="overflow-x-auto rounded-xl border" style={{ borderColor: 'var(--border)' }}>
+            <table className="w-full text-sm" style={{ color: 'var(--text-secondary)' }}>
+              <thead>
+                <tr style={{ backgroundColor: 'var(--bg-elevated)' }}>
+                  <th className="px-3 py-2 text-left text-xs">#</th>
+                  <th className="px-3 py-2 text-left text-xs">{t('courses.requirement')}</th>
+                  <th className="px-3 py-2 text-left text-xs">{t('courses.weight')}</th>
+                </tr>
+              </thead>
+              <tbody>
+                {lesson.rubric.map((row) => (
+                  <tr key={row._key} style={{ borderTop: '1px solid var(--border)' }}>
+                    <td className="px-3 py-2">{row.number}</td>
+                    <td className="px-3 py-2">{row.requirement}</td>
+                    <td className="px-3 py-2">{row.weight}{row.required ? ' • required' : ''}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          <CodeView block={lesson.starter} title="Starter workspace" />
+          <TestsList tests={lesson.tests} />
+        </div>
+      )}
+
+      {/* ── Review: covers ── */}
+      {lesson.kind === 'review' && (lesson.covers?.length ?? 0) > 0 && (
+        <div className="card p-6 space-y-3">
+          <h2 className="font-semibold text-sm uppercase tracking-wider" style={{ color: 'var(--text-muted)' }}>
+            📝 {t('courses.covers')}
+          </h2>
+          <div className="flex flex-wrap gap-2">
+            {lesson.covers.map((c: SanityLessonLite) => (
+              <Link
+                key={c._id}
+                href={`/app/lesson/${c.contentId || c._id}`}
+                className="px-3 py-1.5 rounded-full text-xs font-medium border"
+                style={{ borderColor: 'var(--border)', backgroundColor: 'var(--bg-elevated)', color: 'var(--text-secondary)' }}
+              >
+                {c.title}
+              </Link>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* ── Quiz questions ── */}
+      {questions.length > 0 && (
         <div className="space-y-4">
           <h2
             className={`font-semibold text-sm uppercase tracking-wider ${isRTL ? "text-right" : "text-left"}`}
             style={{ color: 'var(--text-muted)' }}
           >
-            {t('courses.knowledgeCheck')} — {(lesson.quizzes || []).length} {t('courses.questions')}
+            {t('courses.knowledgeCheck')} — {questions.length} {t('courses.questions')}
           </h2>
 
-          {(lesson.quizzes || []).map((quiz, i) => (
+          {questions.map((question, i) => (
             <QuizCard
-              key={quiz._key}
-              quiz={quiz}
+              key={question._key}
+              question={question}
               index={i}
               onAnswer={handleQuizAnswer}
               answered={quizAnswers}
@@ -508,7 +672,7 @@ export default function LessonPage() {
               className="card p-5 text-center"
             >
               <p className="font-medium text-sm mb-1" style={{ color: 'var(--text-primary)' }}>
-                🎯 {correctCount} / {(lesson.quizzes || []).length} {t('courses.correct')}
+                🎯 {correctCount} / {questions.length} {t('courses.correct')}
               </p>
               <p className="text-xs" style={{ color: 'var(--text-secondary)' }}>
                 {isCompleted
@@ -523,7 +687,7 @@ export default function LessonPage() {
       {/* ── Navigation footer ── */}
       <div className={`flex justify-between items-center py-4 ${isRTL ? "flex-row-reverse" : ""}`}>
         <Link
-          href={`/app/courses/${lesson.course.slug}`}
+          href={`/app/courses/${lesson.module.course.slug}`}
           className={`btn-secondary gap-2 ${isRTL ? "flex-row-reverse" : ""}`}
         >
           {isRTL ? <ArrowRight className="w-4 h-4" /> : <ArrowLeft className="w-4 h-4" />} {t('courses.courseOverview')}

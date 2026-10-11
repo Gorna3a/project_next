@@ -1,0 +1,30 @@
+{
+  "name": "pixelcode-studio",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "sanity dev --port 3333",
+    "build": "sanity build",
+    "start": "sanity start",
+    "deploy": "sanity deploy",
+    "cors:list": "sanity cors list",
+    "cors:add:app": "sanity cors add http://localhost:3000 --credentials",
+    "cors:add:vite": "sanity cors add http://localhost:5173 --no-credentials",
+    "cors:add:studio": "sanity cors add http://localhost:3333 --credentials"
+  },
+  "dependencies": {
+    "@sanity/code-input": "^7.1.0",
+    "@sanity/vision": "^5.23.0",
+    "framer-motion": "^12.38.0",
+    "lucide-react": "^1.14.0",
+    "motion-dom": "^12.38.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "sanity": "^5.23.0",
+    "styled-components": "^6.4.1"
+  },
+  "devDependencies": {
+    "typescript": "^5.4.5"
+  }
+}

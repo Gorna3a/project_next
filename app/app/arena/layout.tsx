@@ -1,11 +1,10 @@
 'use client';
 import { NavLink } from "@/shared/ui/NavLink";
 import { motion } from "framer-motion";
-import { Trophy, Target, Zap, LayoutDashboard, BarChart3 } from "lucide-react";
+import { Trophy, Zap, LayoutDashboard, BarChart3 } from "lucide-react";
 
 const navItems = [
   { to: "/app/arena", label: "Arena Hub", icon: LayoutDashboard, end: true },
-  { to: "/app/arena/training", label: "Training", icon: Target },
   { to: "/app/arena/duels", label: "Duel Zone", icon: Zap },
   { to: "/app/arena/rankings", label: "Rankings", icon: BarChart3 },
 ];

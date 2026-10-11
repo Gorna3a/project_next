@@ -1,0 +1,18 @@
+{
+  "name": "pixelcode-import",
+  "version": "1.0.0",
+  "description": "Validate PixelCode Markdown course files and import them into Sanity as drafts",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "validate": "node cli.mjs validate",
+    "ndjson": "node cli.mjs ndjson",
+    "import": "node cli.mjs import"
+  },
+  "engines": { "node": ">=18" },
+  "dependencies": {
+    "@sanity/client": "^6.29.0",
+    "dotenv": "^16.4.5",
+    "gray-matter": "^4.0.3"
+  }
+}

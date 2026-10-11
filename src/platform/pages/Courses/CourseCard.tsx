@@ -32,14 +32,15 @@ interface CourseCardProps {
 
 export const CourseCard = ({ course, progress }: CourseCardProps) => {
   const { isRTL } = useLanguage();
-  const meta = LANGUAGE_META[course.language] ?? { short: 'DEV', color: '#161616', label: course.language, bg: 'var(--surface)' };
-  const levelStyle = LEVEL_STYLES[course.level] ?? LEVEL_STYLES.beginner;
+  const codeLang = course.programmingLanguage ?? course.language ?? 'dev';
+  const meta = LANGUAGE_META[codeLang] ?? { short: 'DEV', color: '#161616', label: codeLang, bg: 'var(--surface)' };
+  const levelStyle = LEVEL_STYLES[course.difficulty ?? 'beginner'] ?? LEVEL_STYLES.beginner;
 
   return (
     <div className={`fcard flex h-full flex-col ${isRTL ? 'text-right' : 'text-left'}`} style={{ background: meta.bg, color: meta.bg === 'var(--phosphor)' || meta.bg === 'var(--yellow)' ? '#161616' : meta.bg === '#161616' ? 'var(--phosphor)' : '#161616', minHeight: 320 }}>
       <div className="fcard-top">
-        <span className="fcard-num">{course.language?.toUpperCase() || 'DEV'}</span>
-        <span className="mono" style={{ fontSize: 9, background: levelStyle.bg, color: levelStyle.fg, padding: '3px 6px', border: '2px solid #161616', fontWeight: 800 }}>{course.level?.toUpperCase()}</span>
+        <span className="fcard-num">{codeLang?.toUpperCase() || 'DEV'}</span>
+        <span className="mono" style={{ fontSize: 9, background: levelStyle.bg, color: levelStyle.fg, padding: '3px 6px', border: '2px solid #161616', fontWeight: 800 }}>{course.difficulty?.toUpperCase() ?? 'BEGINNER'}</span>
       </div>
 
       <div className="fcard-icon" style={{ background: '#fff', color: '#161616', border: '3px solid #161616' }}>
@@ -56,8 +57,8 @@ export const CourseCard = ({ course, progress }: CourseCardProps) => {
       </div>
 
       <div className="flex items-center gap-3 mt-3 font-mono text-[11px] font-bold">
-        <span className="flex items-center gap-1"><BookOpen className="h-3 w-3" />{course.totalLessons}</span>
-        <span className="flex items-center gap-1"><Clock className="h-3 w-3" />{course.estimatedHours}h</span>
+        <span className="flex items-center gap-1"><BookOpen className="h-3 w-3" />{course.lessonCount}</span>
+        <span className="flex items-center gap-1"><Clock className="h-3 w-3" />{course.estimatedHours != null ? `${course.estimatedHours}h` : '–'}</span>
         {progress === 100 && <span className="ml-auto flex items-center gap-1 bg-black text-white px-1.5 py-0.5 border border-black"><CheckCircle2 className="h-3 w-3" />Done</span>}
       </div>
 

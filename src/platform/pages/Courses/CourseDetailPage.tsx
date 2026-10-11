@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useRouter, useParams } from "next/navigation";
 import { motion, type Variants } from 'framer-motion';
 import { ArrowLeft, ArrowRight, BookOpen, CheckCircle2, Clock, Lock, PlayCircle, Tag } from 'lucide-react';
-import { getCourse, getLessonsForCourse, type SanityCourse, type SanityLesson } from '../../../core/services/sanity';
+import { getCourse, getModulesForCourse, type SanityCourse, type SanityLessonLite, type SanityModule } from '../../../core/services/sanity';
 import { getCourseProgress, startCourse, type CourseProgressData } from '../../../core/services/progress';
 import { useAuth } from '../../../core/context/AuthContext';
 import { useLanguage } from '../../../core/context/LanguageContext';
@@ -15,6 +15,17 @@ const fadeUp: Variants = {
   hidden: { opacity: 0, y: 16 },
   show: { opacity: 1, y: 0, transition: { duration: 0.4, ease: 'easeOut' as const } },
 };
+
+const KIND_META: Record<string, { emoji: string; label: string }> = {
+  theory: { emoji: '📘', label: 'Theory' },
+  workshop: { emoji: '🛠', label: 'Workshop' },
+  lab: { emoji: '🧪', label: 'Lab' },
+  review: { emoji: '📝', label: 'Review' },
+  quiz: { emoji: '❓', label: 'Quiz' },
+  'certification-project': { emoji: '🎓', label: 'Project' },
+};
+
+const lessonUrl = (lesson: SanityLessonLite) => `/app/lesson/${lesson.contentId || lesson._id}`;
 
 const LessonIcon = ({ done, index, color }: { done: boolean; index: number; color: string }) => {
   if (done) {
@@ -40,7 +51,7 @@ export default function CourseDetailPage() {
 
   const [course, setCourse] = useState<SanityCourse | null>(null);
   const [progress, setProgress] = useState<CourseProgressData | null>(null);
-  const [lessons, setLessons] = useState<SanityLesson[]>([]);
+  const [modules, setModules] = useState<SanityModule[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -54,11 +65,11 @@ export default function CourseDetailPage() {
 
         if (courseData) {
           try {
-            const courseLessons = await getLessonsForCourse(courseData._id);
-            setLessons(courseLessons);
+            const courseModules = await getModulesForCourse(courseData._id);
+            setModules(courseModules);
           } catch (err) {
-            console.error('Failed to load course lessons:', err);
-            setLessons([]);
+            console.error('Failed to load course modules:', err);
+            setModules([]);
           }
         }
 
@@ -81,9 +92,10 @@ export default function CourseDetailPage() {
     fetchData();
   }, [slug, user]);
 
-  const sortedLessons = useMemo(
-    () => [...lessons].sort((a, b) => a.order - b.order),
-    [lessons],
+  // Flattened lesson list in module → lesson order for start/continue logic
+  const allLessons = useMemo(
+    () => modules.flatMap(m => [...(m.items ?? [])].sort((a, b) => (a.order ?? 0) - (b.order ?? 0))),
+    [modules],
   );
 
   const handleStart = async () => {
@@ -93,22 +105,23 @@ export default function CourseDetailPage() {
     } catch (e) {
       console.error('Failed to start course in Firebase:', e);
     }
-    if (sortedLessons.length > 0) {
-      navigate.push(`/app/lesson/${sortedLessons[0].slug}`);
+    if (allLessons.length > 0) {
+      navigate.push(lessonUrl(allLessons[0]));
     }
   };
 
   const handleContinue = () => {
     if (!course) return;
-    const next = sortedLessons.find(lesson => !progress?.completedLessons.includes(lesson._id));
-    if (next) navigate.push(`/app/lesson/${next.slug}`);
+    const next = allLessons.find(lesson => !progress?.completedLessons.includes(lesson._id));
+    if (next) navigate.push(lessonUrl(next));
   };
 
   const isCompleted = (lessonId: string) => progress?.completedLessons.includes(lessonId) ?? false;
   const percent = progress?.percentComplete ?? 0;
 
+  const codeLang = course?.programmingLanguage ?? course?.language ?? 'dev';
   const meta = course
-    ? LANGUAGE_META[course.language] ?? { short: 'DEV', color: '#6272f5', label: course.language }
+    ? LANGUAGE_META[codeLang] ?? { short: 'DEV', color: '#6272f5', label: codeLang }
     : { short: 'DEV', color: '#6272f5', label: 'Course' };
 
   if (loading) {
@@ -137,6 +150,8 @@ export default function CourseDetailPage() {
       </div>
     );
   }
+
+  const difficulty = course.difficulty ?? 'beginner';
 
   return (
     <motion.div
@@ -167,8 +182,13 @@ export default function CourseDetailPage() {
                     {meta.label}
                   </span>
                   <span className="rounded-full px-2 py-0.5 text-xs font-medium capitalize" style={{ backgroundColor: 'var(--accent-subtle)', color: 'var(--accent-text)' }}>
-                    {course.level === 'beginner' ? t('common.beginner') : course.level === 'intermediate' ? t('common.intermediate') : course.level === 'advanced' ? t('common.advanced') : course.level}
+                    {difficulty === 'beginner' ? t('common.beginner') : difficulty === 'intermediate' ? t('common.intermediate') : difficulty === 'advanced' ? t('common.advanced') : difficulty}
                   </span>
+                  {course.domain && (
+                    <span className="rounded-full px-2 py-0.5 text-xs font-medium" style={{ backgroundColor: 'var(--bg-subtle)', color: 'var(--text-secondary)' }}>
+                      {course.domain}
+                    </span>
+                  )}
                 </div>
                 <h1 className="text-2xl font-bold leading-tight sm:text-3xl" style={{ color: 'var(--text-primary)' }}>
                   {course.title}
@@ -179,6 +199,17 @@ export default function CourseDetailPage() {
             <p className="max-w-3xl text-sm leading-7" style={{ color: 'var(--text-secondary)' }}>
               {course.description}
             </p>
+
+            {(course.learningObjectives?.length ?? 0) > 0 && (
+              <ul className={`space-y-1 text-sm ${isRTL ? 'text-right' : 'text-left'}`} style={{ color: 'var(--text-secondary)' }}>
+                {(course.learningObjectives ?? []).map((obj, i) => (
+                  <li key={i} className={`flex items-start gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
+                    <CheckCircle2 className="mt-0.5 h-4 w-4 flex-shrink-0 text-green-500" />
+                    <span>{obj}</span>
+                  </li>
+                ))}
+              </ul>
+            )}
 
             <div className={`flex flex-wrap gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
               {(course.tags || []).map(tag => (
@@ -199,13 +230,13 @@ export default function CourseDetailPage() {
               <div className={isRTL ? 'order-2' : ''}>
                 <p className="text-xs" style={{ color: 'var(--text-muted)' }}>{t('courses.lessons')}</p>
                 <p className={`mt-1 flex items-center gap-1.5 font-semibold ${isRTL ? 'flex-row-reverse' : ''}`} style={{ color: 'var(--text-primary)' }}>
-                  <BookOpen className="h-4 w-4" /> {course.totalLessons}
+                  <BookOpen className="h-4 w-4" /> {course.lessonCount}
                 </p>
               </div>
               <div className={isRTL ? 'order-1' : ''}>
                 <p className="text-xs" style={{ color: 'var(--text-muted)' }}>{t('courses.estimatedTime')}</p>
                 <p className={`mt-1 flex items-center gap-1.5 font-semibold ${isRTL ? 'flex-row-reverse' : ''}`} style={{ color: 'var(--text-primary)' }}>
-                  <Clock className="h-4 w-4" /> {course.estimatedHours}{t('common.hoursShort')}
+                  <Clock className="h-4 w-4" /> {course.estimatedHours != null ? `${course.estimatedHours}${t('common.hoursShort')}` : '–'}
                 </p>
               </div>
             </div>
@@ -242,7 +273,7 @@ export default function CourseDetailPage() {
         </div>
       </section>
 
-      <section className="space-y-3">
+      <section className="space-y-4">
         <div className={`flex items-center justify-between ${isRTL ? 'flex-row-reverse' : ''}`}>
           <h2 className="text-sm font-semibold uppercase tracking-wider" style={{ color: 'var(--text-muted)' }}>
             {t('courses.lessons')}
@@ -252,44 +283,57 @@ export default function CourseDetailPage() {
           </span>
         </div>
 
-        <div className="card divide-y overflow-hidden" style={{ borderColor: 'var(--border)' }}>
-          {sortedLessons.map((lesson, idx) => {
-            const done = isCompleted(lesson._id);
-            const locked = idx > 0 && !isCompleted(sortedLessons[idx - 1]._id) && percent === 0;
+        {modules.map((mod) => {
+          const items = [...(mod.items ?? [])].sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
+          return (
+            <div key={mod._id} className="space-y-2">
+              <h3 className={`text-sm font-bold ${isRTL ? 'text-right' : 'text-left'}`} style={{ color: 'var(--text-primary)' }}>
+                {mod.order != null ? `${mod.order}. ` : ''}{mod.title}
+              </h3>
+              <div className="card divide-y overflow-hidden" style={{ borderColor: 'var(--border)' }}>
+                {items.map((lesson, idx) => {
+                  const done = isCompleted(lesson._id);
+                  const locked = idx > 0 && !isCompleted(items[idx - 1]._id) && percent === 0;
+                  const kind = lesson.kind ? KIND_META[lesson.kind] : null;
 
-            if (locked) {
-              return (
-                <div key={lesson._id} className={`flex cursor-not-allowed items-center gap-4 px-5 py-4 opacity-55 ${isRTL ? 'flex-row-reverse text-right' : ''}`}>
-                  <Lock className="h-5 w-5 flex-shrink-0" style={{ color: 'var(--text-muted)' }} />
-                  <div className="flex-1">
-                    <p className="text-sm font-medium" style={{ color: 'var(--text-secondary)' }}>{lesson.title}</p>
-                    <p className="text-xs" style={{ color: 'var(--text-muted)' }}>{t('courses.lessonLocked')}</p>
-                  </div>
-                </div>
-              );
-            }
+                  if (locked) {
+                    return (
+                      <div key={lesson._id} className={`flex cursor-not-allowed items-center gap-4 px-5 py-4 opacity-55 ${isRTL ? 'flex-row-reverse text-right' : ''}`}>
+                        <Lock className="h-5 w-5 flex-shrink-0" style={{ color: 'var(--text-muted)' }} />
+                        <div className="flex-1">
+                          <p className="text-sm font-medium" style={{ color: 'var(--text-secondary)' }}>{lesson.title}</p>
+                          <p className="text-xs" style={{ color: 'var(--text-muted)' }}>{t('courses.lessonLocked')}</p>
+                        </div>
+                      </div>
+                    );
+                  }
 
-            return (
-              <Link
-                key={lesson._id}
-                href={`/app/lesson/${lesson.slug}`}
-                className={`flex items-center gap-4 px-5 py-4 transition-colors ${isRTL ? 'flex-row-reverse text-right' : ''}`}
-                style={{ color: 'var(--text-primary)' }}
-                onMouseEnter={e => (e.currentTarget.style.backgroundColor = 'var(--bg-subtle)')}
-                onMouseLeave={e => (e.currentTarget.style.backgroundColor = '')}
-              >
-                <LessonIcon done={done} index={idx} color={meta.color} />
-                <div className="min-w-0 flex-1">
-                  <p className="truncate text-sm font-medium">{lesson.title}</p>
-                  <p className="mt-0.5 text-xs" style={{ color: 'var(--text-muted)' }}>
-                    {t('courses.about')} {lesson.estimatedMinutes} {t('common.minutesShort')}
-                  </p>
-                </div>
-                {done && <CheckCircle2 className="h-4 w-4 flex-shrink-0 text-green-500" />}
-              </Link>
-            );
-          })}
-        </div>
+                  return (
+                    <Link
+                      key={lesson._id}
+                      href={lessonUrl(lesson)}
+                      className={`flex items-center gap-4 px-5 py-4 transition-colors ${isRTL ? 'flex-row-reverse text-right' : ''}`}
+                      style={{ color: 'var(--text-primary)' }}
+                      onMouseEnter={e => (e.currentTarget.style.backgroundColor = 'var(--bg-subtle)')}
+                      onMouseLeave={e => (e.currentTarget.style.backgroundColor = '')}
+                    >
+                      <LessonIcon done={done} index={idx} color={meta.color} />
+                      <div className="min-w-0 flex-1">
+                        <p className="truncate text-sm font-medium">
+                          {kind ? `${kind.emoji} ` : ''}{lesson.title}
+                        </p>
+                        <p className="mt-0.5 text-xs" style={{ color: 'var(--text-muted)' }}>
+                          {kind ? `${kind.label} • ` : ''}{t('courses.about')} {lesson.estimatedMinutes ?? '–'} {t('common.minutesShort')}
+                        </p>
+                      </div>
+                      {done && <CheckCircle2 className="h-4 w-4 flex-shrink-0 text-green-500" />}
+                    </Link>
+                  );
+                })}
+              </div>
+            </div>
+          );
+        })}
       </section>
     </motion.div>
   );
