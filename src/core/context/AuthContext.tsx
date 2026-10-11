@@ -91,9 +91,9 @@ const getFriendlyError = (error: AuthError): string => {
 
 /**
  * signInWithPopup reads `popup.closed` to detect cancellation, which
- * Cross-Origin-Opener-Policy: same-origin (set on /app/ide for the Nodepod SW)
- * blocks. When the document is cross-origin isolated we fall back to the
- * redirect flow, which performs a full navigation instead of opening a popup.
+ * Cross-Origin-Opener-Policy: same-origin blocks when the document is
+ * cross-origin isolated. In that case we fall back to the redirect flow,
+ * which performs a full navigation instead of opening a popup.
  */
 const isCrossOriginIsolatedDoc = (): boolean =>
   typeof window !== "undefined" &&

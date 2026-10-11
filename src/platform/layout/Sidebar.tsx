@@ -16,6 +16,7 @@ import {
   Trophy,
   ShieldCheck,
   Users,
+  Target,
 } from "lucide-react";
 import { Logo } from "../../shared/ui/Logo";
 import { useAuth } from "../../core/context/AuthContext";
@@ -37,7 +38,8 @@ export const Sidebar = ({ collapsed, onToggle }: SidebarProps) => {
   const mainItems: NavItem[] = [
     { to: "/app", labelKey: "nav.dashboard", icon: LayoutDashboard },
     { to: "/app/courses", labelKey: "nav.courses", icon: BookOpen },
-    { to: "/app/ide", labelKey: "nav.ide", icon: Terminal },
+    { to: "/app/playground", labelKey: "nav.playground", icon: Terminal },
+    { to: "/app/training", labelKey: "nav.training", icon: Target },
     { to: "/app/arena", labelKey: "nav.arena", icon: Sword },
     { to: "/app/arena/rankings", labelKey: "nav.arena", icon: Trophy },
     { to: "/app/profile", labelKey: "nav.community", icon: Users },

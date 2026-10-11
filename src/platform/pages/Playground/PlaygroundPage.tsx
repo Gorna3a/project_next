@@ -1,7 +1,7 @@
 'use client';
 
-import { useState, useCallback, useRef } from "react";
-import Editor from "@monaco-editor/react";
+import { useState, useCallback, useRef, useEffect } from "react";
+import Editor, { type Monaco } from "@monaco-editor/react";
 import { motion, AnimatePresence, type Variants } from "framer-motion";
 import {
   Play,
@@ -25,6 +25,11 @@ import {
 import { reviewCode, explainError } from "../../../core/services/ai";
 import { useTheme } from "../../../core/context/ThemeContext";
 import { useLanguage } from "../../../core/context/LanguageContext";
+import {
+  PIXELCODE_MONACO_THEME,
+  MONACO_FONT_FAMILY,
+  buildPixelcodeTheme,
+} from "../../../shared/ui/monacoTheme";
 
 // ─── Animation variants ───────────────────────────────────────────────────────
 
@@ -363,8 +368,20 @@ export default function PlaygroundPage() {
     setTimeout(() => setCopied(false), 2000);
   };
 
-  // Monaco theme: use vs-dark for all dark themes, vs for light
-  const monacoTheme = themeData.isDark ? "vs-dark" : "vs";
+  // Monaco theme: rebuilt from the active global theme's CSS vars, so the
+  // editor surface (background, gutter, cursor, selection, widgets) always
+  // matches light/dark/custom themes. Token colors stay stock for readability.
+  // NOTE: intentionally NOT using useMonaco() here — that hook attaches a
+  // rejection-unhandled branch to the loader promise, so a blocked Monaco CDN
+  // surfaces as an "[object Object]" unhandled rejection. beforeMount only
+  // runs after a successful load, and the Editor itself logs load failures.
+  const monacoRef = useRef<Monaco | null>(null);
+  useEffect(() => {
+    const monaco = monacoRef.current;
+    if (!monaco) return;
+    monaco.editor.defineTheme(PIXELCODE_MONACO_THEME, buildPixelcodeTheme(themeData));
+    monaco.editor.setTheme(PIXELCODE_MONACO_THEME);
+  }, [themeData]);
 
   // ─────────────────────────────────────────────────────────────────────────────
 
@@ -468,14 +485,18 @@ export default function PlaygroundPage() {
               height="100%"
               language={LANGUAGES[language]?.monacoLang ?? language}
               value={code}
-              theme={monacoTheme}
+              theme={PIXELCODE_MONACO_THEME}
               onChange={(val) => setCode(val ?? "")}
+              beforeMount={(monaco) => {
+                monacoRef.current = monaco;
+                monaco.editor.defineTheme(PIXELCODE_MONACO_THEME, buildPixelcodeTheme(themeData));
+              }}
               onMount={(editor) => {
                 editorRef.current = editor;
               }}
               options={{
                 fontSize: 14,
-                fontFamily: "JetBrains Mono, Fira Code, monospace",
+                fontFamily: MONACO_FONT_FAMILY,
                 fontLigatures: true,
                 minimap: { enabled: false },
                 scrollBeyondLastLine: false,

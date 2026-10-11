@@ -1,4 +1,66 @@
-import type { SanityCourse, SanityLesson } from './sanity';
+// ─── Legacy (pre-v2) shape — hardcoded fallback only ─────────────────────────
+// These interfaces describe the OLD starter data below. The live app uses the
+// v2 types from './sanity'; this file is adapted to v2 at the boundary there.
+
+export interface LegacySanityQuiz {
+  _key: string;
+  question: string;
+  options: string[];
+  correctIndex: number;
+  explanation: string;
+  xp: number;
+}
+
+export interface LegacySanityCourse {
+  _id: string;
+  title: string;
+  slug: string;
+  shortDescription: string;
+  description: string;
+  language: string;
+  courseVersion: string;
+  level: "beginner" | "intermediate" | "advanced";
+  thumbnail?: unknown;
+  thumbnailPrompt?: string;
+  tags: string[];
+  learningObjectives: string[];
+  prerequisites: string[];
+  totalLessons: number;
+  estimatedHours: number;
+  order: number;
+  status: "draft" | "published" | "archived";
+  publishedAt: string;
+}
+
+export interface LegacySanityLesson {
+  _id: string;
+  title: string;
+  slug: string;
+  order: number;
+  summary: string;
+  objectives: string[];
+  difficulty: "easy" | "medium" | "hard";
+  estimatedMinutes: number;
+  xp: number;
+  lessonType?: "standard" | "lab";
+  notebookUrl?: string;
+  exercise?: {
+    title: string;
+    instructions: string;
+    starterCode: string;
+    solution: string;
+    expectedOutput: string;
+  };
+  body: { _type: string; [key: string]: unknown }[];
+  quizzes: LegacySanityQuiz[];
+  course: {
+    _id: string;
+    title: string;
+    slug: string;
+    language: string;
+    totalLessons: number;
+  };
+}
 
 const block = (key: string, text: string, style = 'normal') => ({
   _type: 'block',
@@ -24,7 +86,7 @@ const quiz = (
   xp = 10
 ) => ({ _key: key, question, options, correctIndex, explanation, xp });
 
-const courseSummaries: SanityCourse[] = [
+const courseSummaries: LegacySanityCourse[] = [
   {
     _id: 'starter-python',
     title: 'Python Foundations',
@@ -128,7 +190,7 @@ const courseSummaries: SanityCourse[] = [
 
 ];
 
-const lessonDetails: SanityLesson[] = [
+const lessonDetails: LegacySanityLesson[] = [
   {
     _id: 'starter-python-1',
     title: 'Values and Variables',
@@ -847,6 +909,9 @@ CREATE TABLE books (
 ];
 
 export const getStarterCourses = () => courseSummaries;
+
+export const getStarterCourseById = (id: string) =>
+  courseSummaries.find(course => course._id === id) ?? null;
 
 export const getStarterCourse = (slug: string) =>
   courseSummaries.find(course => course.slug === slug) ?? null;

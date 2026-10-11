@@ -1,6 +1,7 @@
 // ─── Judge0 CE Code Execution Service ────────────────────────────────────────
-// Uses Judge0 Community Edition via a local Vite proxy to bypass CORS.
-// In production, point VITE_JUDGE0_URL to your own Judge0 instance or proxy.
+// Browser calls go to the same-origin /api/judge0 proxy (see app/api/judge0),
+// which forwards to JUDGE0_UPSTREAM. Point JUDGE0_UPSTREAM at your own Judge0
+// instance in production; it defaults to the public community server.
 
 const JUDGE0_URL = process.env.NEXT_PUBLIC_JUDGE0_URL ?? "https://ce.judge0.com";
 

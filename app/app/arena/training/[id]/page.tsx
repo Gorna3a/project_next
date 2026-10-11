@@ -1,8 +1,14 @@
 'use client';
-import dynamic from "next/dynamic";
+import { useEffect } from "react";
+import { useParams, useRouter } from "next/navigation";
 
-const ChallengeView = dynamic(() => import("@/platform/pages/Arena/ChallengeView"), { ssr: false });
+export default function LegacyTrainingChallenge() {
+  const params = useParams();
+  const router = useRouter();
 
-export default function Challenge() {
-  return <ChallengeView />;
+  useEffect(() => {
+    router.replace(`/app/training/${params.id}`);
+  }, [params.id, router]);
+
+  return null;
 }

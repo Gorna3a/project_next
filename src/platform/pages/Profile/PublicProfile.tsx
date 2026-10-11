@@ -21,7 +21,7 @@ export default function PublicProfile() {
   const params = useParams();
   const uid = params.uid as string;
   const navigate = useRouter();
-  const { profile: currentProfile } = useAuth();
+  const { profile: currentProfile, user, loading: authLoading } = useAuth();
   const { addNotification } = useNotifications();
   const { t, isRTL } = useLanguage();
   
@@ -35,6 +35,14 @@ export default function PublicProfile() {
   useEffect(() => {
     const fetchUser = async () => {
       if (!uid) return;
+      // Wait for auth to settle — fetching with no token produces a
+      // permission-denied error and an empty profile.
+      if (authLoading) return;
+      if (!user) {
+        setProfile(null);
+        setLoading(false);
+        return;
+      }
       setLoading(true);
       try {
         const snap = await getDoc(doc(db, "users", uid));
@@ -57,7 +65,7 @@ export default function PublicProfile() {
       }
     };
     fetchUser();
-  }, [uid, currentProfile]);
+  }, [uid, currentProfile, user, authLoading]);
 
   const handleDuel = async () => {
     if (!currentProfile || !profile) return;

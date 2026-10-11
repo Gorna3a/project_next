@@ -26,9 +26,9 @@ export default function CourseManagement() {
     fetchCourses();
   }, []);
 
-  const filtered = courses.filter(c => 
-    c.title.toLowerCase().includes(search.toLowerCase()) || 
-    c.language.toLowerCase().includes(search.toLowerCase())
+  const filtered = courses.filter(c =>
+    c.title.toLowerCase().includes(search.toLowerCase()) ||
+    (c.programmingLanguage ?? c.language ?? '').toLowerCase().includes(search.toLowerCase())
   );
 
   return (
@@ -79,19 +79,19 @@ export default function CourseManagement() {
                 <div key={course._id} className="card p-4 flex items-center justify-between group hover:border-indigo-200 transition-all">
                   <div className="flex items-center gap-3">
                     <div className="w-10 h-10 rounded-xl bg-gray-50 dark:bg-gray-800 flex items-center justify-center text-xl shadow-inner">
-                      {course.language === 'python' ? '🐍' : '⚡'}
+                      {(course.programmingLanguage ?? course.language) === 'python' ? '🐍' : '⚡'}
                     </div>
                     <div>
                       <h3 className="font-bold text-sm">{course.title}</h3>
                       <div className="flex items-center gap-2 text-[10px] font-black text-gray-400 uppercase tracking-widest">
-                        <span>{course.language}</span>
+                        <span>{course.programmingLanguage ?? course.language ?? 'dev'}</span>
                         <span>•</span>
-                        <span>{course.level}</span>
+                        <span>{course.difficulty ?? 'beginner'}</span>
                       </div>
                     </div>
                   </div>
                   <div className="text-xs font-black text-indigo-500 px-3 py-1 rounded-full bg-indigo-50 dark:bg-indigo-900/20">
-                    {course.totalLessons} Lessons
+                    {course.lessonCount} Lessons
                   </div>
                 </div>
               ))
