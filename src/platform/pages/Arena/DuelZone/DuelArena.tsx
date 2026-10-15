@@ -5,7 +5,7 @@ import { useParams, useRouter } from "next/navigation";
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Timer, CheckCircle2, XCircle, 
-  Lightbulb 
+  Lightbulb, User, Ghost, Hourglass, Trophy, Skull
 } from 'lucide-react';
 import { doc, getDoc } from 'firebase/firestore';
 import { db } from '../../../../core/firebase/config';
@@ -112,8 +112,13 @@ export default function DuelArena() {
 
   if (loading || !room || !challenge) return (
     <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4">
-      <div className="w-12 h-12 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin" />
-      <p className="font-black text-gray-500 animate-pulse">PREPARING ARENA...</p>
+      <div
+        className="grid place-items-center animate-pulse"
+        style={{ width: 72, height: 72, backgroundColor: 'var(--border)', border: '4px solid var(--border)' }}
+      >
+        <Timer style={{ width: 30, height: 30, color: 'var(--phosphor)' }} className="animate-spin" />
+      </div>
+      <p style={{ fontFamily: "'Press Start 2P', monospace", fontSize: 11, color: 'var(--muted)' }}>PREPARING ARENA...</p>
     </div>
   );
 
@@ -124,36 +129,58 @@ export default function DuelArena() {
   const isGameOver = room.status === 'finished';
 
   return (
-    <div className="max-w-4xl mx-auto space-y-6 pb-20">
+    <div className="max-w-4xl mx-auto space-y-4 pb-20">
       {/* Duel Header / Status Bar */}
-      <div className="sticky top-[120px] z-30 bg-white/80 dark:bg-gray-950/80 backdrop-blur-md rounded-2xl border-2 border-gray-100 dark:border-gray-800 p-4 shadow-xl">
+      <div
+        className="sticky top-[120px] z-30 p-4"
+        style={{ backgroundColor: 'var(--surface)', border: '4px solid var(--border)', boxShadow: 'var(--shadow-sm)' }}
+      >
         <div className="flex items-center justify-between gap-4">
           {/* My Stats */}
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full bg-indigo-100 dark:bg-indigo-900/30 flex items-center justify-center text-lg">👤</div>
+            <div
+              className="grid place-items-center"
+              style={{ width: 42, height: 42, backgroundColor: 'var(--phosphor)', border: '3px solid var(--border)', flexShrink: 0 }}
+            >
+              <User style={{ width: 20, height: 20, color: '#000' }} />
+            </div>
             <div>
-              <div className="text-[10px] font-black text-indigo-500 uppercase">You</div>
-              <div className="text-sm font-bold truncate max-w-[100px]">{profile?.displayName}</div>
+              <div className="mono text-[10px] font-black uppercase" style={{ color: 'var(--phosphor-dark)' }}>You</div>
+              <div className="text-sm font-black truncate max-w-[100px]" style={{ color: 'var(--fg)' }}>{profile?.displayName}</div>
             </div>
           </div>
 
           {/* VS & Timer */}
           <div className="flex flex-col items-center">
-            <div className="flex items-center gap-4">
-              <div className={`px-3 py-1 rounded-full text-xs font-black uppercase tracking-widest transition-all ${myStatus === 'finished' ? 'bg-green-500 text-white' : 'bg-gray-100 dark:bg-gray-800 text-gray-400'}`}>
+            <div className="flex items-center gap-3 flex-wrap justify-center">
+              <span
+                className="mono text-[10px] font-black uppercase tracking-widest px-2 py-1"
+                style={{
+                  backgroundColor: myStatus === 'finished' ? '#22c55e' : 'var(--surface-2)',
+                  color: myStatus === 'finished' ? '#000' : 'var(--muted)',
+                  border: '3px solid var(--border)',
+                }}
+              >
                 {myStatus === 'finished' ? 'DONE!' : 'Racing'}
-              </div>
-              <div className="text-2xl font-black text-gray-800 dark:text-white tabular-nums flex items-center gap-2">
-                <Timer className={`w-5 h-5 ${duelTime > 30 ? 'text-red-500 animate-pulse' : 'text-indigo-500'}`} />
+              </span>
+              <div className="text-2xl font-black tabular-nums flex items-center gap-2" style={{ fontFamily: "'Press Start 2P', monospace", fontSize: 16, color: 'var(--fg)' }}>
+                <Timer style={{ width: 16, height: 16, color: duelTime > 30 ? 'var(--orange)' : 'var(--phosphor-dark)' }} className={duelTime > 30 ? 'animate-pulse' : ''} />
                 {Math.floor(duelTime / 60)}:{(duelTime % 60).toString().padStart(2, '0')}
               </div>
-              <div className={`px-3 py-1 rounded-full text-xs font-black uppercase tracking-widest transition-all ${opponentStatus === 'finished' ? 'bg-red-500 text-white' : 'bg-gray-100 dark:bg-gray-800 text-gray-400'}`}>
+              <span
+                className="mono text-[10px] font-black uppercase tracking-widest px-2 py-1"
+                style={{
+                  backgroundColor: opponentStatus === 'finished' ? 'var(--orange)' : 'var(--surface-2)',
+                  color: '#000',
+                  border: '3px solid var(--border)',
+                }}
+              >
                 {opponentStatus === 'finished' ? 'FINISHED' : 'Thinking'}
-              </div>
+              </span>
             </div>
             {isGameOver && (
-              <div className="mt-2 text-xs font-black text-amber-500 uppercase animate-bounce">
-                {isWinner ? '🎉 YOU WON!' : '💀 DEFEAT'}
+              <div className="mt-2 animate-bounce" style={{ fontFamily: "'Press Start 2P', monospace", fontSize: 10, color: 'var(--amber)' }}>
+                {isWinner ? 'YOU WON!' : 'DEFEAT'}
               </div>
             )}
           </div>
@@ -161,25 +188,32 @@ export default function DuelArena() {
           {/* Opponent Stats */}
           <div className="flex items-center gap-3 text-right">
             <div>
-              <div className="text-[10px] font-black text-red-500 uppercase">Opponent</div>
-              <div className="text-sm font-bold truncate max-w-[100px]">{opponentName}</div>
+              <div className="mono text-[10px] font-black uppercase" style={{ color: 'var(--orange)' }}>Opponent</div>
+              <div className="text-sm font-black truncate max-w-[100px]" style={{ color: 'var(--fg)' }}>{opponentName}</div>
             </div>
-            <div className="w-10 h-10 rounded-full bg-red-100 dark:bg-red-900/30 flex items-center justify-center text-lg">👺</div>
+            <div
+              className="grid place-items-center"
+              style={{ width: 42, height: 42, backgroundColor: 'var(--orange)', border: '3px solid var(--border)', flexShrink: 0 }}
+            >
+              <Ghost style={{ width: 20, height: 20, color: '#000' }} />
+            </div>
           </div>
         </div>
 
         {/* Progress Bars */}
         <div className="mt-4 grid grid-cols-2 gap-4">
-          <div className="h-1.5 bg-gray-100 dark:bg-gray-800 rounded-full overflow-hidden">
+          <div style={{ height: 12, backgroundColor: 'var(--surface-2)', border: '3px solid var(--border)', padding: 2, display: 'flex' }}>
             <motion.div 
-              className="h-full bg-indigo-500"
+              className="h-full"
+              style={{ backgroundColor: 'var(--phosphor)' }}
               initial={{ width: 0 }}
               animate={{ width: myStatus === 'finished' ? '100%' : '50%' }}
             />
           </div>
-          <div className="h-1.5 bg-gray-100 dark:bg-gray-800 rounded-full overflow-hidden flex justify-end">
+          <div style={{ height: 12, backgroundColor: 'var(--surface-2)', border: '3px solid var(--border)', padding: 2, display: 'flex', justifyContent: 'flex-end' }}>
             <motion.div 
-              className="h-full bg-red-500"
+              className="h-full"
+              style={{ backgroundColor: 'var(--orange)' }}
               initial={{ width: 0 }}
               animate={{ width: opponentStatus === 'finished' ? '100%' : '50%' }}
             />
@@ -193,33 +227,39 @@ export default function DuelArena() {
             initial={{ opacity: 0, scale: 2 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.5 }}
-            className="fixed inset-0 z-50 flex items-center justify-center bg-gray-950/80 backdrop-blur-xl"
+            className="fixed inset-0 z-50 flex items-center justify-center"
+            style={{ backgroundColor: 'rgba(0,0,0,0.85)' }}
           >
             <div className="text-center">
-              <div className="text-[100px] font-black text-white leading-none">{countdown}</div>
-              <div className="text-xl font-black text-indigo-400 uppercase tracking-widest mt-4">Get Ready!</div>
+              <div style={{ fontFamily: "'Press Start 2P', monospace", fontSize: 100, color: 'var(--phosphor)', lineHeight: 1 }}>{countdown}</div>
+              <div className="mono text-sm font-black uppercase tracking-widest mt-4" style={{ color: 'var(--surface)' }}>Get Ready!</div>
             </div>
           </motion.div>
         )}
       </AnimatePresence>
 
       {room.status === 'waiting' && (
-        <div className="card p-12 text-center space-y-6">
-          <div className="w-20 h-20 bg-indigo-100 dark:bg-indigo-900/30 rounded-full flex items-center justify-center text-4xl mx-auto animate-bounce">⏳</div>
+        <div className="panel p-12 text-center space-y-6">
+          <div
+            className="mx-auto grid place-items-center animate-bounce"
+            style={{ width: 80, height: 80, backgroundColor: 'var(--surface-2)', border: '4px solid var(--border)' }}
+          >
+            <Hourglass style={{ width: 34, height: 34, color: 'var(--phosphor-dark)' }} />
+          </div>
           <div className="space-y-2">
-            <h2 className="text-2xl font-black">Waiting for Opponent...</h2>
-            <p className="text-gray-500 font-medium max-w-sm mx-auto">
+            <h2 style={{ fontFamily: "'Press Start 2P', monospace", fontSize: 16, color: 'var(--fg)' }}>Waiting for Opponent...</h2>
+            <p className="mono text-xs font-bold max-w-sm mx-auto" style={{ color: 'var(--muted)' }}>
               You are the host of this duel. Once a challenger joins, the race will begin automatically!
             </p>
           </div>
-          <div className="flex justify-center gap-3">
-            <button onClick={() => navigate.push('/app/arena/duels')} className="btn-secondary">Cancel Duel</button>
+          <div className="flex justify-center gap-3 flex-wrap">
+            <button onClick={() => navigate.push('/app/arena/duels')} className="big-btn !w-auto px-5">Cancel Duel</button>
             <button 
               onClick={() => {
                 navigator.clipboard.writeText(window.location.href);
                 alert('Room link copied!');
               }} 
-              className="btn-primary"
+              className="big-btn yellow !w-auto px-5"
             >
               Copy Invite Link
             </button>
@@ -231,18 +271,18 @@ export default function DuelArena() {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="space-y-6"
+          className="space-y-4"
         >
           {/* Challenge Player */}
-          <div className="card p-6 space-y-4">
-            <div className="flex items-center gap-3">
-              <span className="px-2.5 py-1 rounded-full bg-indigo-50 text-indigo-600 text-xs font-black border border-indigo-100 uppercase">
-                {challenge.difficulty}
-              </span>
-              <span className="text-xs font-bold text-gray-400">{challenge.language}</span>
+          <div className="panel">
+            <div className="panel-head">
+              <span>{challenge.difficulty} • {challenge.language}</span>
+              <span>+{challenge.xp} XP</span>
             </div>
-            <h1 className="text-2xl font-black">{challenge.title}</h1>
-            <p className="text-gray-600 dark:text-gray-400 font-medium leading-relaxed">{challenge.description}</p>
+            <div className="p-5 space-y-3" style={{ backgroundColor: 'var(--surface)' }}>
+              <h1 className="text-xl font-black" style={{ color: 'var(--fg)' }}>{challenge.title}</h1>
+              <p className="text-sm font-medium leading-relaxed" style={{ color: 'var(--muted)' }}>{challenge.description}</p>
+            </div>
           </div>
 
           <div className="grid gap-3">
@@ -250,11 +290,14 @@ export default function DuelArena() {
               const isSelected = selected === key;
               const isCorrect = key === challenge.correctAnswer;
               
-              let styles = "border-gray-100 dark:border-gray-800 hover:border-indigo-500";
+              let bg: string = 'var(--surface)';
+              let border = 'var(--border)';
+              let textColor = 'var(--fg)';
+              let shadow = 'var(--shadow-sm)';
               if (answered) {
-                if (isCorrect) styles = "border-green-500 bg-green-50 dark:bg-green-900/20 text-green-700 ring-2 ring-green-500";
-                else if (isSelected) styles = "border-red-500 bg-red-50 dark:bg-red-900/20 text-red-700";
-                else styles = "opacity-50 border-gray-100";
+                if (isCorrect) { bg = 'rgba(34,197,94,0.12)'; border = '#22c55e'; textColor = '#22c55e'; }
+                else if (isSelected) { bg = 'rgba(239,68,68,0.12)'; border = '#ef4444'; textColor = '#ef4444'; }
+                else { textColor = 'var(--muted)'; shadow = 'none'; }
               }
 
               return (
@@ -262,15 +305,19 @@ export default function DuelArena() {
                   key={key}
                   disabled={answered || isGameOver}
                   onClick={() => handleSelect(key)}
-                  className={`w-full p-5 rounded-2xl border-2 text-left transition-all flex items-center gap-4 ${styles}`}
+                  className="w-full p-4 text-left transition-all flex items-center gap-4"
+                  style={{ backgroundColor: bg, border: `4px solid ${border}`, boxShadow: shadow, color: textColor }}
                 >
-                  <span className="w-8 h-8 rounded-full border-2 flex items-center justify-center font-black text-sm">
+                  <span
+                    className="grid place-items-center font-black text-sm mono"
+                    style={{ width: 32, height: 32, border: `3px solid ${border}`, flexShrink: 0 }}
+                  >
                     {String.fromCharCode(65 + parseInt(key))}
                   </span>
-                  <pre className="font-mono text-sm whitespace-pre-wrap">{value as string}</pre>
-                  <div className="ml-auto">
-                    {answered && isCorrect && <CheckCircle2 className="w-6 h-6 text-green-500" />}
-                    {answered && isSelected && !isCorrect && <XCircle className="w-6 h-6 text-red-500" />}
+                  <pre className="font-mono text-sm whitespace-pre-wrap flex-1">{value as string}</pre>
+                  <div className="ml-auto flex-shrink-0">
+                    {answered && isCorrect && <CheckCircle2 style={{ width: 22, height: 22, color: '#22c55e' }} />}
+                    {answered && isSelected && !isCorrect && <XCircle style={{ width: 22, height: 22, color: '#ef4444' }} />}
                   </div>
                 </button>
               );
@@ -282,17 +329,22 @@ export default function DuelArena() {
                <button
                 onClick={handleGetHint}
                 disabled={loadingHint}
-                className="btn-ghost text-xs flex items-center gap-2"
+                className="badge !py-2 !px-4"
               >
-                <Lightbulb className="w-4 h-4 text-yellow-500" />
+                <Lightbulb style={{ width: 14, height: 14, color: 'var(--amber)' }} />
                 {loadingHint ? 'Thinking...' : 'Get Hint (+5s Penalty)'}
               </button>
             </div>
           )}
 
           {showHint && (
-            <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} className="p-4 rounded-xl bg-amber-50 dark:bg-amber-900/20 border border-amber-200 text-sm font-medium text-amber-700">
-              💡 {hint}
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: 'auto' }}
+              className="p-4 mono text-xs font-bold"
+              style={{ backgroundColor: 'var(--surface)', border: '4px solid var(--amber)', boxShadow: 'var(--shadow-sm)', color: 'var(--fg)' }}
+            >
+              HINT: {hint}
             </motion.div>
           )}
         </motion.div>
@@ -304,38 +356,42 @@ export default function DuelArena() {
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-gray-950/80 backdrop-blur-md"
+            className="fixed inset-0 z-50 flex items-center justify-center p-4"
+            style={{ backgroundColor: 'rgba(0,0,0,0.7)' }}
           >
             <motion.div
               initial={{ scale: 0.9, y: 20 }}
               animate={{ scale: 1, y: 0 }}
-              className="card p-10 max-w-sm w-full text-center space-y-6 shadow-2xl"
+              className="panel p-10 max-w-sm w-full text-center space-y-6"
             >
-              <div className="text-7xl">{isWinner ? '🏆' : '💀'}</div>
+              <div className="flex justify-center">
+                {isWinner
+                  ? <Trophy style={{ width: 56, height: 56, color: 'var(--amber)' }} />
+                  : <Skull style={{ width: 56, height: 56, color: 'var(--muted)' }} />}
+              </div>
               <div>
-                <h2 className="text-3xl font-black mb-2">{isWinner ? 'VICTORY!' : 'DEFEAT'}</h2>
-                <p className="text-gray-500 font-bold">
+                <h2 style={{ fontFamily: "'Press Start 2P', monospace", fontSize: 20, color: 'var(--fg)', marginBottom: 8 }}>{isWinner ? 'VICTORY!' : 'DEFEAT'}</h2>
+                <p className="mono text-xs font-bold" style={{ color: 'var(--muted)' }}>
                   {isWinner 
                     ? `You outcoded ${opponentName} in ${duelTime} seconds!` 
                     : `${opponentName} was faster this time...`}
                 </p>
               </div>
               
-              <div className="bg-gray-50 dark:bg-gray-900 rounded-2xl p-4 flex justify-around">
-                <div>
-                  <div className="text-2xl font-black text-indigo-500">+{isWinner ? '25' : '0'}</div>
-                  <div className="text-[10px] font-black text-gray-400 uppercase">Rating</div>
+              <div className="grid grid-cols-2" style={{ border: '4px solid var(--border)' }}>
+                <div className="p-4" style={{ borderRight: '4px solid var(--border)' }}>
+                  <div style={{ fontFamily: "'Press Start 2P', monospace", fontSize: 18, color: 'var(--phosphor-dark)' }}>+{isWinner ? '25' : '0'}</div>
+                  <div className="mono text-[10px] font-black uppercase" style={{ color: 'var(--muted)' }}>Rating</div>
                 </div>
-                <div className="w-px bg-gray-200 dark:bg-gray-800" />
-                <div>
-                  <div className="text-2xl font-black text-amber-500">+{isWinner ? challenge.xp : '10'}</div>
-                  <div className="text-[10px] font-black text-gray-400 uppercase">XP</div>
+                <div className="p-4" style={{ backgroundColor: 'var(--surface-2)' }}>
+                  <div style={{ fontFamily: "'Press Start 2P', monospace", fontSize: 18, color: 'var(--amber)' }}>+{isWinner ? challenge.xp : '10'}</div>
+                  <div className="mono text-[10px] font-black uppercase" style={{ color: 'var(--muted)' }}>XP</div>
                 </div>
               </div>
 
               <div className="flex flex-col gap-2">
-                <button onClick={() => navigate.push('/app/arena/duels')} className="btn-primary w-full justify-center">Back to Lobby</button>
-                <button onClick={() => navigate.push('/app/arena/rankings')} className="btn-secondary w-full justify-center">View Leaderboard</button>
+                <button onClick={() => navigate.push('/app/arena/duels')} className="big-btn green w-full justify-center">Back to Lobby</button>
+                <button onClick={() => navigate.push('/app/arena/rankings')} className="big-btn w-full justify-center">View Leaderboard</button>
               </div>
             </motion.div>
           </motion.div>

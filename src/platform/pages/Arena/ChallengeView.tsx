@@ -68,10 +68,10 @@ const TYPE_META: Record<string, { label: string; emoji: string; color: string }>
 
 const LoadingSkeleton = () => (
   <div className="max-w-3xl mx-auto animate-pulse space-y-4">
-    <div className="h-8 rounded w-1/3" style={{ backgroundColor: 'var(--bg-surface)' }} />
-    <div className="h-48 rounded-2xl" style={{ backgroundColor: 'var(--bg-surface)' }} />
+    <div className="h-8 w-1/3" style={{ backgroundColor: 'var(--surface-2)', border: '3px solid var(--border)' }} />
+    <div className="h-48" style={{ backgroundColor: 'var(--surface-2)', border: '4px solid var(--border)' }} />
     {Array.from({ length: 4 }).map((_, i) => (
-      <div key={i} className="h-14 rounded-xl" style={{ backgroundColor: 'var(--bg-surface)' }} />
+      <div key={i} className="h-14" style={{ backgroundColor: 'var(--surface-2)', border: '3px solid var(--border)' }} />
     ))}
   </div>
 );
@@ -327,7 +327,7 @@ export default function ChallengeView() {
               animate={{ scale: 1,   opacity: 1 }}
               exit={{   scale: 0.8, opacity: 0 }}
               transition={{ duration: 0.25, ease: 'easeOut' as const }}
-              className="card p-8 max-w-sm w-full text-center space-y-4 shadow-2xl"
+              className="panel p-8 max-w-sm w-full text-center space-y-4"
               onClick={e => e.stopPropagation()}
             >
               {/* Emoji */}
@@ -336,8 +336,8 @@ export default function ChallengeView() {
               {/* Headline */}
               <div>
                 <h2
-                  className="text-2xl font-bold mb-1"
-                  style={{ color: 'var(--text-primary)' }}
+                  className="mb-2"
+                  style={{ fontFamily: "'Press Start 2P', monospace", fontSize: 18, color: 'var(--fg)' }}
                 >
                   {isCorrect ? t('arena.correct') : t('arena.notQuite')}
                 </h2>
@@ -361,7 +361,7 @@ export default function ChallengeView() {
                     </p>
                     {challenge.explanations?.[challenge.correctAnswer] && (
                       <p
-                        className="text-xs leading-relaxed p-3 rounded-xl"
+                        className="text-xs leading-relaxed p-3"
                         style={{ backgroundColor: 'var(--bg-subtle)' }}
                       >
                         {challenge.explanations[challenge.correctAnswer]}
@@ -375,13 +375,13 @@ export default function ChallengeView() {
               <div className={`flex gap-3 ${isRTL ? 'flex-row-reverse' : ''}`}>
                 <button
                   onClick={() => setShowResult(false)}
-                  className="btn-secondary flex-1"
+                  className="big-btn flex-1"
                 >
                   {t('arena.review')}
                 </button>
                 <Link
                   href="/app/training"
-                  className={`btn-primary flex-1 justify-center ${isRTL ? 'flex-row-reverse' : ''}`}
+                  className={`big-btn yellow flex-1 justify-center ${isRTL ? 'flex-row-reverse' : ''}`}
                 >
                   {t('arena.more')} {isRTL ? <ArrowLeft className="w-4 h-4" /> : <ArrowRight className="w-4 h-4" />}
                 </Link>
@@ -398,67 +398,55 @@ export default function ChallengeView() {
       </Link>
 
       {/* ── Challenge header ──────────────────────────────────────────────────── */}
-      <div className="card p-8 space-y-5">
-        {/* Meta row */}
-        <div className={`flex items-center gap-3 flex-wrap ${isRTL ? 'flex-row-reverse' : ''}`}>
-          <span
-            className="text-xs font-semibold px-2.5 py-1 rounded-full"
-            style={{ backgroundColor: diff.bg, color: diff.color }}
-          >
-            {diff.label}
-          </span>
-          <span
-            className={`text-xs font-bold flex items-center gap-1 ${isRTL ? 'flex-row-reverse' : ''}`}
-            style={{ color: '#f59e0b' }}
-          >
-            <Star className="w-3.5 h-3.5 fill-current" />
-            {challenge.xp} {t('common.xp')}
-          </span>
-          {challenge.language && (
+      <div className="panel">
+        <div className="panel-head">
+          <span className="inline-flex items-center gap-2">
             <span
-              className="text-xs px-2 py-0.5 rounded-full"
-              style={{ backgroundColor: 'var(--bg-subtle)', color: 'var(--text-muted)' }}
+              className="mono text-[10px] font-black px-1.5 py-0.5 uppercase"
+              style={{ backgroundColor: diff.bg, color: diff.color, border: '2px solid var(--border)' }}
             >
-              {challenge.language}
+              {diff.label}
             </span>
+            <span className="mono text-[10px] font-black inline-flex items-center gap-1" style={{ color: '#f59e0b' }}>
+              <Star className="w-3 h-3 fill-current" />
+              {challenge.xp} {t('common.xp')}
+            </span>
+          </span>
+          <span className="mono text-[10px] font-black uppercase">
+            {challenge.language}
+            {challenge.type && TYPE_META[challenge.type] && (
+              <> • {TYPE_META[challenge.type].emoji} {TYPE_META[challenge.type].label}</>
+            )}
+          </span>
+        </div>
+        <div className="p-5 space-y-4" style={{ backgroundColor: 'var(--surface)' }}>
+          {/* Title */}
+          <h1
+            className="text-xl font-black leading-snug"
+            style={{ color: 'var(--fg)' }}
+          >
+            {challenge.title}
+          </h1>
+
+          {/* Description — Markdown so fenced code renders as a snippet */}
+          {challenge.description && (
+            <Markdown content={challenge.description} rtl={isRTL} />
           )}
-          {challenge.type && TYPE_META[challenge.type] && (
-            <span
-              className="text-xs px-2 py-0.5 rounded-full inline-flex items-center gap-1"
-              style={{ backgroundColor: 'var(--bg-subtle)', color: TYPE_META[challenge.type].color }}
-            >
-              {TYPE_META[challenge.type].emoji} {TYPE_META[challenge.type].label}
-            </span>
+
+          {/* Tags */}
+          {challenge.tags && challenge.tags.length > 0 && (
+            <div className={`flex flex-wrap gap-1.5 pt-1 ${isRTL ? 'flex-row-reverse' : ''}`}>
+              {challenge.tags.map(tag => (
+                <span
+                  key={tag}
+                  className="badge !py-0.5 !px-2 mono !text-[10px]"
+                >
+                  {tag}
+                </span>
+              ))}
+            </div>
           )}
         </div>
-
-        {/* Title */}
-        <h1
-          className="text-2xl font-bold leading-snug"
-          style={{ color: 'var(--text-primary)' }}
-        >
-          {challenge.title}
-        </h1>
-
-        {/* Description — Markdown so fenced code renders as a snippet */}
-        {challenge.description && (
-          <Markdown content={challenge.description} rtl={isRTL} />
-        )}
-
-        {/* Tags */}
-        {challenge.tags && challenge.tags.length > 0 && (
-          <div className={`flex flex-wrap gap-1.5 pt-1 ${isRTL ? 'flex-row-reverse' : ''}`}>
-            {challenge.tags.map(tag => (
-              <span
-                key={tag}
-                className="text-xs px-2 py-0.5 rounded-full"
-                style={{ backgroundColor: 'var(--bg-subtle)', color: 'var(--text-muted)' }}
-              >
-                {tag}
-              </span>
-            ))}
-          </div>
-        )}
       </div>
 
       {/* ── Options (choice-based types; missing-word uses the input below) ─── */}
@@ -496,22 +484,23 @@ export default function ChallengeView() {
           return (
             <motion.button
               key={key}
-              whileHover={!answered ? { scale: 1.01 } : {}}
-              whileTap={!answered ? { scale: 0.99 } : {}}
+              whileHover={!answered ? { y: -2 } : {}}
+              whileTap={!answered ? { x: 1, y: 1 } : {}}
               onClick={() => handleSelect(key)}
               disabled={answered}
-              className={`w-full flex items-center gap-3 p-4 rounded-xl border-2 transition-all duration-200 ${isRTL ? 'flex-row-reverse text-right' : 'text-left'}`}
+              className={`w-full flex items-center gap-3 p-4 transition-all duration-100 ${isRTL ? 'flex-row-reverse text-right' : 'text-left'}`}
               style={{
                 backgroundColor: bg,
-                borderColor:     border,
+                border: `4px solid ${border}`,
+                boxShadow: answered ? 'none' : 'var(--shadow-sm)',
                 color:           textColor,
                 cursor:          answered ? 'default' : 'pointer',
               }}
             >
               {/* Letter label */}
               <span
-                className="w-6 h-6 rounded-full border flex items-center justify-center text-xs font-bold flex-shrink-0"
-                style={{ borderColor: border }}
+                className="grid place-items-center text-xs font-black mono flex-shrink-0"
+                style={{ width: 26, height: 26, border: `3px solid ${border}` }}
               >
                 {String.fromCharCode(65 + Number(key))}
               </span>
@@ -557,7 +546,7 @@ export default function ChallengeView() {
           <button
             onClick={handleMissingSubmit}
             disabled={!missingInput.trim()}
-            className="btn-primary text-xs disabled:opacity-50"
+            className="big-btn yellow !w-auto px-5 text-xs disabled:opacity-50"
           >
             Check
           </button>
@@ -593,13 +582,13 @@ export default function ChallengeView() {
           <button
             onClick={handleWriteSubmit}
             disabled={grading || !written.trim()}
-            className="btn-primary text-xs disabled:opacity-50"
+            className="big-btn yellow !w-auto px-5 text-xs disabled:opacity-50"
           >
             {grading ? 'AI is checking…' : 'Submit solution'}
           </button>
         )}
         {(aiFeedback || (aiSolution && revealed)) && !answered && (
-          <div className="card p-5 space-y-3">
+          <div className="panel p-5 space-y-3">
             {aiFeedback && (
               <div>
                 <p className="text-xs font-bold uppercase tracking-widest mb-1" style={{ color: '#ef4444' }}>
@@ -644,8 +633,8 @@ export default function ChallengeView() {
           Write your code — the AI checks it
         </p>
         <div
-          className="rounded-xl overflow-hidden border"
-          style={{ borderColor: 'var(--border)' }}
+          className="overflow-hidden"
+          style={{ border: '4px solid var(--border)', boxShadow: 'var(--shadow-sm)' }}
         >
           <Editor
             height="380px"
@@ -672,13 +661,13 @@ export default function ChallengeView() {
           <button
             onClick={handleRunSubmit}
             disabled={grading || !runCodeText.trim()}
-            className="btn-primary text-xs disabled:opacity-50"
+            className="big-btn yellow !w-auto px-5 text-xs disabled:opacity-50"
           >
             {grading ? 'AI is checking…' : 'Submit for review'}
           </button>
         )}
         {(aiFeedback || (aiSolution && revealed)) && !answered && (
-          <div className="card p-5 space-y-3">
+          <div className="panel p-5 space-y-3">
             {aiFeedback && (
               <div>
                 <p className="text-xs font-bold uppercase tracking-widest mb-1" style={{ color: '#ef4444' }}>
@@ -721,11 +710,11 @@ export default function ChallengeView() {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.25, ease: 'easeOut' as const }}
-            className={`p-4 rounded-xl text-sm ${isRTL ? 'text-right' : 'text-left'}`}
+            className={`p-4 text-sm ${isRTL ? 'text-right' : 'text-left'}`}
             style={{
               backgroundColor: 'rgba(239,68,68,0.08)',
               color:           'var(--text-secondary)',
-              border:          '1px solid rgba(239,68,68,0.2)',
+              border:          '3px solid rgba(239,68,68,0.3)',
             }}
           >
             <strong>{t('arena.whyNot')}</strong> {challenge.explanations[selected]}
@@ -750,11 +739,11 @@ export default function ChallengeView() {
               initial={{ opacity: 0, y: 8 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.25, ease: 'easeOut' as const }}
-              className={`p-4 rounded-xl border ${isRTL ? 'text-right' : 'text-left'}`}
-              style={{
-                backgroundColor: 'rgba(245,158,11,0.08)',
-                borderColor:     'rgba(245,158,11,0.3)',
-              }}
+            className={`p-4 ${isRTL ? 'text-right' : 'text-left'}`}
+            style={{
+              backgroundColor: 'rgba(245,158,11,0.08)',
+              border:          '3px solid rgba(245,158,11,0.4)',
+            }}
             >
               <div className={`flex items-center gap-2 mb-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
                 <Lightbulb className="w-4 h-4" style={{ color: '#f59e0b' }} />
@@ -787,13 +776,13 @@ export default function ChallengeView() {
         >
           <button
             onClick={() => setShowResult(true)}
-            className={`btn-primary gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}
+            className={`big-btn yellow !w-auto px-6 gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}
           >
             {isCorrect
               ? <><CheckCircle2 className="w-4 h-4" /> {t('arena.viewResult')}</>
               : <><XCircle className="w-4 h-4" /> {t('arena.viewResult')}</>}
           </button>
-          <Link href="/app/training" className={`btn-secondary gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
+          <Link href="/app/training" className={`big-btn !w-auto px-6 gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
             {t('arena.moreTraining')} {isRTL ? <ArrowLeft className="w-4 h-4" /> : <ArrowRight className="w-4 h-4" />}
           </Link>
         </motion.div>

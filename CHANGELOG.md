@@ -5,6 +5,14 @@ All notable changes to the PixelCode product are documented here.
 ## [Unreleased]
 
 ### Added
+- Lesson code snippets are now interactive: lesson-body code fences, workshop
+  starter code, lab starter code, and certification starter workspace render as
+  editable Monaco editors with Run / Reset and live stdout/stderr output
+  (same execution engine as the Playground). Each snippet uses the site's
+  pixel/retro "robot face" design: a cream light-palette plate (black pixel
+  border, stepped corners, hard offset shadow) holding a dark pixelated editor
+  with three pixel "eyes" and a Press Start 2P Run button. Non-runnable fences
+  keep the static code window.
 - JavaScript Fundamentals course: Module 3 (Data Types & Conversion) —
   module file, 4 theory lessons (primitive types, typeof & special values,
   explicit conversion, implicit coercion), type-inspector workshop,
@@ -51,6 +59,16 @@ All notable changes to the PixelCode product are documented here.
   archive instead of 🔒 Expired.
 
 ### Changed
+- Arena section redesigned to the pixel/retro theme: hub (CRT hero, stat
+  boxes, quest panel, history, top gladiators), duel lobby + live duel room,
+  rankings podium + rows, challenge detail, and tab bar all use 4px borders,
+  hard shadows, Press Start 2P labels, and section panels. No logic, routing,
+  scoring, XP, or duel-service changes; removed the duplicate ArenaLayout
+  component (`app/app/arena/layout.tsx` is the single layout).
+- Lesson page: the footer button now reads "Next Lesson" and continues to
+  the next lesson in module order (falling back to "Back to Course" on the
+  last lesson). Advancing marks the current lesson complete and awards its
+  XP before navigating.
 - `run-code` challenges are now AI-graded (chatbot's Gemini model) instead of
   Judge0 stdout compare: bigger 380px themed editor, "Submit for review",
   wrong attempts show AI feedback (why it's wrong) + the canonical solution;
