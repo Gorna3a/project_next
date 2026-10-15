@@ -5,6 +5,13 @@ All notable changes to the PixelCode product are documented here.
 ## [Unreleased]
 
 ### Added
+- JavaScript Fundamentals course: Module 3 (Data Types & Conversion) —
+  module file, 4 theory lessons (primitive types, typeof & special values,
+  explicit conversion, implicit coercion), type-inspector workshop,
+  safe-number-parser lab, cheat sheet review, and an 8-question quiz.
+  27 content files pass the validator; the 9 new documents were imported
+  to Sanity as drafts (`js-mod03.ndjson` artifact committed) and are
+  pending publish in Studio.
 - AI solution grading (`gradeSolution` in `src/core/services/ai.ts`): same
   Gemini model as the chatbot judges challenge attempts, returning a strict
   JSON verdict (correct/feedback/solution) at temperature 0.2; unparseable
@@ -84,6 +91,14 @@ All notable changes to the PixelCode product are documented here.
   Solve state reads `users/{uid}/completedChallenges`.
 - TrainingPage sort-by-type now includes the new types; row/type chips and
   `ChallengeView` header show ✍️/▶ badges.
+
+### Removed
+- Kids mode, end to end: deleted `app/kids/` routes and the entire
+  `src/kids/` section (home, Learn CS, Math, 10+ games); removed the
+  `@kids/*` path alias, `ROUTES.KIDS`, `ChildProfile`, the kids-ocean /
+  kids-green / kids-sunset themes, `kidsMode` strings (en + ar), and the
+  `kids` variant of `UserMenu`. Landing page no longer advertises it
+  (features deck is now 8 cards, no kids section/marquee/footer links).
 
 ### Deprecated
 - `/app/arena/training` now shows an empty "Training moved" state; use

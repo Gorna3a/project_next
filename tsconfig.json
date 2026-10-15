@@ -33,9 +33,6 @@
       "@platform/*": [
         "./src/platform/*"
       ],
-      "@kids/*": [
-        "./src/kids/*"
-      ],
       "@admin/*": [
         "./src/admin/*"
       ],

@@ -32,12 +32,6 @@ export const ROUTES = {
     COURSES: '/admin/courses',
     SETTINGS: '/admin/settings',
   },
-  KIDS: {
-    HOME: '/kids',
-    CS: '/kids/cs',
-    MATH: '/kids/math',
-    GAMES: '/kids/games',
-  },
 } as const;
 
 export const XP = {

@@ -6,9 +6,6 @@ export type AppTheme =
   | "midnight"
   | "sunset"
   | "nord"
-  | "kids-ocean"
-  | "kids-green"
-  | "kids-sunset"
   | "neobrutalism"
   | "custom"
   | "system";
@@ -38,26 +35,11 @@ export interface UserPreferences {
     | "midnight"
     | "sunset"
     | "nord"
-    | "kids-ocean"
-    | "kids-green"
-    | "kids-sunset"
     | "neobrutalism"
     | "custom"
     | "system";
   language: string; // preferred programming language
   emailNotifs: boolean;
-}
-
-// ─── Kids ─────────────────────────────────────────────────────────────────────
-
-export interface ChildProfile {
-  id: string;
-  name: string;
-  avatar: string; // emoji or avatar id
-  age?: number;
-  totalXP: number;
-  completedActivities: string[];
-  createdAt: Date;
 }
 
 // ─── Courses & Lessons ────────────────────────────────────────────────────────

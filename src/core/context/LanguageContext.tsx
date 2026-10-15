@@ -315,7 +315,6 @@ const translations: Record<Language, any> = {
       heroSub: "PixelCode turns complex programming concepts into small, manageable pieces. Master 13+ languages with AI assistance, live coding, and real challenges.",
       startFree: "Start for free",
       goDashboard: "Go to Dashboard",
-      kidsMode: "Kids Mode",
       features: "Features",
       languages: "Languages",
       about: "About",
@@ -336,7 +335,6 @@ const translations: Record<Language, any> = {
         challenges: { title: "Challenges", desc: "Sharpen your skills with real coding challenges across all difficulty levels." },
         classrooms: { title: "Classrooms", desc: "Teachers can create classrooms, assign tasks, and track student progress." },
         courses: { title: "Structured Courses", desc: "Follow a pixel-by-pixel learning path from beginner to advanced." },
-        kidsMode: { title: "Kids Mode", desc: "A fun, colorful experience teaching CS basics, math, and mind games." },
       }
     },
     about: {
@@ -762,7 +760,6 @@ const translations: Record<Language, any> = {
       heroSub: "PixelCode يحول مفاهيم البرمجة المعقدة إلى أجزاء صغيرة وسهلة الاستيعاب. أتقن أكثر من 13 لغة بمساعدة الذكاء الاصطناعي، والبرمجة المباشرة، والتحديات الحقيقية.",
       startFree: "ابدأ مجاناً",
       goDashboard: "الذهاب إلى لوحة التحكم",
-      kidsMode: "وضع الأطفال",
       features: "المميزات",
       languages: "اللغات",
       about: "عن المنصة",
@@ -783,7 +780,6 @@ const translations: Record<Language, any> = {
         challenges: { title: "تحديات", desc: "اشحذ مهاراتك مع تحديات برمجة حقيقية عبر جميع مستويات الصعوبة." },
         classrooms: { title: "فصول دراسية", desc: "يمكن للمعلمين إنشاء فصول دراسية وتكليف المهام وتتبع تقدم الطلاب." },
         courses: { title: "دورات منظمة", desc: "اتبع مسار تعلم بكسل تلو الآخر من المبتدئ إلى المتقدم." },
-        kidsMode: { title: "وضع الأطفال", desc: "تجربة ممتعة وملونة لتعليم أساسيات علوم الكمبيوتر والرياضيات وألعاب العقل." },
       }
     },
     about: {

@@ -9,15 +9,14 @@ import { useAuth } from '../../../core/hooks/useAuth';
 import { useTheme } from '../../../core/context/ThemeContext';
 
 const FEATURES = [
-  { n: '01 / 09', badge: 'CORE', bg: 'var(--phosphor)', fg: '#161616', iconBg: 'var(--yellow)', icon: '📚', title: 'Structured Courses', desc: '13+ languages, leveled paths from scratch. Bite-sized lessons, checks, and projects.', points: ['Python, JS, Go, Rust & more', 'Projects that ship'] },
-  { n: '02 / 09', badge: '● LIVE', bg: 'var(--yellow)', fg: '#161616', iconBg: 'var(--orange)', icon: '⚡', title: 'Interactive Playground', desc: 'Write and run code in the browser. Instant output, no install.', points: ['13 runtimes + live preview', 'Share with one link'] },
-  { n: '03 / 09', badge: 'XP', bg: 'var(--orange)', fg: '#fff', iconBg: 'var(--yellow)', icon: '⚔️', title: 'Challenges & Duels', desc: 'Daily puzzles and 1v1 duels. Earn XP, keep the streak, climb.', points: ['Daily challenge', 'Ranked duels'] },
-  { n: '04 / 09', badge: 'TEAMS', bg: '#CFC8B5', fg: '#161616', iconBg: 'var(--phosphor)', icon: '🎓', title: 'Classrooms', desc: 'Join teacher-led groups, get assignments, and track class progress.', points: ['Invite by code', 'Teacher dashboard'] },
-  { n: '05 / 09', badge: 'REFS', bg: '#EFE9D9', fg: '#161616', iconBg: 'var(--grey)', icon: '📖', title: 'Library & Docs', desc: 'Curated references, cheatsheets, and docs — searchable and offline-ready.', points: ['Cheatsheets', 'Offline mode'] },
-  { n: '06 / 09', badge: 'AI', bg: '#161616', fg: 'var(--phosphor)', iconBg: 'var(--yellow)', icon: '🧠', title: 'AI Chat Tutor', desc: 'Stuck? Ask the tutor — explains, fixes, and hints without giving away the answer.', points: ['Hint → explain → fix', 'Works in playground'] },
-  { n: '07 / 09', badge: 'PROGRESS', bg: 'var(--phosphor)', fg: '#161616', iconBg: 'var(--surface)', icon: '📈', title: 'Levels & Streaks', desc: 'Earn XP, level up, keep the flame alive. Every line counts.', points: ['XP & levels', 'Daily streak & freeze'] },
-  { n: '08 / 09', badge: 'RANK', bg: 'var(--grey)', fg: '#fff', iconBg: 'var(--yellow)', icon: '🏆', title: 'Leaderboards', desc: 'Global, friends, and classroom boards. See where you stand.', points: ['Weekly & all-time', 'Class vs class'] },
-  { n: '09 / 09', badge: 'SAFE', bg: 'var(--yellow)', fg: '#161616', iconBg: '#161616', icon: '👾', title: 'Kids Mode', desc: 'Age-appropriate activities, blocks + code, parental controls. Big pixels, big joy.', points: ['Blocks & typing', 'Parent dashboard'] },
+  { n: '01 / 08', badge: 'CORE', bg: 'var(--phosphor)', fg: '#161616', iconBg: 'var(--yellow)', icon: '📚', title: 'Structured Courses', desc: '13+ languages, leveled paths from scratch. Bite-sized lessons, checks, and projects.', points: ['Python, JS, Go, Rust & more', 'Projects that ship'] },
+  { n: '02 / 08', badge: '● LIVE', bg: 'var(--yellow)', fg: '#161616', iconBg: 'var(--orange)', icon: '⚡', title: 'Interactive Playground', desc: 'Write and run code in the browser. Instant output, no install.', points: ['13 runtimes + live preview', 'Share with one link'] },
+  { n: '03 / 08', badge: 'XP', bg: 'var(--orange)', fg: '#fff', iconBg: 'var(--yellow)', icon: '⚔️', title: 'Challenges & Duels', desc: 'Daily puzzles and 1v1 duels. Earn XP, keep the streak, climb.', points: ['Daily challenge', 'Ranked duels'] },
+  { n: '04 / 08', badge: 'TEAMS', bg: '#CFC8B5', fg: '#161616', iconBg: 'var(--phosphor)', icon: '🎓', title: 'Classrooms', desc: 'Join teacher-led groups, get assignments, and track class progress.', points: ['Invite by code', 'Teacher dashboard'] },
+  { n: '05 / 08', badge: 'REFS', bg: '#EFE9D9', fg: '#161616', iconBg: 'var(--grey)', icon: '📖', title: 'Library & Docs', desc: 'Curated references, cheatsheets, and docs — searchable and offline-ready.', points: ['Cheatsheets', 'Offline mode'] },
+  { n: '06 / 08', badge: 'AI', bg: '#161616', fg: 'var(--phosphor)', iconBg: 'var(--yellow)', icon: '🧠', title: 'AI Chat Tutor', desc: 'Stuck? Ask the tutor — explains, fixes, and hints without giving away the answer.', points: ['Hint → explain → fix', 'Works in playground'] },
+  { n: '07 / 08', badge: 'PROGRESS', bg: 'var(--phosphor)', fg: '#161616', iconBg: 'var(--surface)', icon: '📈', title: 'Levels & Streaks', desc: 'Earn XP, level up, keep the flame alive. Every line counts.', points: ['XP & levels', 'Daily streak & freeze'] },
+  { n: '08 / 08', badge: 'RANK', bg: 'var(--grey)', fg: '#fff', iconBg: 'var(--yellow)', icon: '🏆', title: 'Leaderboards', desc: 'Global, friends, and classroom boards. See where you stand.', points: ['Weekly & all-time', 'Class vs class'] },
 ];
 
 export default function LandingPageV2() {
@@ -171,14 +170,12 @@ export default function LandingPageV2() {
           <span style={{ padding: '0 26px', borderRight: '4px solid var(--phosphor)' }}>★ DUELS & XP</span>
           <span style={{ padding: '0 26px', borderRight: '4px solid var(--phosphor)' }}>★ CLASSROOMS</span>
           <span style={{ padding: '0 26px', borderRight: '4px solid var(--phosphor)' }}>★ AI TUTOR</span>
-          <span style={{ padding: '0 26px', borderRight: '4px solid var(--phosphor)' }}>★ KIDS MODE</span>
           <span style={{ padding: '0 26px', borderRight: '4px solid var(--phosphor)' }} aria-hidden>★ FOR BEGINNERS</span>
           <span style={{ padding: '0 26px', borderRight: '4px solid var(--phosphor)' }} aria-hidden>★ 13+ LANGUAGES</span>
           <span style={{ padding: '0 26px', borderRight: '4px solid var(--phosphor)' }} aria-hidden>★ PLAYGROUND</span>
           <span style={{ padding: '0 26px', borderRight: '4px solid var(--phosphor)' }} aria-hidden>★ DUELS & XP</span>
           <span style={{ padding: '0 26px', borderRight: '4px solid var(--phosphor)' }} aria-hidden>★ CLASSROOMS</span>
           <span style={{ padding: '0 26px', borderRight: '4px solid var(--phosphor)' }} aria-hidden>★ AI TUTOR</span>
-          <span style={{ padding: '0 26px', borderRight: '4px solid var(--phosphor)' }} aria-hidden>★ KIDS MODE</span>
         </div>
       </div>
 
@@ -195,7 +192,7 @@ export default function LandingPageV2() {
               <Link href={user ? '/app' : '/signup'} className="btn btn-ph">Start Learning Free →</Link>
               <Link href="/app/playground" className="btn btn-ghost">Try Playground</Link>
             </div>
-            <div className="hero-meta"><span>★ No credit card</span><i /><span>13+ languages</span><i /><span>Kids mode included</span></div>
+            <div className="hero-meta"><span>★ No credit card</span><i /><span>13+ languages</span></div>
           </div>
           <div className="computer-wrap">
             <div className="computer-card">
@@ -216,7 +213,7 @@ export default function LandingPageV2() {
       </section>
 
       <section className="wrap section" id="features">
-        <div className="section-head"><span className="dot" style={{ background: 'var(--phosphor)' }} /><h2 className="h2">Everything a beginner needs</h2><span className="dot" style={{ background: 'var(--orange)' }} /><span className="eyebrow" style={{ marginLeft: 6 }}>— 9 TOOLS · ONE PLATFORM</span></div>
+        <div className="section-head"><span className="dot" style={{ background: 'var(--phosphor)' }} /><h2 className="h2">Everything a beginner needs</h2><span className="dot" style={{ background: 'var(--orange)' }} /><span className="eyebrow" style={{ marginLeft: 6 }}>— 8 TOOLS · ONE PLATFORM</span></div>
         <p className="sub">Not just videos. Swipe the deck — every card is a tool that gets you writing code from day one.</p>
         <div className="deck-wrap">
           <div className="deck-head-row">
@@ -320,26 +317,6 @@ export default function LandingPageV2() {
         </div>
       </section>
 
-      <section className="kids">
-        <div className="wrap kids-grid">
-          <div>
-            <p className="mono" style={{ fontSize: 10, letterSpacing: '.14em', fontWeight: 800, color: '#161616' }}>👾 KIDS MODE — AGES 8–14</p>
-            <h2 className="pixel" style={{ fontSize: 20, marginTop: 10, color: '#161616', lineHeight: 1.3 }}>Big pixels. Big joy. Safe.</h2>
-            <p className="mono" style={{ fontSize: 12, fontWeight: 700, color: '#2B2416', marginTop: 8, lineHeight: 1.6 }}>Blocks meet typing. Guided puzzles, playful characters, and parental controls. Same progress system, age-appropriate pace.</p>
-            <div style={{ display: 'flex', gap: 10, marginTop: 14, flexWrap: 'wrap' }}>
-              <Link href="/kids" className="btn btn-dark">Enter Kids Mode →</Link>
-              <span className="mono" style={{ fontSize: 11, padding: '10px 12px', border: '3px solid #161616', background: 'var(--surface)', fontWeight: 800, boxShadow: '3px 3px 0 #161616' }}>Parent dashboard</span>
-            </div>
-          </div>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
-            <div className="kids-card"><div style={{ fontSize: 22 }}>🧱</div><b className="silk">Blocks</b><p className="mono" style={{ fontSize: 11, color: 'var(--muted)', marginTop: 4 }}>Drag, snap, run.</p></div>
-            <div className="kids-card"><div style={{ fontSize: 22 }}>🎨</div><b className="silk">Draw with code</b><p className="mono" style={{ fontSize: 11, color: 'var(--muted)', marginTop: 4 }}>Plot pixels, see art.</p></div>
-            <div className="kids-card"><div style={{ fontSize: 22 }}>🛡️</div><b className="silk">Safe chat</b><p className="mono" style={{ fontSize: 11, color: 'var(--muted)', marginTop: 4 }}>Filtered AI hints.</p></div>
-            <div className="kids-card" style={{ background: '#161616', color: 'var(--phosphor)' }}><div style={{ fontSize: 22 }}>⭐</div><b className="silk">Earn stars</b><p className="mono" style={{ fontSize: 11, opacity: .8, marginTop: 4 }}>Stickers & levels.</p></div>
-          </div>
-        </div>
-      </section>
-
       <section className="wrap languages">
         <h2 className="pixel" style={{ fontSize: 18 }}>13+ Languages. One playground.</h2>
         <p className="mono" style={{ fontSize: 12, fontWeight: 700, color: 'var(--muted)', marginTop: 6 }}>Start anywhere — switch anytime. Your XP follows you.</p>
@@ -367,7 +344,7 @@ export default function LandingPageV2() {
           <p className="mono">Free forever. No credit card. CRT included.</p>
           <div style={{ display: 'flex', justifyContent: 'center', gap: 12, flexWrap: 'wrap', marginTop: 18 }}>
             <Link href={user ? '/app' : '/signup'} className="btn btn-dark">Create Free Account →</Link>
-            <Link href="/kids" className="btn" style={{ background: 'var(--surface)', border: '3px solid #161616', boxShadow: '4px 4px 0 #161616' }}>👾 Try Kids Mode</Link>
+            <Link href="/app/playground" className="btn" style={{ background: 'var(--surface)', border: '3px solid #161616', boxShadow: '4px 4px 0 #161616' }}>⚡ Try Playground</Link>
           </div>
         </div>
       </section>
@@ -394,7 +371,6 @@ export default function LandingPageV2() {
               <a href="#features">Challenges</a>
               <a href="#features">Duels & Leaderboards</a>
               <a href="#classrooms">Classrooms</a>
-              <a href="#features">Kids Mode</a>
             </nav>
           </div>
           <div>

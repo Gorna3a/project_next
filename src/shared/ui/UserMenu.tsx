@@ -15,7 +15,7 @@ import { useLanguage } from "../../core/context/LanguageContext";
 import { motion, AnimatePresence } from "framer-motion";
 
 interface UserMenuProps {
-  variant?: "platform" | "kids" | "landing";
+  variant?: "platform" | "landing";
 }
 
 export const UserMenu = ({ variant = "platform" }: UserMenuProps) => {
@@ -39,13 +39,11 @@ export const UserMenu = ({ variant = "platform" }: UserMenuProps) => {
     
     return (
       <div className={`flex items-center gap-3 ${isRTL ? 'flex-row-reverse' : ''}`}>
-        <Link href="/login" className={variant === "kids" ? "text-white hover:underline font-bold text-sm" : "btn-secondary text-sm px-4 py-2"}>
+        <Link href="/login" className="btn-secondary text-sm px-4 py-2">
           {t('auth.loginLink')}
         </Link>
-        <Link href="/signup" className={variant === "kids" ? "bg-white text-purple-600 px-4 py-2 rounded-full font-black text-sm shadow-md" : "btn-primary text-sm px-4 py-2"}>
-          {variant === "kids" 
-            ? t('common.joinNow') 
-            : t('common.getStarted')}
+        <Link href="/signup" className="btn-primary text-sm px-4 py-2">
+          {t('common.getStarted')}
         </Link>
       </div>
     );
@@ -58,23 +56,21 @@ export const UserMenu = ({ variant = "platform" }: UserMenuProps) => {
     <div className="relative" ref={menuRef}>
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className={`flex items-center gap-2 p-1 rounded-xl transition-all
-          ${variant === "kids" 
-            ? "bg-white/20 text-white hover:bg-white/30" 
-            : "hover:bg-gray-100 dark:hover:bg-gray-800"}`}
+          className={`flex items-center gap-2 p-1 rounded-xl transition-all
+            hover:bg-gray-100 dark:hover:bg-gray-800`}
       >
         <div className={`w-8 h-8 rounded-full flex items-center justify-center font-black text-xs shadow-inner
-          ${variant === "kids" ? "bg-yellow-400 text-purple-700" : "bg-brand-500 text-white"}`}>
+          bg-brand-500 text-white`}>
           {profile?.photoURL ? (
             <img src={profile.photoURL} alt="" className="w-full h-full rounded-full object-cover" />
           ) : (
             initials.toUpperCase()
           )}
         </div>
-        <span className={`text-sm font-bold hidden sm:block ${variant === "kids" ? "text-white" : "text-gray-700 dark:text-gray-200"}`}>
+        <span className={`text-sm font-bold hidden sm:block text-gray-700 dark:text-gray-200`}>
           {profile?.displayName?.split(' ')[0] || t('common.user')}
         </span>
-        <ChevronDown className={`w-4 h-4 opacity-50 ${variant === "kids" ? "text-white" : ""}`} />
+        <ChevronDown className="w-4 h-4 opacity-50" />
       </button>
 
       <AnimatePresence>
