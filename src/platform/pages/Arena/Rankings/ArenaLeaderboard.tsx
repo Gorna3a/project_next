@@ -76,7 +76,7 @@ export default function ArenaLeaderboard() {
       );
       await socialService.sendDuelInvite(currentProfile, target.uid, roomId);
       addNotification('success', t('arena.duelSent'), `${isRTL ? 'تمت دعوة' : 'Invited'} ${target.displayName} ${isRTL ? 'للمنافسة!' : 'to race!'}`);
-      navigate.push(`/arena/duels/${roomId}`);
+      navigate.push(`/app/arena/duels/${roomId}`);
     } catch (err) {
       addNotification('error', t('common.failed'), isRTL ? 'تعذر إرسال دعوة المبارزة' : 'Could not send duel invite');
     } finally {

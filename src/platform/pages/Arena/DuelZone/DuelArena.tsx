@@ -391,7 +391,7 @@ export default function DuelArena() {
 
               <div className="flex flex-col gap-2">
                 <button onClick={() => navigate.push('/app/arena/duels')} className="big-btn green w-full justify-center">Back to Lobby</button>
-                <button onClick={() => navigate.push('/app/arena/rankings')} className="big-btn w-full justify-center">View Leaderboard</button>
+                <button onClick={() => navigate.push('/app/rankings')} className="big-btn w-full justify-center">View Leaderboard</button>
               </div>
             </motion.div>
           </motion.div>

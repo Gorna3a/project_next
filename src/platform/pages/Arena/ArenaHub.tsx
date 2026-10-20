@@ -145,7 +145,7 @@ export default function ArenaHub() {
                   </div>
                 </div>
               ))}
-              <Link href="/app/arena/rankings" className="row justify-center mono text-[10px] font-black" style={{ color: 'var(--fg)' }}>
+              <Link href="/app/rankings" className="row justify-center mono text-[10px] font-black" style={{ color: 'var(--fg)' }}>
                 {t('arena.viewAllRankings')} →
               </Link>
             </div>

@@ -21,7 +21,7 @@
   --nb-grey: #8A867F;
   --nb-radius: 0px;
   --nb-shadow: 6px 6px 0 #161616;
-  --nb-shadow-sm: 4px 4px 0 #161616;
+  --nb-shadow-sm: 4px 4px 0 #161616;                 
 }
 :root[data-theme="dark"] {
   --nb-ink: #DDE6C8;

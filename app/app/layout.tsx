@@ -33,7 +33,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 
   if (!user) return null;
 
-  const marginValue = collapsed ? 64 : 240;
+  const marginValue = collapsed ? 64 : 230;
 
   return (
     <div className="min-h-screen" style={{ backgroundColor: "var(--bg-base)" }}>
@@ -46,7 +46,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
           marginRight: isRTL ? marginValue : 0,
         }}
         transition={{ duration: 0.25, ease: "easeInOut" }}
-        className="pt-16 min-h-screen"
+        className="pt-14 min-h-screen"
       >
         <div className="p-6">{children}</div>
       </motion.main>

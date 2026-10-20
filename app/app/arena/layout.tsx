@@ -2,12 +2,11 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { motion } from "framer-motion";
-import { Trophy, Zap, LayoutDashboard, BarChart3, Swords } from "lucide-react";
+import { Trophy, Zap, LayoutDashboard, Swords } from "lucide-react";
 
 const navItems = [
   { to: "/app/arena", label: "Arena Hub", icon: LayoutDashboard, end: true },
   { to: "/app/arena/duels", label: "Duel Zone", icon: Swords },
-  { to: "/app/arena/rankings", label: "Rankings", icon: BarChart3 },
 ];
 
 export default function ArenaLayout({ children }: { children: React.ReactNode }) {
@@ -17,7 +16,7 @@ export default function ArenaLayout({ children }: { children: React.ReactNode })
   return (
     <div className="min-h-screen flex flex-col">
       <div
-        className="sticky top-16 z-40"
+        className="sticky top-14 z-40 -mt-6 -mx-6"
         style={{ backgroundColor: 'var(--surface)', borderBottom: '4px solid var(--border)' }}
       >
         <div className="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between gap-3">

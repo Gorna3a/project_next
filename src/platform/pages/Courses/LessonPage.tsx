@@ -10,6 +10,7 @@ import {
 } from 'lucide-react';
 import {
   getLesson,
+  getModulesForCourse,
   type SanityLesson,
   type SanityLessonLite,
   type QuizQuestion,
@@ -23,11 +24,15 @@ import {
 import { useAuth } from '../../../core/context/AuthContext';
 import { useLanguage } from '../../../core/context/LanguageContext';
 import { Markdown } from '../../../shared/ui/Markdown';
+import { InteractiveCode, resolveLanguage } from '../../../shared/ui/InteractiveCode';
 
 // ─── Small building blocks ────────────────────────────────────────────────────
 
-const CodeView = ({ block, title }: { block?: CodeBlockObj; title?: string }) => {
+const CodeView = ({ block, title, interactive = false }: { block?: CodeBlockObj; title?: string; interactive?: boolean }) => {
   if (!block?.code?.trim()) return null;
+  if (interactive && resolveLanguage(block.language)) {
+    return <InteractiveCode language={block.language} code={block.code} title={title} />;
+  }
   return (
     <div className="my-4 rounded-xl overflow-hidden border" style={{ borderColor: 'var(--border)' }}>
       <div
@@ -264,7 +269,7 @@ const StepCard = ({ step, index }: { step: WorkshopStep; index: number }) => {
             </div>
           )}
 
-          <CodeView block={step.starter} title="Starter code" />
+          <CodeView block={step.starter} title="Starter code" interactive />
           <TestsList tests={step.tests} />
 
           <div>
@@ -318,6 +323,7 @@ export default function LessonPage() {
   const [showCelebration, setShowCelebration] = useState(false);
   const [allQuizzesDone,  setAllQuizzesDone]  = useState(false);
   const [showReference,   setShowReference]   = useState(false);
+  const [nextLessonId,    setNextLessonId]    = useState<string | null>(null);
 
   // ── Fetch lesson ────────────────────────────────────────────────────────────
 
@@ -338,6 +344,17 @@ export default function LessonPage() {
             setIsCompleted(false);
           }
         }
+        if (data) {
+          try {
+            const modules = await getModulesForCourse(data.module.course._id);
+            const all = modules.flatMap(m => [...(m.items ?? [])].sort((a, b) => (a.order ?? 0) - (b.order ?? 0)));
+            const idx = all.findIndex(l => l._id === data._id);
+            setNextLessonId(idx >= 0 && idx + 1 < all.length ? (all[idx + 1].contentId || all[idx + 1]._id) : null);
+          } catch (e) {
+            console.error('Failed to resolve next lesson:', e);
+            setNextLessonId(null);
+          }
+        }
       } finally {
         setLoading(false);
       }
@@ -350,6 +367,7 @@ export default function LessonPage() {
     setShowCelebration(false);
     setAllQuizzesDone(false);
     setShowReference(false);
+    setNextLessonId(null);
     contentRef.current?.scrollTo({ top: 0 });
   }, [lessonId, user]);
 
@@ -376,7 +394,7 @@ export default function LessonPage() {
     }
   };
 
-  const handleComplete = async () => {
+  const completeCurrentLesson = async (withCelebration: boolean) => {
     if (!user || !lesson || isCompleted) return;
     setCompleting(true);
     try {
@@ -385,15 +403,25 @@ export default function LessonPage() {
       try { await startCourse(user.uid, courseId); } catch(e) { console.error(e); }
       try { await completeLesson(user.uid, courseId, lesson._id, total, 10); } catch(e) { console.error(e); }
       setIsCompleted(true);
-      setShowCelebration(true);
-      setTimeout(() => setShowCelebration(false), 3000);
+      if (withCelebration) {
+        setShowCelebration(true);
+        setTimeout(() => setShowCelebration(false), 3000);
+      }
     } finally {
       setCompleting(false);
     }
   };
 
-  const handleNavigateNext = () => {
-    navigate.push(`/app/courses/${lesson?.module.course.slug}`);
+  const handleComplete = () => completeCurrentLesson(true);
+
+  const handleNavigateNext = async () => {
+    // Advancing to the next lesson (or back to the course) marks this one complete.
+    await completeCurrentLesson(false);
+    if (nextLessonId) {
+      navigate.push(`/app/lesson/${nextLessonId}`);
+    } else {
+      navigate.push(`/app/courses/${lesson?.module.course.slug}`);
+    }
   };
 
   // ── Loading state ───────────────────────────────────────────────────────────
@@ -545,7 +573,7 @@ export default function LessonPage() {
       {/* ── Lesson body (Markdown) ── */}
       {lesson.body?.trim() && (
         <div ref={contentRef} className="card p-8">
-          <Markdown content={lesson.body} rtl={isRTL} />
+          <Markdown content={lesson.body} rtl={isRTL} interactive />
         </div>
       )}
 
@@ -567,7 +595,7 @@ export default function LessonPage() {
           <h2 className="font-semibold text-sm uppercase tracking-wider" style={{ color: 'var(--text-muted)' }}>
             🧪 {t('courses.labWorkspace')}
           </h2>
-          <CodeView block={lesson.starter} title="Starter code" />
+          <CodeView block={lesson.starter} title="Starter code" interactive />
           {(lesson.hints?.length ?? 0) > 0 && (
             <div className="rounded-xl p-3 text-xs space-y-1" style={{ backgroundColor: 'rgba(251,191,36,0.08)', color: 'var(--text-secondary)' }}>
               {(lesson.hints ?? []).map((hint, i) => (
@@ -617,7 +645,7 @@ export default function LessonPage() {
               </tbody>
             </table>
           </div>
-          <CodeView block={lesson.starter} title="Starter workspace" />
+          <CodeView block={lesson.starter} title="Starter workspace" interactive />
           <TestsList tests={lesson.tests} />
         </div>
       )}
@@ -693,11 +721,20 @@ export default function LessonPage() {
           {isRTL ? <ArrowRight className="w-4 h-4" /> : <ArrowLeft className="w-4 h-4" />} {t('courses.courseOverview')}
         </Link>
 
-        {isCompleted && (
-          <button onClick={handleNavigateNext} className={`btn-primary gap-2 ${isRTL ? "flex-row-reverse" : ""}`}>
-            {t('courses.backToCourse')} {isRTL ? <ArrowLeft className="w-4 h-4" /> : <ArrowRight className="w-4 h-4" />}
-          </button>
-        )}
+        <button
+          onClick={handleNavigateNext}
+          disabled={completing}
+          className={`btn-primary gap-2 ${isRTL ? "flex-row-reverse" : ""}`}
+        >
+          {completing ? (
+            <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+          ) : nextLessonId ? (
+            t('courses.nextLesson')
+          ) : (
+            t('courses.backToCourse')
+          )}
+          {isRTL ? <ArrowLeft className="w-4 h-4" /> : <ArrowRight className="w-4 h-4" />}
+        </button>
       </div>
     </motion.div>
   );

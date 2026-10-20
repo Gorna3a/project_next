@@ -196,6 +196,13 @@ export const THEMES: ThemeDefinition[] = [
   },
 ];
 
+// Canonical light/dark palettes used to invert surfaces (e.g. lesson code
+// snippets) so they always contrast the active page theme.
+export const CANONICAL_LIGHT_THEME: ThemeDefinition =
+  THEMES.find((t) => t.id === "light") ?? THEMES[0];
+export const CANONICAL_DARK_THEME: ThemeDefinition =
+  THEMES.find((t) => t.id === "dark") ?? THEMES[1];
+
 // ─── Context ──────────────────────────────────────────────────────────────────
 
 interface ThemeContextValue {

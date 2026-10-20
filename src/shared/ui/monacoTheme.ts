@@ -23,6 +23,66 @@ const withAlpha = (hex: string, alpha: string): string => {
 
 export const PIXELCODE_MONACO_THEME = "pixelcode";
 
+// Inverted theme used by lesson code snippets: the site's dark palette on light
+// pages and the site's light palette on dark pages, so it always contrasts.
+export const PIXELCODE_CODEBLOCK_THEME = "pixelcode-codeblock";
+
+export const buildCodeBlockTheme = (theme: ThemeDefinition): editor.IStandaloneThemeData => {
+  const { vars, isDark } = theme;
+  const bg = varOf(vars, "--bg-base", isDark ? "#0a0a0f" : "#ffffff");
+  const bgElevated = varOf(vars, "--bg-elevated", bg);
+  const bgSubtle = varOf(vars, "--bg-subtle", bg);
+  const border = varOf(vars, "--border", isDark ? "#2a2a38" : "#d5d5e0");
+  const fg = varOf(vars, "--text-primary", isDark ? "#e8e8ff" : "#1e1e2a");
+  const muted = varOf(vars, "--text-muted", isDark ? "#8b8ba0" : "#6b6b7c");
+  const accent = varOf(vars, "--accent", isDark ? "#A6E000" : "#15803d");
+
+  return {
+    base: isDark ? "vs-dark" : "vs",
+    inherit: true,
+    rules: [],
+    colors: {
+      "editor.background": bg,
+      "editor.foreground": fg,
+      "editorGutter.background": bg,
+      "editorLineNumber.foreground": muted,
+      "editorLineNumber.activeForeground": fg,
+      "editorCursor.foreground": accent,
+      "editor.selectionBackground": withAlpha(accent, "40"),
+      "editor.inactiveSelectionBackground": withAlpha(accent, "22"),
+      "editor.lineHighlightBackground": bgSubtle,
+      "editor.lineHighlightBorder": "#00000000",
+      "editorWhitespace.foreground": muted,
+      "editorIndentGuide.background1": withAlpha(muted, "35"),
+      "editorIndentGuide.activeBackground1": withAlpha(muted, "70"),
+      "editorWidget.background": bgElevated,
+      "editorWidget.border": border,
+      "editorWidget.foreground": fg,
+      "editorHoverWidget.background": bgElevated,
+      "editorHoverWidget.border": border,
+      "editorHoverWidget.foreground": fg,
+      "editorSuggestWidget.background": bgElevated,
+      "editorSuggestWidget.border": border,
+      "editorSuggestWidget.foreground": fg,
+      "editorSuggestWidget.selectedBackground": withAlpha(accent, "35"),
+      "editorSuggestWidget.highlightForeground": accent,
+      "editor.findMatchBackground": withAlpha(accent, "55"),
+      "editor.findMatchHighlightBackground": withAlpha(accent, "30"),
+      "editorBracketMatch.background": withAlpha(accent, "30"),
+      "editorBracketMatch.border": withAlpha(accent, "90"),
+      "editorLineNumber.dimmedForeground": withAlpha(muted, "80"),
+      "editorCodeLens.foreground": muted,
+      "editor.foldBackground": withAlpha(accent, "20"),
+      "editorGutter.addedBackground": "#22c55e",
+      "editorGutter.deletedBackground": "#ef4444",
+      "editorGutter.modifiedBackground": accent,
+      "scrollbarSlider.background": withAlpha(muted, "55"),
+      "scrollbarSlider.hoverBackground": withAlpha(muted, "85"),
+      "scrollbarSlider.activeBackground": withAlpha(muted, "AA"),
+    },
+  };
+};
+
 export const buildPixelcodeTheme = (theme: ThemeDefinition): editor.IStandaloneThemeData => {
   const { vars, isDark } = theme;
   const bgSurface = varOf(vars, "--bg-surface", isDark ? "#1e1e1e" : "#ffffff");

@@ -3,6 +3,7 @@
 import { Children, isValidElement, type ReactNode } from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
+import { InteractiveCode, resolveLanguage } from './InteractiveCode';
 
 // ─── Markdown renderer for v2 Sanity content ─────────────────────────────────
 // v2 lesson/module/course `body` fields are Markdown strings. Styling mirrors
@@ -34,7 +35,7 @@ const CodeWindow = ({ language, code }: { language?: string; code: string }) => 
   </div>
 );
 
-export const Markdown = ({ content, rtl = false }: { content?: string; rtl?: boolean }) => {
+export const Markdown = ({ content, rtl = false, interactive = false }: { content?: string; rtl?: boolean; interactive?: boolean }) => {
   if (!content?.trim()) return null;
   return (
     <div className={`max-w-none ${rtl ? 'text-right' : 'text-left'}`}>
@@ -90,6 +91,11 @@ export const Markdown = ({ content, rtl = false }: { content?: string; rtl?: boo
             const kids = Children.toArray(children);
             if (kids.length === 1) {
               const { language, code } = extract(kids[0]);
+              // Interactive mode turns runnable fences into editable, runnable
+              // editors (lesson body). Other callers keep the static window.
+              if (interactive && language && resolveLanguage(language)) {
+                return <InteractiveCode language={language} code={code} />;
+              }
               return <CodeWindow language={language} code={code} />;
             }
             return <pre>{children}</pre>;

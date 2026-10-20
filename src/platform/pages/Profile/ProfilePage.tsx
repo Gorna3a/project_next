@@ -256,7 +256,7 @@ export default function ProfilePage() {
                   <Users className="w-7 h-7 text-black" />
                 </span>
                 <p className="font-mono text-xs font-black uppercase tracking-widest text-black">{t('profile.noFriends')}</p>
-                <button onClick={() => navigate.push('/app/arena/rankings')} className="bg-black text-white border-[3px] border-black shadow-[3px_3px_0_0_#000] font-mono text-xs font-black uppercase tracking-widest px-6 py-2 hover:bg-[#FFD23F] hover:text-black active:translate-x-[1px] active:translate-y-[1px] active:shadow-none transition-all">{t('profile.findFriends')}</button>
+                <button onClick={() => navigate.push('/app/rankings')} className="bg-black text-white border-[3px] border-black shadow-[3px_3px_0_0_#000] font-mono text-xs font-black uppercase tracking-widest px-6 py-2 hover:bg-[#FFD23F] hover:text-black active:translate-x-[1px] active:translate-y-[1px] active:shadow-none transition-all">{t('profile.findFriends')}</button>
               </div>
             ) : (
               friends.map(friend => (

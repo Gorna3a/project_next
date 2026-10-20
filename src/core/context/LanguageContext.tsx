@@ -111,6 +111,13 @@ const translations: Record<Language, any> = {
       manage: "Manage",
       open: "Open",
     },
+    community: {
+      title: "Community",
+      notReadyTag: "Coming Soon",
+      notReadyTitle: "Not Ready Yet",
+      notReadyDesc: "The community hub is still under construction. Soon you'll be able to share projects, ask questions, and connect with other PixelCoders here.",
+      backHome: "Back to Dashboard",
+    },
     nav: {
       dashboard: "Dashboard",
       courses: "Courses",
@@ -547,6 +554,13 @@ const translations: Record<Language, any> = {
       create: "إنشاء",
       manage: "إدارة",
       open: "فتح",
+    },
+    community: {
+      title: "المجتمع",
+      notReadyTag: "قريباً",
+      notReadyTitle: "غير جاهز بعد",
+      notReadyDesc: "مركز المجتمع قيد الإنشاء. قريباً ستتمكن من مشاركة مشاريعك وطرح الأسئلة والتواصل مع بقية مستخدمي بكسل كود هنا.",
+      backHome: "العودة إلى اللوحة",
     },
     nav: {
       dashboard: "لوحة التحكم",

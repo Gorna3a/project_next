@@ -1,8 +1,5 @@
-'use client';
-import dynamic from "next/dynamic";
+import { redirect } from "next/navigation";
 
-const ArenaLeaderboard = dynamic(() => import("@/platform/pages/Arena/Rankings/ArenaLeaderboard"), { ssr: false });
-
-export default function Rankings() {
-  return <ArenaLeaderboard />;
+export default function LegacyRankings() {
+  redirect("/app/rankings");
 }

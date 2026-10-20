@@ -5,6 +5,10 @@ All notable changes to the PixelCode product are documented here.
 ## [Unreleased]
 
 ### Added
+- Community section: new independent `/app/community` page showing a themed
+  "Not Ready Yet" placeholder (CRT hero + panel, en/ar strings). The sidebar
+  Community button now opens it instead of pointing at `/app/profile`;
+  Profile stays reachable from its own sidebar entry.
 - Lesson code snippets are now interactive: lesson-body code fences, workshop
   starter code, lab starter code, and certification starter workspace render as
   editable Monaco editors with Run / Reset and live stdout/stderr output
@@ -59,6 +63,19 @@ All notable changes to the PixelCode product are documented here.
   archive instead of 🔒 Expired.
 
 ### Changed
+- Dashboard decluttered: removed the duplicate four-tile stats row (level,
+  XP, streak and rank were each shown two-to-four times), the promo list
+  masquerading as "Recent Activity", and the hardcoded fake data
+  ("Global Rank #12", "Top 3%", the "Arena Gladiator" achievement, the CRT
+  badge). Level/XP/streak now come from the user profile only: hero shows
+  welcome + level progress, two minis show real Day Streak and Total XP,
+  and the bottom keeps Quick Actions + a real Coders Online panel.
+- Sidebar: the second "Arena" entry is now a separate "Hall of Fame"
+  section (Trophy) instead of a duplicate "Arena" label; the Arena tab bar
+  now shows only Arena Hub + Duel Zone. Rankings moved from
+  `/app/arena/rankings` to its own `/app/rankings` route (the old path
+  redirects), so the Arena section stays highlighted across its sub-pages
+  and the two sections no longer both light up at once.
 - Arena section redesigned to the pixel/retro theme: hub (CRT hero, stat
   boxes, quest panel, history, top gladiators), duel lobby + live duel room,
   rankings podium + rows, challenge detail, and tab bar all use 4px borders,
@@ -111,6 +128,10 @@ All notable changes to the PixelCode product are documented here.
   `ChallengeView` header show ✍️/▶ badges.
 
 ### Removed
+- Dashboard decorative bloat: the fixed robot mascot with its rotating
+  speech bubble (a `setInterval` mutating the DOM directly) and the
+  toast helper it drove, plus the fake "recent activity" promo list and
+  hardcoded-rank achievement panel they sat next to.
 - Kids mode, end to end: deleted `app/kids/` routes and the entire
   `src/kids/` section (home, Learn CS, Math, 10+ games); removed the
   `@kids/*` path alias, `ROUTES.KIDS`, `ChildProfile`, the kids-ocean /
@@ -123,6 +144,14 @@ All notable changes to the PixelCode product are documented here.
   `/app/training` instead. The old detail URL redirects automatically.
 
 ### Fixed
+- Arena page had a gap between the app top bar and the arena tab bar: the
+  app content offset used 64px while the header is 56px, and the arena tab
+  bar sat inside the 24px page padding. Content offset is now 56px to match
+  the header, and the arena tab bar is pulled flush (full-bleed) beneath it.
+  Also aligned the expanded content margin (240 → 230) with the sidebar and
+  header width.
+- Hall of Fame quick-duel navigated to `/arena/duels/:id` (missing `/app`);
+  now `/app/arena/duels/:id`.
 - Removed 8 duplicate documents from the Firestore `challenges` collection
   (33 → 25), keyed by title+difficulty+language, keeping the earliest copy
   per pair. Firestore rules temporarily opened for the sweep were reverted
