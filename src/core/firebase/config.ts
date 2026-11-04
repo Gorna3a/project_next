@@ -16,13 +16,36 @@ const firebaseConfig = {
 // Prevent duplicate app initialization (useful with HMR)
 const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0];
 
-export const auth = getAuth(app);
-export const db   = getFirestore(app);
+// Service instances are created LAZILY on first access (via Proxy), not at
+// module scope: during static prerendering (SSG) no env validation happens,
+// so a missing/invalid NEXT_PUBLIC_FIREBASE_API_KEY can't crash the build.
+// On the client the first real usage initializes everything as usual.
+let _auth: ReturnType<typeof getAuth> | null = null;
+const getFirebaseAuth = () => (_auth ??= getAuth(app));
+
+let _db: ReturnType<typeof getFirestore> | null = null;
+const getFirebaseDb = () => (_db ??= getFirestore(app));
+
+export const auth = new Proxy({} as ReturnType<typeof getAuth>, {
+  get: (_t, prop) => Reflect.get(getFirebaseAuth() as object, prop),
+  set: (_t, prop, value) => (Reflect.set(getFirebaseAuth() as object, prop, value), true),
+  has: (_t, prop) => Reflect.has(getFirebaseAuth() as object, prop),
+});
+
+export const db = new Proxy({} as ReturnType<typeof getFirestore>, {
+  get: (_t, prop) => Reflect.get(getFirebaseDb() as object, prop),
+  set: (_t, prop, value) => (Reflect.set(getFirebaseDb() as object, prop, value), true),
+  has: (_t, prop) => Reflect.has(getFirebaseDb() as object, prop),
+});
 
 // Analytics only in browser environments that support it
-isSupported().then((yes) => {
-  if (yes) getAnalytics(app);
-});
+if (typeof window !== 'undefined') {
+  isSupported().then((yes) => {
+    if (yes) getAnalytics(app);
+  }).catch(() => {
+    /* analytics optional */
+  });
+}
 
 // Auth providers
 export const googleProvider = new GoogleAuthProvider();
