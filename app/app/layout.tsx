@@ -5,14 +5,19 @@ import { Sidebar } from "@/platform/layout/Sidebar";
 import { Header } from "@/platform/layout/Header";
 import { useAuth } from "@/core/context/AuthContext";
 import { useLanguage } from "@/core/context/LanguageContext";
-import { useRouter } from "next/navigation";
 import { useEffect } from "react";
+import { usePathname, useRouter } from "next/navigation";
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   const [collapsed, setCollapsed] = useState(false);
   const { user, loading } = useAuth();
   const { isRTL } = useLanguage();
   const router = useRouter();
+  const pathname = usePathname();
+
+  useEffect(() => {
+    setCollapsed(pathname === "/app/arduino");
+  }, [pathname]);
 
   useEffect(() => {
     if (!loading && !user) {

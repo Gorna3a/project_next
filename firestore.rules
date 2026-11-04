@@ -1,10 +1,15 @@
-// ─── deployed 2026-10-04 ─────────────────────────────────────────────
+// ─── rules v2 (2026-11-04) — XP is server-authoritative ─────────────
+// XP / level / streak / leaderboard are committed exclusively by
+// POST /api/xp/award via the Firebase Admin SDK, which bypasses these
+// rules. Clients can no longer write those fields at all.
+//
+// NOT DEPLOYED until `firebase deploy --only firestore:rules` is run.
 rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    // ─── Helpers ──────────────────────────────────────────────────────────
+    // ─── Helpers ─────────────────────────────────────────────────────
 
     function signedIn() {
       return request.auth != null;
@@ -19,29 +24,40 @@ service cloud.firestore {
         && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
     }
 
-    // ─── User profiles ────────────────────────────────────────────────────
-    // Readable by any signed-in user (public profiles, user search, friends,
-    // leaderboards, duel invites). Writes are owner-only; only admins may
-    // change roles or touch other users' docs. Signups always create
-    // role == "student" — teachers/admins are promoted via UserManagement.
+    // ─── User profiles ────────────────────────────────────────────────
+    // Owner updates: display name, avatar + its source marker, preferences
+    // and lastActive (login touch). Everything that implies progression —
+    // totalXP, level, streak, lastStreakDate, role, uid, email, createdAt —
+    // is rejected for clients here, even for the document owner.
 
     match /users/{userId} {
       allow read: if signedIn();
       allow create: if isOwner(userId)
-        && request.resource.data.role == 'student';
+        && request.resource.data.role == 'student'
+        && request.resource.data.totalXP == 0
+        && request.resource.data.level == 1
+        && request.resource.data.streak == 0;
       allow update: if isAdmin()
-        || (isOwner(userId) && request.resource.data.role == resource.data.role);
+        || (
+          isOwner(userId)
+          && request.resource.data.role == resource.data.role
+          && request.resource.data.diff(resource.data).affectedKeys()
+              .hasOnly(['displayName', 'photoURL', 'photoSource', 'preferences', 'lastActive'])
+        );
       allow delete: if isOwner(userId) || isAdmin();
 
-      // Private per-user data — owner only
+      // Server-maintained: courseProgress is written only by /api/xp/award.
       match /courseProgress/{docId} {
-        allow read, write: if isOwner(userId);
+        allow read: if isOwner(userId);
+        allow write: if false;
       }
       match /chats/{docId} {
         allow read, write: if isOwner(userId);
       }
+      // Server-maintained completion ledger (write = server only).
       match /completedChallenges/{docId} {
-        allow read, write: if isOwner(userId);
+        allow read: if isOwner(userId);
+        allow write: if false;
       }
       match /enrolledClassrooms/{docId} {
         allow read, write: if isOwner(userId);
@@ -49,6 +65,11 @@ service cloud.firestore {
       match /projects/{projectId} {
         allow read, write: if isOwner(userId);
       }
+    }
+
+    // Server-only XP ledger — no client access whatsoever.
+    match /xpEvents/{docId} {
+      allow read, write: if false;
     }
 
     // Legacy single-doc projects (migration source) — keep until fully migrated
@@ -61,18 +82,16 @@ service cloud.firestore {
       allow write: if isAdmin();
     }
 
-    // ─── Public curriculum content ────────────────────────────────────────
+    // ─── Public curriculum content ───────────────────────────────────
 
     match /challenges/{challengeId} {
       allow read: if signedIn();
       allow write: if isAdmin();
     }
 
-    // ─── Social ───────────────────────────────────────────────────────────
+    // ─── Social ───────────────────────────────────────────────────────
 
     match /friend_requests/{requestId} {
-      // GETs by fixed id (e.g. uidA_uidB) happen even when no doc exists;
-      // evaluating `resource.data.*` on a null resource errors out to deny.
       allow read: if signedIn();
       allow create: if signedIn()
         && request.resource.data.from == request.auth.uid;
@@ -96,7 +115,7 @@ service cloud.firestore {
         && resource.data.userId == request.auth.uid;
     }
 
-    // ─── Bookmarks (private to their owner via the userId field) ──────────
+    // ─── Bookmarks (private to their owner via the userId field) ──────
 
     match /bookmarks/{bookmarkId} {
       allow read: if signedIn()
@@ -107,15 +126,23 @@ service cloud.firestore {
         && resource.data.userId == request.auth.uid;
     }
 
-    // ─── Duels ────────────────────────────────────────────────────────────
+    // ─── Duels ────────────────────────────────────────────────────────
+    // Clients may: join an open room as a participant, and flip their own
+    // thinking/answered/finished marker. Clients may NEVER set winnerId or
+    // force the room into 'finished' — that is the server's job (fair,
+    // race-proof). Status 'finished' is set only by /api/xp/award.
 
     match /duel_rooms/{roomId} {
       allow read: if signedIn();
       allow create: if signedIn()
         && request.resource.data.creatorId == request.auth.uid;
       allow update: if signedIn() && (
-        resource.data.creatorId == request.auth.uid
-        || resource.data.opponentId == request.auth.uid
+        // Creator updates own status only
+        (resource.data.creatorId == request.auth.uid
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['creatorStatus']))
+        // Opponent updates own status only
+        || (resource.data.opponentId == request.auth.uid
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['opponentStatus']))
         // Joining an open room: may only set yourself as opponent
         || (
           resource.data.opponentId == null
@@ -127,9 +154,10 @@ service cloud.firestore {
       allow delete: if isAdmin();
     }
 
+    // Read-only for clients; writes happen server-side.
     match /competitive_leaderboard/{entryId} {
       allow read: if signedIn();
-      allow write: if signedIn();
+      allow write: if false;
     }
 
     // Legacy dashboard collection name (see AdminDashboard)
@@ -138,10 +166,7 @@ service cloud.firestore {
       allow write: if isAdmin();
     }
 
-    // ─── Classrooms ───────────────────────────────────────────────────────
-    // Reads are signed-in (join-by-code lookup needs to find the room before
-    // becoming a member). Writes: teachers own their rooms; students may only
-    // add themselves to `students` (self-enroll, never remove others).
+    // ─── Classrooms ───────────────────────────────────────────────────
 
     match /classrooms/{classroomId} {
       allow read: if signedIn();

@@ -1,4 +1,5 @@
 import { type ComponentType } from "react";
+import Image from "next/image";
 import { NavLink } from "../../shared/ui/NavLink";
 import { motion } from "framer-motion";
 import {
@@ -7,6 +8,7 @@ import {
   Terminal,
   GraduationCap,
   Bot,
+  Cpu,
   Library,
   User,
   Settings,
@@ -18,10 +20,9 @@ import {
   Users,
   Target,
 } from "lucide-react";
-import { Logo } from "../../shared/ui/Logo";
+import { usePoolLogo } from "../../core/context/LogoContext";
 import { useAuth } from "../../core/context/AuthContext";
 import { useLanguage } from "../../core/context/LanguageContext";
-import { useTheme } from "../../core/context/ThemeContext";
 
 interface NavItem {
   to: string;
@@ -32,13 +33,14 @@ interface NavItem {
 export const Sidebar = ({ collapsed, onToggle }: SidebarProps) => {
   const { profile } = useAuth();
   const { t, isRTL } = useLanguage();
-  const { theme, setTheme } = useTheme();
+  const { image: poolFace } = usePoolLogo();
   const isAdmin = profile?.role === "admin";
 
   const mainItems: NavItem[] = [
     { to: "/app", labelKey: "nav.dashboard", icon: LayoutDashboard },
     { to: "/app/courses", labelKey: "nav.courses", icon: BookOpen },
     { to: "/app/playground", labelKey: "nav.playground", icon: Terminal },
+    { to: "/app/arduino", labelKey: "nav.arduino", icon: Cpu },
     { to: "/app/training", labelKey: "nav.training", icon: Target },
     { to: "/app/arena", labelKey: "nav.arena", icon: Sword },
     { to: "/app/rankings", labelKey: "arena.rankings", icon: Trophy },
@@ -92,13 +94,19 @@ export const Sidebar = ({ collapsed, onToggle }: SidebarProps) => {
     >
       <div className="side-head">
         <div className="logo-box" style={{ width: 44, height: 30 }}>
-          {collapsed ? (
-            <div className="w-full h-full grid place-items-center bg-black text-[var(--phosphor)] font-mono text-[8px] font-black">PC</div>
-          ) : (
-            <div style={{ transform: 'scale(0.82)', transformOrigin: 'center' }}>
-              <Logo linkTo="/app" size="sm" />
-            </div>
-          )}
+          <Image
+            src={poolFace}
+            alt="PixelCode"
+            width={30}
+            height={30}
+            style={{
+              width: '100%',
+              height: '100%',
+              objectFit: 'contain',
+              imageRendering: 'pixelated',
+              display: 'block',
+            }}
+          />
         </div>
         {!collapsed && (
           <>
@@ -126,15 +134,6 @@ export const Sidebar = ({ collapsed, onToggle }: SidebarProps) => {
       </nav>
 
       <div className="side-foot">
-        {!collapsed && (
-          <>
-            <div className="mono" style={{ fontSize: 8, fontWeight: 800, letterSpacing: '0.08em' }}>THEME</div>
-            <div className="theme-row">
-              <button onClick={() => setTheme('light' as any)} className={`theme-btn ${theme === 'light' ? 'on' : 'off'}`}>LIGHT</button>
-              <button onClick={() => setTheme('dark' as any)} className={`theme-btn ${theme === 'dark' ? 'on' : 'off'}`}>DARK</button>
-            </div>
-          </>
-        )}
         <div className="flex items-center gap-2 mt-2">
           <button
             onClick={onToggle}

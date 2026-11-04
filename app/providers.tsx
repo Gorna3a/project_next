@@ -5,13 +5,15 @@ import { AuthProvider } from "../src/core/context/AuthContext";
 import { ThemeProvider } from "../src/core/context/ThemeContext";
 import { LanguageProvider } from "../src/core/context/LanguageContext";
 import { NotificationProvider } from "../src/core/context/NotificationContext";
+import { LogoProvider } from "../src/core/context/LogoContext";
 import { Toaster } from "react-hot-toast";
 
 export const Providers = ({ children }: { children: ReactNode }) => (
   <LanguageProvider>
     <ThemeProvider>
       <AuthProvider>
-        <NotificationProvider>
+        <LogoProvider>
+          <NotificationProvider>
           <Toaster
             position="top-center"
             toastOptions={{
@@ -23,7 +25,8 @@ export const Providers = ({ children }: { children: ReactNode }) => (
             }}
           />
           {children}
-        </NotificationProvider>
+          </NotificationProvider>
+        </LogoProvider>
       </AuthProvider>
     </ThemeProvider>
   </LanguageProvider>

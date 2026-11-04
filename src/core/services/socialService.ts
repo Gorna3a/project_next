@@ -14,6 +14,32 @@ import {
 import { db } from "../firebase";
 import type { UserProfile } from "../types";
 
+/**
+ * Firestore rejects `undefined` anywhere in a written document (and in
+ * arrays). Deep-walk the payload: drop undefined object keys, map undefined
+ * array items to null. Plain objects only — FieldValue sentinels
+ * (serverTimestamp etc.) and class instances pass through untouched.
+ */
+const stripUndefined = <T>(value: T): T => {
+  if (value === undefined) return null as unknown as T;
+  if (Array.isArray(value)) return value.map(stripUndefined) as unknown as T;
+  if (typeof value === 'object' && value !== null && value.constructor === Object) {
+    const out: Record<string, unknown> = {};
+    for (const [k, v] of Object.entries(value as Record<string, unknown>)) {
+      if (v !== undefined) out[k] = stripUndefined(v);
+    }
+    return out as unknown as T;
+  }
+  return value;
+};
+
+const requireUid = (uid: unknown, name: string): string => {
+  if (typeof uid !== 'string' || uid.length === 0) {
+    throw new Error(`[social] missing or invalid ${name}`);
+  }
+  return uid;
+};
+
 export interface FriendRequest {
   id: string;
   from: string;
@@ -48,45 +74,49 @@ export const socialService = {
 
   // Send a friend request
   sendFriendRequest: async (fromUser: UserProfile, toUserId: string) => {
-    const requestId = `${fromUser.uid}_${toUserId}`;
+    const uid = requireUid(fromUser?.uid, 'fromUser.uid');
+    const to = requireUid(toUserId, 'toUserId');
+    const requestId = `${uid}_${to}`;
     const requestRef = doc(db, "friend_requests", requestId);
-    
+
     // Check if request already exists
     const existing = await getDoc(requestRef);
     if (existing.exists()) return;
 
-    await setDoc(requestRef, {
+    await setDoc(requestRef, stripUndefined({
       from: fromUser.uid,
-      to: toUserId,
-      fromName: fromUser.displayName,
-      fromPhoto: fromUser.photoURL,
+      to,
+      fromName: fromUser.displayName ?? 'PixelCoder',
+      fromPhoto: fromUser.photoURL ?? null,
       status: 'pending',
       timestamp: serverTimestamp()
-    });
+    }));
 
     // Also create a notification
-    await socialService.createNotification(toUserId, {
+    await socialService.createNotification(to, stripUndefined({
       type: 'friend_request',
       from: {
         uid: fromUser.uid,
-        displayName: fromUser.displayName,
-        photoURL: fromUser.photoURL
+        displayName: fromUser.displayName ?? 'PixelCoder',
+        photoURL: fromUser.photoURL ?? null
       },
       requestId
-    });
+    }));
   },
 
   // Accept a friend request
   acceptFriendRequest: async (requestId: string, currentUserId: string, otherUserId: string) => {
+    const uid = requireUid(currentUserId, 'currentUserId');
+    const other = requireUid(otherUserId, 'otherUserId');
     const requestRef = doc(db, "friend_requests", requestId);
     await updateDoc(requestRef, { status: 'accepted' });
 
     // Create friendship entries (two-way)
-    const friendshipId = [currentUserId, otherUserId].sort().join('_');
-    await setDoc(doc(db, "friendships", friendshipId), {
-      users: [currentUserId, otherUserId],
+    const friendshipId = [uid, other].sort().join('_');
+    await setDoc(doc(db, "friendships", friendshipId), stripUndefined({
+      users: [uid, other],
       createdAt: serverTimestamp()
-    });
+    }));
   },
 
   // Decline a friend request
@@ -128,25 +158,27 @@ export const socialService = {
 
   // Create a notification
   createNotification: async (toUserId: string, data: any) => {
-    await setDoc(doc(collection(db, "notifications")), {
+    const uid = requireUid(toUserId, 'toUserId');
+    await setDoc(doc(collection(db, "notifications")), stripUndefined({
       ...data,
-      userId: toUserId,
+      userId: uid,
       read: false,
       timestamp: serverTimestamp()
-    });
+    }));
   },
 
   // Send a duel invite
   sendDuelInvite: async (fromUser: UserProfile, toUserId: string, roomId: string) => {
-    await socialService.createNotification(toUserId, {
+    requireUid(fromUser?.uid, 'fromUser.uid');
+    await socialService.createNotification(toUserId, stripUndefined({
       type: 'duel_invite',
       from: {
         uid: fromUser.uid,
-        displayName: fromUser.displayName,
-        photoURL: fromUser.photoURL
+        displayName: fromUser.displayName ?? 'PixelCoder',
+        photoURL: fromUser.photoURL ?? null
       },
       roomId
-    });
+    }));
   },
 
   // Check relationship status between two users

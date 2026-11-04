@@ -1,106 +1,34 @@
 'use client';
 
 import { useState, useRef, useEffect } from "react";
-import Link from "next/link";
-import { Bell, Search, Globe } from "lucide-react";
+import { Bell, Globe, Zap } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import { useTheme, THEMES } from "../../core/context/ThemeContext";
+import { useTheme } from "../../core/context/ThemeContext";
 import { useLanguage } from "../../core/context/LanguageContext";
 import { useNotifications } from "../../core/context/NotificationContext";
+import { useAuth } from "../../core/context/AuthContext";
 import { UserMenu } from "../../shared/ui/UserMenu";
 import { NotificationTray } from "../../shared/ui/NotificationTray";
-import { UserSearch } from "../../shared/ui/UserSearch";
 
-// ─── Theme Menu ───────────────────────────────────────────────────────────────
+// ─── Theme Switch (single pixel toggle, LIGHT / DARK) ─────────────────────────
 
-const ThemeMenu = () => {
-  const { theme, setTheme, themeData } = useTheme();
-  const { isRTL, t } = useLanguage();
-  const [open, setOpen] = useState(false);
-  const ref = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const handler = (e: MouseEvent) => {
-      if (ref.current && !ref.current.contains(e.target as Node))
-        setOpen(false);
-    };
-    document.addEventListener("mousedown", handler);
-    return () => document.removeEventListener("mousedown", handler);
-  }, []);
-
+const ThemeToggle = () => {
+  const { themeData, setTheme } = useTheme();
+  const { t } = useLanguage();
+  const dark = !!themeData.isDark;
   return (
-    <div className="relative" ref={ref}>
-      <button
-        onClick={() => setOpen((v) => !v)}
-        className="btn-ghost p-2 rounded-xl flex items-center gap-1.5 text-xs"
-        aria-label={t('common.changeTheme')}
-        title={`${t('common.settings')}: ${themeData.label}`}
-      >
-        <div className="flex gap-0.5">
-          {themeData.preview.map((color, i) => (
-            <div
-              key={i}
-              className="w-2.5 h-2.5 rounded-full"
-              style={{ backgroundColor: color }}
-            />
-          ))}
-        </div>
-      </button>
-
-      <AnimatePresence>
-        {open && (
-          <motion.div
-            initial={{ opacity: 0, y: -8, scale: 0.96 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: -8, scale: 0.96 }}
-            transition={{ duration: 0.15 }}
-            className={`absolute ${isRTL ? 'left-0' : 'right-0'} top-full mt-2 z-50 rounded-2xl shadow-xl border p-3`}
-            style={{
-              width: "260px",
-              backgroundColor: "var(--bg-elevated)",
-              borderColor: "var(--border)",
-            }}
-          >
-            <p
-              className={`text-xs font-semibold mb-3 px-1 ${isRTL ? 'text-right' : 'text-left'}`}
-              style={{ color: "var(--text-muted)" }}
-            >
-              {t('common.changeTheme').toUpperCase()}
-            </p>
-            <div className="grid grid-cols-3 gap-2 mb-3">
-              {["light", "dark", "midnight"].map((id) => {
-                const themeItem = THEMES.find((th) => th.id === id);
-                if (!themeItem) return null;
-                return (
-                  <button
-                    key={id}
-                    onClick={() => {
-                      setTheme(id as any);
-                      setOpen(false);
-                    }}
-                    className={`flex flex-col items-center gap-1.5 p-2 rounded-xl border-2 transition-all
-                      ${theme === id ? "border-brand-500 bg-brand-50 dark:bg-brand-900/20" : "border-transparent hover:bg-gray-100 dark:hover:bg-gray-800"}`}
-                  >
-                    <div 
-                      className="w-8 h-8 rounded-full border border-gray-200 dark:border-gray-700"
-                      style={{ background: `linear-gradient(135deg, ${themeItem.preview[0]} 0%, ${themeItem.preview[1]} 100%)` }}
-                    />
-                    <span className="text-[10px] font-bold uppercase tracking-wider">{themeItem.label}</span>
-                  </button>
-                );
-              })}
-            </div>
-            <Link
-              href="/app/settings"
-              onClick={() => setOpen(false)}
-              className={`flex items-center justify-center gap-2 w-full py-2 rounded-xl bg-gray-100 dark:bg-gray-800 text-[10px] font-black uppercase tracking-widest text-gray-500 hover:text-brand-600 transition-colors ${isRTL ? 'flex-row-reverse' : ''}`}
-            >
-              {isRTL ? 'المزيد من السمات ←' : 'More Themes →'}
-            </Link>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </div>
+    <button
+      type="button"
+      role="switch"
+      aria-checked={dark}
+      onClick={() => setTheme(dark ? "light" : "dark")}
+      className="theme-switch"
+      aria-label={`${t('common.changeTheme')}: ${dark ? 'DARK' : 'LIGHT'}`}
+      title={`${t('common.changeTheme')}: ${dark ? 'DARK' : 'LIGHT'}`}
+    >
+      <span className="ts-track" aria-hidden="true"><span className="ts-thumb" /></span>
+      <span className="ts-label">{dark ? 'DARK' : 'LIGHT'}</span>
+    </button>
   );
 };
 
@@ -177,9 +105,10 @@ interface HeaderProps {
 
 export const Header = ({ sidebarCollapsed }: HeaderProps) => {
   const [showNotifications, setShowNotifications] = useState(false);
-  const [showSearch, setShowSearch] = useState(false);
   const { unreadCount } = useNotifications();
   const { isRTL, t } = useLanguage();
+  const { profile } = useAuth();
+  const totalXP = profile?.totalXP ?? 0;
 
   return (
     <motion.header
@@ -205,17 +134,18 @@ export const Header = ({ sidebarCollapsed }: HeaderProps) => {
       <div className="flex-1" />
 
       <div className="flex items-center gap-2">
-        <button
-          onClick={() => setShowSearch(true)}
-          className="p-2 rounded-xl text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
-          aria-label={t('common.searchUsers')}
-          title={t('common.searchUsers')}
+        <div
+          className="xp-chip"
+          title={`${totalXP.toLocaleString()} ${t('common.xp')}`}
+          aria-label={`${totalXP.toLocaleString()} ${t('common.xp')}`}
         >
-          <Search className="w-4 h-4" />
-        </button>
+          <Zap strokeWidth={3} fill="currentColor" aria-hidden="true" />
+          <span className="xp-num">{totalXP.toLocaleString()}</span>
+          <span className="xp-tag">XP</span>
+        </div>
 
         <LanguageMenu />
-        <ThemeMenu />
+        <ThemeToggle />
 
         <div className="relative">
           <button
@@ -239,8 +169,6 @@ export const Header = ({ sidebarCollapsed }: HeaderProps) => {
 
         <UserMenu variant="platform" />
       </div>
-
-      <UserSearch isOpen={showSearch} onClose={() => setShowSearch(false)} />
     </motion.header>
   );
 };

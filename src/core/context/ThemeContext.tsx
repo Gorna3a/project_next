@@ -11,7 +11,7 @@ import type { AppTheme } from "../types";
 
 // New retro theme — “Beige Computer” light + “Phosphor Night” dark from pixelcode-retro.html
 const THEME_LOCKED = false;
-const LOCKED_THEME: AppTheme = "neobrutalism";
+const LOCKED_THEME: AppTheme = "light";
 
 // ─── Theme definitions ────────────────────────────────────────────────────────
 
@@ -242,13 +242,23 @@ const applyTheme = (themeDef: ThemeDefinition) => {
 
 // ─── Provider ─────────────────────────────────────────────────────────────────
 
+// The quick theme UI only offers LIGHT and DARK. Older stored ids
+// ("midnight", "sunset", "nord", "neobrutalism", …) never styled the pixel
+// app shell correctly (it reacts only to [data-theme="dark"]), so they are
+// normalized to the nearest of the two real options on read.
+const sanitizeTheme = (stored: string | null): AppTheme => {
+  if (stored === "light" || stored === "dark") return stored;
+  const legacy = THEMES.find((t) => t.id === stored);
+  return legacy?.isDark ? "dark" : "light";
+};
+
 export const ThemeProvider = ({ children }: { children: ReactNode }) => {
   const [theme, setThemeState] = useState<AppTheme>(() => {
     if (THEME_LOCKED) return LOCKED_THEME;
     if (typeof window !== "undefined") {
-      return (localStorage.getItem("pixelcode-theme") as AppTheme) || "neobrutalism";
+      return sanitizeTheme(localStorage.getItem("pixelcode-theme"));
     }
-    return "neobrutalism";
+    return "light";
   });
 
   const [customTheme, setCustomTheme] = useState<ThemeDefinition | null>(() => {

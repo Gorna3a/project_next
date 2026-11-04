@@ -37,4 +37,11 @@ dev.err
 
 # local agent tooling (skills, sessions) — not part of the product
 .opencode/
+.claude/
+
+# python / build scratch
+__pycache__/
+*.pyc
+.next-dev.log
+*.log
 

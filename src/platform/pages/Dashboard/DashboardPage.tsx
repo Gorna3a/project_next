@@ -8,12 +8,13 @@ import { useAuth } from '../../../core/hooks/useAuth';
 import { useLanguage } from '../../../core/context/LanguageContext';
 import { AvatarPicker } from '../../../shared/ui/AvatarPicker';
 import { socialService } from '../../../core/services/socialService';
+import { pixelAvatarFor } from '../../../shared/ui/avatarFallback';
 
 const XP_PER_LEVEL = 1000;
 
 export default function DashboardPage() {
   const { profile, user } = useAuth();
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const navigate = useRouter();
   const [showAvatarPicker, setShowAvatarPicker] = useState(false);
   const [friends, setFriends] = useState<any[]>([]);
@@ -44,7 +45,7 @@ export default function DashboardPage() {
     <>
       {showAvatarPicker && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-black/60 backdrop-blur-sm">
-          <div className="border-[4px] border-black shadow-[8px_8px_0_#000] bg-white">
+          <div className="border-[4px] shadow-[8px_8px_0_#000]" style={{ borderColor: 'var(--border)', background: 'var(--surface)' }}>
             <AvatarPicker uid={user!.uid} onComplete={() => setShowAvatarPicker(false)} />
           </div>
         </div>
@@ -53,20 +54,20 @@ export default function DashboardPage() {
       <div className="wrap">
         <div className="sys">
           <span>PIXEL CODE — DASHBOARD</span>
-          <span>{new Date().toLocaleDateString('en-GB')}</span>
+          <span>{new Date().toLocaleDateString(language === 'ar' ? 'ar-EG' : 'en-GB')}</span>
         </div>
 
-        <div className="hero-grid">
-          <div className="crt scan">
+        <div className="hero-row">
+          <div className="welcome scan">
             <div className="sub">{t('dashboard.welcome').toUpperCase()} —</div>
             <h1>{name}</h1>
-            <div className="level-box">
-              <div className="mono" style={{ fontSize: 9, fontWeight: 800, display: 'flex', justifyContent: 'space-between' }}>
+            <div className="meter-box">
+              <div className="mono meter-row">
                 <span>LEVEL {level}</span>
                 <span>{xpPercent.toFixed(0)}%</span>
               </div>
-              <div className="bar" style={{ marginTop: 6 }}><i style={{ width: `${xpPercent}%` }} /></div>
-              <div className="mono" style={{ fontSize: 8, opacity: 0.5, marginTop: 6 }}>{xpToNextLevel} XP → NEXT LEVEL</div>
+              <div className="bar" style={{ marginTop: 8 }}><i style={{ width: `${xpPercent}%` }} /></div>
+              <div className="mono meter-foot">{xpToNextLevel} XP → NEXT LEVEL</div>
             </div>
           </div>
           <div className="side-stack">
@@ -88,15 +89,15 @@ export default function DashboardPage() {
         </div>
 
         {requests.length > 0 && (
-          <div className="mt-4 bg-white border-[4px] border-black shadow-[4px_4px_0_#000] p-3 flex items-center justify-between gap-3">
+          <div className="mt-4 border-[4px] shadow-[4px_4px_0_#000] p-3 flex items-center justify-between gap-3" style={{ borderColor: 'var(--border)', background: 'var(--surface)' }}>
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-[#FF6B1A] border-[3px] border-black grid place-items-center"><UserPlus className="w-5 h-5 text-white" /></div>
+              <div className="w-10 h-10 bg-[#FF6B1A] grid place-items-center" style={{ border: '3px solid var(--border)' }}><UserPlus className="w-5 h-5 text-white" /></div>
               <div>
-                <p className="mono text-xs font-black uppercase tracking-widest">{t('profile.requests')} • {requests.length}</p>
+                <p className="mono text-xs font-black uppercase tracking-widest" style={{ color: 'var(--fg)' }}>{t('profile.requests')} • {requests.length}</p>
                 <p className="mono text-[11px] font-bold opacity-60">{t('profile.pendingRequests').replace('{count}', String(requests.length))}</p>
               </div>
             </div>
-            <button onClick={() => navigate.push('/app/profile?tab=friends')} className="bg-black text-white border-[3px] border-black px-4 py-2 font-mono text-xs font-black uppercase tracking-widest">Review →</button>
+            <button onClick={() => navigate.push('/app/profile?tab=friends')} className="px-4 py-2 font-mono text-xs font-black uppercase tracking-widest" style={{ background: 'var(--border)', color: 'var(--phosphor)', border: '3px solid var(--border)' }}>{t('dashboard.review')}</button>
           </div>
         )}
 
@@ -104,10 +105,10 @@ export default function DashboardPage() {
           <div>
             <div className="section-label">▣ {t('dashboard.quickActions').toUpperCase()}</div>
             <div className="qgrid">
-              <Link href="/app/courses" className="q yellow"><div className="q-icon"><BookOpen className="w-4 h-4" /></div><div style={{ fontWeight: 800 }}>Courses</div><div className="mono" style={{ fontSize: 9, opacity: 0.6 }}>LEARN →</div></Link>
-              <Link href="/app/playground" className="q green"><div className="q-icon"><Terminal className="w-4 h-4" /></div><div style={{ fontWeight: 800 }}>Playground</div><div className="mono" style={{ fontSize: 9, opacity: 0.6 }}>RUN →</div></Link>
-              <Link href="/app/arena" className="q orange"><div className="q-icon"><Trophy className="w-4 h-4" /></div><div style={{ fontWeight: 800 }}>Arena</div><div className="mono" style={{ fontSize: 9, opacity: 0.6 }}>BATTLE →</div></Link>
-              <Link href="/app/chat" className="q purple"><div className="q-icon"><Bot className="w-4 h-4" /></div><div style={{ fontWeight: 800 }}>Smart Chat</div><div className="mono" style={{ fontSize: 9, opacity: 0.6 }}>ASK →</div></Link>
+              <Link href="/app/courses" className="q yellow"><div className="q-icon"><BookOpen className="w-4 h-4" /></div><div style={{ fontWeight: 800 }}>{t('dashboard.qaCourses')}</div><div className="mono" style={{ fontSize: 9, opacity: 0.6 }}>{t('dashboard.qaLearn')}</div></Link>
+              <Link href="/app/playground" className="q green"><div className="q-icon"><Terminal className="w-4 h-4" /></div><div style={{ fontWeight: 800 }}>{t('dashboard.qaPlayground')}</div><div className="mono" style={{ fontSize: 9, opacity: 0.6 }}>{t('dashboard.qaRun')}</div></Link>
+              <Link href="/app/arena" className="q orange"><div className="q-icon"><Trophy className="w-4 h-4" /></div><div style={{ fontWeight: 800 }}>{t('dashboard.qaArena')}</div><div className="mono" style={{ fontSize: 9, opacity: 0.6 }}>{t('dashboard.qaBattle')}</div></Link>
+              <Link href="/app/chat" className="q purple"><div className="q-icon"><Bot className="w-4 h-4" /></div><div style={{ fontWeight: 800 }}>{t('dashboard.qaChat')}</div><div className="mono" style={{ fontSize: 9, opacity: 0.6 }}>{t('dashboard.qaAsk')}</div></Link>
             </div>
           </div>
 
@@ -126,9 +127,9 @@ export default function DashboardPage() {
               ) : (
                 <div className="space-y-2">
                   {friends.map((f: any) => (
-                    <div key={f.uid} onClick={() => navigate.push(`/app/profile/${f.uid}`)} className="flex items-center gap-2 border-[2px] border-black p-2 cursor-pointer hover:bg-[var(--surface-2)]">
-                      <img src={f.photoURL || `https://api.dicebear.com/7.x/avataaars/svg?seed=${f.displayName}`} className="w-8 h-8 border-[2px] border-black object-cover" alt="" />
-                      <span className="font-mono text-xs font-black truncate">{f.displayName}</span>
+                    <div key={f.uid} onClick={() => navigate.push(`/app/profile/${f.uid}`)} className="flex items-center gap-2 p-2 cursor-pointer hover:bg-[var(--surface-2)]" style={{ border: '2px solid var(--border)' }}>
+                      <img src={f.photoURL || pixelAvatarFor(f.displayName || 'player')} className="w-8 h-8 object-cover" style={{ border: '2px solid var(--border)' }} alt="" />
+                      <span className="font-mono text-xs font-black truncate" style={{ color: 'var(--fg)' }}>{f.displayName}</span>
                       <ChevronRight className="w-4 h-4 ml-auto" />
                     </div>
                   ))}
@@ -137,6 +138,11 @@ export default function DashboardPage() {
             </div>
           </div>
         </div>
+
+        <Link href="/app/chat" className="tutor-loop">
+          <span className="tl-chip">24/7 AI</span>
+          <span className="tl-text">{t('dashboard.tutorCta')}</span>
+        </Link>
       </div>
     </>
   );

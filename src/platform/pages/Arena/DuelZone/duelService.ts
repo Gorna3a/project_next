@@ -1,15 +1,13 @@
-import { 
-  collection, 
-  doc, 
-  addDoc, 
-  updateDoc, 
-  onSnapshot, 
-  query, 
-  where, 
+import {
+  collection,
+  addDoc,
+  updateDoc,
+  onSnapshot,
+  query,
+  where,
   serverTimestamp,
-  getDoc,
+  doc,
   Timestamp,
-  increment
 } from "firebase/firestore";
 import { db } from "../../../../core/firebase/config";
 
@@ -28,6 +26,10 @@ export type DuelRoom = {
   winnerId: string | null;
   createdAt: Timestamp;
 };
+
+// Duel *finishing* (winner determination, XP awards, leaderboard) happens in
+// POST /api/xp/award — server-authoritative. This file only covers room
+// lifecycle: create, join, in-progress status, and subscriptions.
 
 export const duelService = {
   // Create a new duel room
@@ -65,36 +67,16 @@ export const duelService = {
   // Update status during duel
   updateStatus: async (roomId: string, isCreator: boolean, status: 'thinking' | 'answered' | 'finished') => {
     const roomRef = doc(db, "duel_rooms", roomId);
-    const update: any = {};
+    const update: Record<string, string> = {};
     if (isCreator) update.creatorStatus = status;
     else update.opponentStatus = status;
     await updateDoc(roomRef, update);
   },
 
-  // Finish duel and set winner if not already set
-  finishDuel: async (roomId: string, userId: string) => {
-    const roomRef = doc(db, "duel_rooms", roomId);
-    const roomSnap = await getDoc(roomRef);
-    if (!roomSnap.exists()) return;
-
-    const data = roomSnap.data();
-    if (!data.winnerId) {
-      // First one to finish is the winner
-      await updateDoc(roomRef, {
-        winnerId: userId,
-        status: 'finished'
-      });
-      
-      // Update winner's leaderboard stats
-      await updateLeaderboard(userId, true);
-      // Update loser's stats if possible (later)
-    }
-  },
-
   // Listen to open rooms
   subscribeToOpenRooms: (callback: (rooms: DuelRoom[]) => void) => {
     const q = query(
-      collection(db, "duel_rooms"), 
+      collection(db, "duel_rooms"),
       where("status", "==", "waiting")
     );
     return onSnapshot(q, (snap) => {
@@ -109,27 +91,6 @@ export const duelService = {
       if (doc.exists()) {
         callback({ id: doc.id, ...doc.data() } as DuelRoom);
       }
-    });
-  }
-};
-
-const updateLeaderboard = async (userId: string, isWin: boolean) => {
-  const lbRef = doc(db, "competitive_leaderboard", userId);
-  const lbSnap = await getDoc(lbRef);
-  
-  if (lbSnap.exists()) {
-    await updateDoc(lbRef, {
-      wins: isWin ? increment(1) : increment(0),
-      matchesPlayed: increment(1),
-      rating: isWin ? increment(25) : increment(-10),
-    });
-  } else {
-    // Initial entry
-    await addDoc(collection(db, "competitive_leaderboard"), {
-      uid: userId,
-      wins: isWin ? 1 : 0,
-      matchesPlayed: 1,
-      rating: isWin ? 1025 : 990,
     });
   }
 };

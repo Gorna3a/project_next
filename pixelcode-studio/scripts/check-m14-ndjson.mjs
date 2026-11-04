@@ -1,0 +1,10 @@
+import * as fs from 'node:fs';
+const p = 'C:/Users/ikkam/Documents/GitHub/project-next/courses/pixelcode-import/pixelcode-import/py-mod14-restart.ndjson';
+const lines = fs.readFileSync(p, 'utf8').trim().split('\n');
+console.log(`lines: ${lines.length}`);
+const first = JSON.parse(lines[0]);
+console.log(`keys: ${Object.keys(first).join(', ')}`);
+console.log(`first _id: ${first._id}, contentId: ${first.contentId}`);
+const ids = lines.map(l => JSON.parse(l)._id);
+console.log(`has py-mod-14: ${ids.includes('py-mod-14-data-structures')}`);
+console.log(`sample ids: ${ids.slice(0, 8).join(', ')}`);

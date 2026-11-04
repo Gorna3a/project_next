@@ -54,6 +54,37 @@ export default function CourseDetailPage() {
   const [modules, setModules] = useState<SanityModule[]>([]);
   const [loading, setLoading] = useState(true);
 
+  // Restore scroll position after content loads
+  useEffect(() => {
+    if (!slug || loading) return;
+    try {
+      const saved = sessionStorage.getItem(`scrollPos:${slug}`);
+      if (saved) {
+        const y = parseInt(saved, 10);
+        if (!Number.isNaN(y) && y > 0) {
+          // Try multiple times to ensure content is fully rendered
+          const restore = () => {
+            const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
+            const target = Math.min(y, maxScroll);
+            if (target > 0) {
+              window.scrollTo({ top: target, behavior: 'auto' });
+            }
+          };
+          // Multiple rAF to wait for DOM settle after async data load
+          requestAnimationFrame(() => {
+            requestAnimationFrame(() => {
+              restore();
+              // Second attempt after a short delay for slow renders
+              setTimeout(restore, 100);
+            });
+          });
+        }
+      }
+    } catch {
+      // ignore
+    }
+  }, [slug, loading, modules.length]);
+
   useEffect(() => {
     if (!slug) return;
 
@@ -113,7 +144,14 @@ export default function CourseDetailPage() {
   const handleContinue = () => {
     if (!course) return;
     const next = allLessons.find(lesson => !progress?.completedLessons.includes(lesson._id));
-    if (next) navigate.push(lessonUrl(next));
+    if (next) {
+      try { sessionStorage.setItem(`scrollPos:${slug}`, String(window.scrollY)); } catch { /* ignore */ }
+      navigate.push(lessonUrl(next));
+    }
+  };
+
+  const handleLessonClick = () => {
+    try { sessionStorage.setItem(`scrollPos:${slug}`, String(window.scrollY)); } catch { /* ignore */ }
   };
 
   const isCompleted = (lessonId: string) => progress?.completedLessons.includes(lessonId) ?? false;
@@ -312,6 +350,8 @@ export default function CourseDetailPage() {
                     <Link
                       key={lesson._id}
                       href={lessonUrl(lesson)}
+                      scroll={false}
+                      onClick={handleLessonClick}
                       className={`flex items-center gap-4 px-5 py-4 transition-colors ${isRTL ? 'flex-row-reverse text-right' : ''}`}
                       style={{ color: 'var(--text-primary)' }}
                       onMouseEnter={e => (e.currentTarget.style.backgroundColor = 'var(--bg-subtle)')}

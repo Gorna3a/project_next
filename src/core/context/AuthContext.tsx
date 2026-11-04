@@ -53,6 +53,8 @@ interface AuthContextValue {
   linkProvider: "github" | "google" | null;
   clearLink: () => void;
   logOut: () => Promise<void>;
+  /** Re-fetch the Firestore profile (e.g. after an avatar change). */
+  refreshProfile: () => Promise<void>;
 }
 
 // ─── Context ──────────────────────────────────────────────────────────────────
@@ -109,20 +111,32 @@ const readGithubToken = (): string | null => {
   }
 };
 
+/** Which OAuth provider (if any) a Firebase user authenticated with. */
+const providerPhotoSource = (user: User): "google" | "github" | "email" => {
+  const pid = user.providerData[0]?.providerId ?? "";
+  if (pid.includes("google")) return "google";
+  if (pid.includes("github")) return "github";
+  return "email";
+};
+
 /** Creates or updates the user document in Firestore on first login */
 const ensureUserDocument = async (user: User, role: UserRole = "student") => {
   const ref = doc(db, "users", user.uid);
   const snap = await getDoc(ref);
+  const providerSource = providerPhotoSource(user);
+  const providerPhoto = user.photoURL ?? null;
   if (!snap.exists()) {
     await setDoc(ref, {
       uid: user.uid,
       email: user.email,
       displayName: user.displayName || "PixelCoder",
-      photoURL: user.photoURL ?? null,
+      photoURL: providerPhoto,
+      photoSource: providerSource === "email" ? "email" : providerSource,
       role,
       totalXP: 0,
       level: 1,
       streak: 0,
+      lastStreakDate: null,
       createdAt: serverTimestamp(),
       lastActive: serverTimestamp(),
       preferences: {
@@ -131,9 +145,23 @@ const ensureUserDocument = async (user: User, role: UserRole = "student") => {
         emailNotifs: true,
       },
     });
-  } else {
-    await setDoc(ref, { lastActive: serverTimestamp() }, { merge: true });
+    return;
   }
+
+  const existing = snap.data();
+  const updates: Record<string, unknown> = { lastActive: serverTimestamp() };
+  // Auto-sync the provider profile picture on every login, unless the user
+  // deliberately picked a platform avatar or uploaded their own.
+  if (
+    providerPhoto &&
+    existing.photoSource !== "platform" &&
+    existing.photoSource !== "upload" &&
+    (existing.photoURL !== providerPhoto || existing.photoSource !== providerSource)
+  ) {
+    updates.photoURL = providerPhoto;
+    updates.photoSource = providerSource;
+  }
+  await setDoc(ref, updates, { merge: true });
 };
 
 const fetchProfile = async (uid: string): Promise<UserProfile | null> => {
@@ -148,6 +176,16 @@ const fetchProfile = async (uid: string): Promise<UserProfile | null> => {
 };
 
 // ─── Provider ─────────────────────────────────────────────────────────────────
+
+// Signal the logo pool (LogoContext) that a real sign-in just happened, so the
+// pooled face rotates. Event name must match LOGIN_POOL_EVENT in LogoContext.
+export const pulseLogoPool = () => {
+  if (typeof window !== "undefined") {
+    window.dispatchEvent(new Event("pixelcode:login"));
+  }
+};
+
+import { XP_UPDATED_EVENT } from "../services/xpClient";
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
@@ -185,6 +223,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const finalizeAuth = async (result: { user: User }) => {
     captureGithubToken(result as unknown as { credential: AuthCredential | null });
     await ensureUserDocument(result.user);
+    pulseLogoPool();
     const prof = await fetchProfile(result.user.uid);
     setProfile(prof);
   };
@@ -243,6 +282,19 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
+  // Re-fetch the profile whenever an XP award lands (xpClient broadcasts),
+  // so the XP chip / dashboard / profile update without a hard refresh.
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const handler = () => {
+      const current = auth.currentUser;
+      if (!current) return;
+      fetchProfile(current.uid).then(prof => setProfile(prof)).catch(() => {});
+    };
+    window.addEventListener(XP_UPDATED_EVENT, handler);
+    return () => window.removeEventListener(XP_UPDATED_EVENT, handler);
+  }, []);
+
   // Listen to auth state changes
   useEffect(() => {
     const unsub = onAuthStateChanged(auth, async (firebaseUser) => {
@@ -281,6 +333,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       const cred = await createUserWithEmailAndPassword(auth, email, password);
       await updateProfile(cred.user, { displayName });
       await ensureUserDocument(cred.user);
+      pulseLogoPool();
       const prof = await fetchProfile(cred.user.uid);
       setProfile(prof);
     } catch (e) {
@@ -296,6 +349,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     try {
       const cred = await signInWithEmailAndPassword(auth, email, password);
       await ensureUserDocument(cred.user);
+      pulseLogoPool();
       const prof = await fetchProfile(cred.user.uid);
       setProfile(prof);
     } catch (e) {
@@ -340,6 +394,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
+  const refreshProfile = async () => {
+    const current = auth.currentUser;
+    if (!current) return;
+    const prof = await fetchProfile(current.uid);
+    setProfile(prof);
+  };
+
   const logOut = async () => {
     await signOut(auth);
     setUser(null);
@@ -369,6 +430,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         linkProvider,
         clearLink,
         logOut,
+        refreshProfile,
       }}
     >
       {children}

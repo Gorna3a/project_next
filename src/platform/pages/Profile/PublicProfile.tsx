@@ -14,6 +14,7 @@ import { useAuth } from "../../../core/context/AuthContext";
 import { useNotifications } from "../../../core/context/NotificationContext";
 import { socialService } from "../../../core/services/socialService";
 import { duelService } from "../Arena/DuelZone/duelService";
+import { pixelAvatarFor } from "../../../shared/ui/avatarFallback";
 import { useLanguage } from "../../../core/context/LanguageContext";
 import type { UserProfile } from "../../../core/types";
 
@@ -327,7 +328,7 @@ export default function PublicProfile() {
                 >
                   <div className="w-12 h-12 rounded-2xl overflow-hidden border-2 border-gray-100 dark:border-gray-800">
                     <img 
-                      src={friend.photoURL || `https://api.dicebear.com/7.x/avataaars/svg?seed=${friend.displayName}`} 
+                      src={friend.photoURL || pixelAvatarFor(friend.displayName)}
                       className="w-full h-full object-cover"
                       alt=""
                     />

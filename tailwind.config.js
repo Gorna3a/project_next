@@ -8,6 +8,18 @@ export default {
   theme: {
     extend: {
       colors: {
+        border: "var(--border)",
+        input: "var(--border)",
+        ring: "var(--phosphor)",
+        background: "var(--surface)",
+        foreground: "var(--fg)",
+        card: { DEFAULT: "var(--surface)", foreground: "var(--fg)" },
+        popover: { DEFAULT: "var(--surface)", foreground: "var(--fg)" },
+        primary: { DEFAULT: "var(--phosphor)", foreground: "#161616" },
+        secondary: { DEFAULT: "var(--surface-2)", foreground: "var(--fg)" },
+        muted: { DEFAULT: "var(--surface-2)", foreground: "var(--muted)" },
+        accent: { DEFAULT: "var(--surface-2)", foreground: "var(--fg)" },
+        destructive: { DEFAULT: "#E15555", foreground: "#161616" },
         brand: {
           50: "var(--accent-subtle)",
           100: "var(--accent-subtle)",

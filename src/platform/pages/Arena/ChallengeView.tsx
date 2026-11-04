@@ -1,6 +1,8 @@
 'use client';
 
+import dynamic from 'next/dynamic';
 import { useState, useEffect, useRef } from 'react';
+import type { Monaco } from '@monaco-editor/react';
 import Link from "next/link";
 import { useRouter, useParams } from "next/navigation";
 import { motion, AnimatePresence, type Variants } from 'framer-motion';
@@ -8,9 +10,9 @@ import {
   ArrowLeft, Lightbulb, Star,
   CheckCircle2, XCircle, ArrowRight,
 } from 'lucide-react';
-import { doc, getDoc, collection, addDoc, serverTimestamp } from 'firebase/firestore';
-import Editor, { type Monaco } from '@monaco-editor/react';
+import { doc, getDoc } from 'firebase/firestore';
 import { db } from '../../../core/firebase/config';
+import { requestXpAward } from '../../../core/services/xpClient';
 import { useAuth } from '../../../core/context/AuthContext';
 import { generateHint } from '../../../core/services/ai';
 import { gradeSolution } from '../../../core/services/ai';
@@ -23,6 +25,18 @@ import {
   MONACO_FONT_FAMILY,
   buildPixelcodeTheme,
 } from '../../../shared/ui/monacoTheme';
+
+const MonacoEditor = dynamic(
+  () => import("@monaco-editor/react").then((mod) => mod.default),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="h-44 grid place-items-center text-xs" style={{ color: '#8b8ba0', fontFamily: MONACO_FONT_FAMILY }}>
+        LOADING EDITOR…
+      </div>
+    ),
+  },
+);
 
 // ─── Animation variants ───────────────────────────────────────────────────────
 
@@ -166,11 +180,9 @@ export default function ChallengeView() {
   const awardCompletion = async (xpOverride?: number) => {
     if (!user || !challenge) return;
     try {
-      await addDoc(collection(db, 'users', user.uid, 'completedChallenges'), {
+      await requestXpAward('challenge-complete', {
         challengeId: id,
-        xp:          xpOverride ?? challenge.xp,
-        revealed:    revealed || xpOverride === 0,
-        completedAt: serverTimestamp(),
+        xpOverride: xpOverride ?? challenge.xp,
       });
     } catch (e) {
       console.error('[ChallengePage] Failed to record completion:', e);
@@ -636,7 +648,7 @@ export default function ChallengeView() {
           className="overflow-hidden"
           style={{ border: '4px solid var(--border)', boxShadow: 'var(--shadow-sm)' }}
         >
-          <Editor
+          <MonacoEditor
             height="380px"
             language={LANGUAGES[challenge.language]?.monacoLang ?? challenge.language}
             value={runCodeText}

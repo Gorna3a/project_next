@@ -1,0 +1,21 @@
+import { getCliClient } from '@sanity/cli';
+const client = getCliClient({ apiVersion: '2025-02-19' });
+const all = await client.fetch(`*[_type == "course" || _type == "module" || _type == "lesson" || _type == "certificationProject"]{_id, contentId, title, status}`);
+console.log(`All docs: ${all.length}`);
+const draftDocs = all.filter(d => d._id.startsWith('drafts.'));
+const pubDocs = all.filter(d => !d._id.startsWith('drafts.'));
+console.log(`Drafts: ${draftDocs.length}`);
+console.log(`Published: ${pubDocs.length}`);
+const py = all.filter(d => (d.contentId && d.contentId.startsWith('py-')) || d.contentId === 'python-programming');
+const pyDraft = py.filter(d => d._id.startsWith('drafts.'));
+const pyPub = py.filter(d => !d._id.startsWith('drafts.'));
+console.log(`Python total: ${py.length}, drafts: ${pyDraft.length}, published: ${pyPub.length}`);
+const js = all.filter(d => d.contentId && !d.contentId.startsWith('py-') && d.contentId !== 'python-programming');
+const jsDraft = js.filter(d => d._id.startsWith('drafts.'));
+const jsPub = js.filter(d => !d._id.startsWith('drafts.'));
+console.log(`JS total: ${js.length}, drafts: ${jsDraft.length}, published: ${jsPub.length}`);
+// Module 14 docs
+const m14ids = ['py-mod-14-data-structures','py-les-arrays-and-linked-lists','py-les-stacks-and-queues','py-les-heaps-and-priority-queues','py-les-hash-tables','py-les-binary-search-trees','py-ws-linked-list-and-stack','py-lab-bst-toolkit','py-rev-data-structures','py-quiz-data-structures'];
+const m14 = all.filter(d => m14ids.includes(d.contentId)).sort((a,b) => (a.contentId || '').localeCompare(b.contentId || ''));
+console.log(`Module 14 docs found: ${m14.length}`);
+for (const d of m14) console.log(`${d._id} | ${d.title || ''} | ${d.status || ''}`);

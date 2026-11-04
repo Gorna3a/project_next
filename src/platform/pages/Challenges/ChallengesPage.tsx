@@ -104,7 +104,7 @@ export default function ChallengesPage() {
     <div className="max-w-6xl mx-auto space-y-6 pb-12">
       <motion.div variants={fadeUp} initial="hidden" animate="show" className="bg-black text-white border-[3px] border-black shadow-[5px_5px_0_0_#000] p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="font-black text-2xl tracking-tight flex items-center gap-3" style={{ fontFamily: "'Syne', sans-serif" }}>
+          <h1 className="font-black text-2xl tracking-tight flex items-center gap-3" style={{ fontFamily: "'Silkscreen', cursive" }}>
             <span className="w-2 h-6 bg-[#FFD23F] border border-white" /> Challenges
           </h1>
           <p className="font-mono text-xs font-bold uppercase tracking-widest text-white/60 mt-1">
@@ -176,7 +176,7 @@ export default function ChallengesPage() {
           <div className="w-14 h-14 bg-[#FFD23F] border-[3px] border-black grid place-items-center mx-auto shadow-[3px_3px_0_0_#000] rotate-[-1deg]">
             <Trophy className="w-6 h-6 text-black" />
           </div>
-          <p className="font-black text-black" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+          <p className="font-black text-black" style={{ fontFamily: "'Space Mono', monospace" }}>
             {challenges.length === 0 ? 'No challenges yet' : 'No challenges match your filters'}
           </p>
           <p className="font-mono text-xs font-bold uppercase tracking-widest text-black/60">
@@ -216,7 +216,7 @@ export default function ChallengesPage() {
                 <div>
                   <div className="flex items-center gap-2 mb-1">
                     {langMeta && <span className="text-lg">{langMeta.emoji}</span>}
-                    <h3 className="font-black text-sm leading-snug text-black" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+                    <h3 className="font-black text-sm leading-snug text-black" style={{ fontFamily: "'Space Mono', monospace" }}>
                       {challenge.title}
                     </h3>
                   </div>

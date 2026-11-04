@@ -8,8 +8,9 @@ import {
   ArrowLeft, Lightbulb, Star,
   CheckCircle2, XCircle, ArrowRight,
 } from 'lucide-react';
-import { doc, getDoc, collection, addDoc, serverTimestamp } from 'firebase/firestore';
+import { doc, getDoc } from 'firebase/firestore';
 import { db } from '../../../core/firebase/config';
+import { requestXpAward } from '../../../core/services/xpClient';
 import { useAuth } from '../../../core/context/AuthContext';
 import { generateHint } from '../../../core/services/ai';
 
@@ -99,14 +100,11 @@ export default function ChallengePage() {
     setSelected(key);
     setAnswered(true);
 
-    // Award XP to authenticated user when correct
+    // Award XP to authenticated user when correct. The server validates the
+    // challenge and grants XP only once per user per challenge.
     if (key === challenge.correctAnswer && user) {
       try {
-        await addDoc(collection(db, 'users', user.uid, 'completedChallenges'), {
-          challengeId: id,
-          xp:          challenge.xp,
-          completedAt: serverTimestamp(),
-        });
+        await requestXpAward('challenge-complete', { challengeId: id });
       } catch (e) {
         console.error('[ChallengePage] Failed to record completion:', e);
       }

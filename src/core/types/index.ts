@@ -19,10 +19,14 @@ export interface UserProfile {
   email: string;
   displayName: string;
   photoURL?: string;
+  /** 'google' | 'github' | 'platform' | 'upload' | 'email' | undefined (legacy) */
+  photoSource?: string;
   role: UserRole;
   totalXP: number;
   level: number;
   streak: number;
+  /** YYYY-MM-DD of the last day XP was awarded (UTC or client local) */
+  lastStreakDate?: string | null;
   createdAt: Date;
   lastActive: Date;
   preferences: UserPreferences;

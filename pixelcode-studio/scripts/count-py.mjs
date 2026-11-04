@@ -1,0 +1,11 @@
+import { getCliClient } from '@sanity/cli';
+const client = getCliClient({ apiVersion: '2025-02-19' });
+const pyDrafts = await client.fetch(`*[_id match "drafts.py-*"]{_id}`);
+console.log(`drafts.py-* count: ${pyDrafts.length}`);
+console.log(pyDrafts.slice(0, 20).map(d => d._id).join(', '));
+const allDrafts = await client.fetch(`*[_id match "drafts.*"]{_id}`);
+console.log(`all drafts: ${allDrafts.length}`);
+const m14 = await client.fetch(`*[_id == "drafts.py-mod-14-data-structures"]{_id}`);
+console.log(`drafts.py-mod-14: ${JSON.stringify(m14)}`);
+const m14any = await client.fetch(`*[_id match ".*py-mod-14.*" || contentId == "py-mod-14-data-structures"]{_id, contentId}`);
+console.log(`any py-mod-14: ${JSON.stringify(m14any)}`);

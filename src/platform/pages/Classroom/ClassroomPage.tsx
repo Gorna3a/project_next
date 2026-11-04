@@ -109,7 +109,7 @@ const CreateModal = ({
         className={`bg-white border-[3px] border-black shadow-[8px_8px_0_0_#000] p-6 w-full max-w-md space-y-4 ${isRTL ? 'text-right' : 'text-left'}`}
         onClick={e => e.stopPropagation()}
       >
-        <h2 className="font-black text-lg tracking-tight text-black" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+        <h2 className="font-black text-lg tracking-tight text-black" style={{ fontFamily: "'Space Mono', monospace" }}>
           {t('classroom.createModalTitle')}
         </h2>
 
@@ -288,7 +288,7 @@ const ClassroomCard = ({
     >
       <div className={`flex items-start justify-between gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
         <div className="min-w-0">
-          <h3 className="font-black text-sm tracking-tight truncate text-black" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+          <h3 className="font-black text-sm tracking-tight truncate text-black" style={{ fontFamily: "'Space Mono', monospace" }}>
             {classroom.name}
           </h3>
           <p className="font-mono text-[11px] font-bold uppercase tracking-widest mt-1 text-black/60">
@@ -396,7 +396,7 @@ export default function ClassroomPage() {
       {/* ── Header — black masthead ── */}
       <div className={`bg-black text-white border-[3px] border-black shadow-[5px_5px_0_0_#000] p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4 ${isRTL ? 'sm:flex-row-reverse' : ''}`}>
         <div className={`${isRTL ? 'text-right' : 'text-left'}`}>
-          <h1 className="font-black text-2xl tracking-tight flex items-center gap-3" style={{ fontFamily: "'Syne', sans-serif" }}>
+          <h1 className="font-black text-2xl tracking-tight flex items-center gap-3" style={{ fontFamily: "'Silkscreen', cursive" }}>
             <span className="w-2 h-6 bg-[#FFD23F] border border-white hidden sm:inline-block" />
             🎓 {t('classroom.title')}
           </h1>
@@ -435,7 +435,7 @@ export default function ClassroomPage() {
           <span className="w-14 h-14 bg-[#FFD23F] border-[3px] border-black grid place-items-center mx-auto shadow-[3px_3px_0_0_#000] rotate-[-1deg]">
             <GraduationCap className="w-7 h-7 text-black" />
           </span>
-          <p className="font-black text-black" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+          <p className="font-black text-black" style={{ fontFamily: "'Space Mono', monospace" }}>
             {isTeacher ? t('classroom.noClassroomsYet') : t('classroom.noEnrolledClassrooms')}
           </p>
           <p className="font-mono text-xs font-bold uppercase tracking-widest text-black/60">

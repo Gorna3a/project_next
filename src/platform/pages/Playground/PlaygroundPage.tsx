@@ -1,7 +1,8 @@
 'use client';
 
+import dynamic from 'next/dynamic';
 import { useState, useCallback, useRef, useEffect } from "react";
-import Editor, { type Monaco } from "@monaco-editor/react";
+import type { Monaco } from "@monaco-editor/react";
 import { motion, AnimatePresence, type Variants } from "framer-motion";
 import {
   Play,
@@ -30,6 +31,18 @@ import {
   MONACO_FONT_FAMILY,
   buildPixelcodeTheme,
 } from "../../../shared/ui/monacoTheme";
+
+const MonacoEditor = dynamic(
+  () => import("@monaco-editor/react").then((mod) => mod.default),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="h-44 grid place-items-center text-xs" style={{ color: '#8b8ba0', fontFamily: MONACO_FONT_FAMILY }}>
+        LOADING EDITOR…
+      </div>
+    ),
+  },
+);
 
 // ─── Animation variants ───────────────────────────────────────────────────────
 
@@ -389,7 +402,7 @@ export default function PlaygroundPage() {
     <div className="h-[calc(100vh-4rem-3rem)] flex flex-col gap-4 max-w-full pb-4">
       {/* ── Masthead — playground header ── */}
       <div className={`bg-black text-white border-[3px] border-black shadow-[5px_5px_0_0_#000] p-4 flex flex-wrap items-center gap-3 ${isRTL ? 'flex-row-reverse' : ''}`}>
-        <h1 className="font-black text-lg tracking-tight flex items-center gap-3" style={{ fontFamily: "'Syne', sans-serif" }}>
+        <h1 className="font-black text-lg tracking-tight flex items-center gap-3" style={{ fontFamily: "'Silkscreen', cursive" }}>
           <span className="w-2 h-6 bg-[#FFD23F] border border-white hidden sm:inline-block" />
           <Terminal className="w-5 h-5 text-[#FFD23F]" />
           <span className="hidden sm:inline">{t('playground.title') ?? 'Playground'}</span>
@@ -481,7 +494,7 @@ export default function PlaygroundPage() {
             <span className={`font-mono text-[10px] font-bold tracking-widest text-white/60 ${isRTL ? 'mr-auto' : 'ml-auto'}`}>MONACO</span>
           </div>
           <div className="flex-1 min-h-0">
-            <Editor
+            <MonacoEditor
               height="100%"
               language={LANGUAGES[language]?.monacoLang ?? language}
               value={code}

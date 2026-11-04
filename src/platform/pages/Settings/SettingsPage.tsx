@@ -107,7 +107,7 @@ export default function SettingsPage() {
     >
       {/* Page heading — black masthead */}
       <motion.div variants={fadeUp} className="bg-black text-white border-[3px] border-black shadow-[5px_5px_0_0_#000] p-6">
-        <h1 className="font-black text-2xl tracking-tight flex items-center gap-3" style={{ fontFamily: "'Syne', sans-serif" }}>
+        <h1 className="font-black text-2xl tracking-tight flex items-center gap-3" style={{ fontFamily: "'Silkscreen', cursive" }}>
           <span className="w-2 h-6 bg-[#FFD23F] border border-white hidden sm:inline-block" />
           {t('settings.title')}
         </h1>

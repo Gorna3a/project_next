@@ -8,6 +8,7 @@ import { useAuth } from '../../core/context/AuthContext';
 import { useLanguage } from '../../core/context/LanguageContext';
 import { notificationService, type Notification } from '../../core/services/notificationService';
 import { socialService } from '../../core/services/socialService';
+import { pixelAvatarFor } from './avatarFallback';
 
 interface NotificationTrayProps {
   isOpen: boolean;
@@ -41,8 +42,15 @@ export const NotificationTray = ({ isOpen, onClose }: NotificationTrayProps) => 
 
   const handleAcceptFriend = async (notif: Notification) => {
     if (!notif.requestId || !profile) return;
+    const otherUid = (notif as Notification & { from?: { uid?: string } }).from?.uid;
+    if (!otherUid) {
+      // Legacy/corrupt entry: sender uid missing — clean it up instead of crashing.
+      console.error('[NotificationTray] friend_request notification is missing sender uid — deleting corrupt entry');
+      try { await notificationService.deleteNotification(notif.id); } catch { /* ignore */ }
+      return;
+    }
     try {
-      await socialService.acceptFriendRequest(notif.requestId, profile.uid, notif.from.uid);
+      await socialService.acceptFriendRequest(notif.requestId, profile.uid, otherUid);
       await notificationService.deleteNotification(notif.id);
     } catch (err) {
       console.error("Failed to accept friend:", err);
@@ -104,7 +112,7 @@ export const NotificationTray = ({ isOpen, onClose }: NotificationTrayProps) => 
                     <div className="flex gap-3">
                       <div className="relative">
                         <img 
-                          src={notif.from.photoURL || `https://api.dicebear.com/7.x/avataaars/svg?seed=${notif.from.displayName}`} 
+                          src={notif.from.photoURL || pixelAvatarFor(notif.from.displayName || 'player')} 
                           className="w-10 h-10 rounded-full border-2 border-white shadow-sm"
                           alt=""
                         />

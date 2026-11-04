@@ -8,9 +8,12 @@ import { updateProfile } from 'firebase/auth';
 import { db } from '../../../core/firebase/config';
 import { useAuth } from '../../../core/context/AuthContext';
 import { useLanguage } from '../../../core/context/LanguageContext';
+import { Camera } from 'lucide-react';
 import { getAllCourseProgress } from '../../../core/services/progress';
 import { socialService } from '../../../core/services/socialService';
 import { useRouter } from 'next/navigation';
+import { AvatarPicker } from '../../../shared/ui/AvatarPicker';
+import { pixelAvatarFor } from '../../../shared/ui/avatarFallback';
 import toast from 'react-hot-toast';
 
 const fadeUp: Variants = {
@@ -30,6 +33,7 @@ export default function ProfilePage() {
   const [saving,      setSaving]      = useState(false);
   const [activeTab,   setActiveTab]   = useState<'stats' | 'friends'>('stats');
   const [friends,     setFriends]     = useState<any[]>([]);
+  const [showAvatarPicker, setShowAvatarPicker] = useState(false);
 
   const [coursesStarted, setCoursesStarted] = useState<number | string>('—');
   const [lessonsCompleted, setLessonsCompleted] = useState<number | string>('—');
@@ -87,12 +91,18 @@ export default function ProfilePage() {
   };
 
   return (
+    <>
+      {showAvatarPicker && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-black/60 backdrop-blur-sm">
+          <AvatarPicker uid={user!.uid} onComplete={() => setShowAvatarPicker(false)} />
+        </div>
+      )}
     <motion.div variants={stagger} initial="hidden" animate="show" className={`max-w-3xl mx-auto space-y-6 pb-20 ${isRTL ? 'text-right' : 'text-left'}`}>
 
       {/* ── Masthead ── */}
       <motion.div variants={fadeUp} className="bg-black text-white border-[3px] border-black shadow-[5px_5px_0_0_#000] p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
         <div>
-          <h1 className="font-black text-2xl tracking-tight flex items-center gap-3" style={{ fontFamily: "'Syne', sans-serif" }}>
+          <h1 className="font-black text-2xl tracking-tight flex items-center gap-3" style={{ fontFamily: "'Silkscreen', cursive" }}>
             <span className="w-2 h-6 bg-[#FFD23F] border border-white hidden sm:inline-block" />
             {t('nav.profile') ?? 'Profile'}
           </h1>
@@ -108,12 +118,22 @@ export default function ProfilePage() {
       {/* Profile card — hard brutalist */}
       <motion.div variants={fadeUp} className="bg-white border-[3px] border-black shadow-[5px_5px_0_0_#000] p-6 md:p-8">
         <div className={`flex items-start gap-6 flex-wrap ${isRTL ? 'flex-row-reverse' : ''}`}>
-          {/* Avatar — hard square */}
-          <div className="w-20 h-20 bg-[#FFD23F] border-[3px] border-black shadow-[4px_4px_0_0_#000] flex items-center justify-center text-2xl font-black shrink-0 overflow-hidden" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+          {/* Avatar — hard square, click to change */}
+          <button
+            type="button"
+            onClick={() => setShowAvatarPicker(true)}
+            aria-label="Change profile picture"
+            title="Change profile picture"
+            className="relative w-20 h-20 bg-[#FFD23F] border-[3px] border-black shadow-[4px_4px_0_0_#000] flex items-center justify-center text-2xl font-black shrink-0 overflow-hidden group cursor-pointer"
+            style={{ fontFamily: "'Space Mono', monospace" }}
+          >
             {profile?.photoURL
               ? <img src={profile.photoURL} alt="avatar" className="w-full h-full object-cover" />
               : <span className="text-black">{initials}</span>}
-          </div>
+            <span className="absolute bottom-0 inset-x-0 bg-black/70 text-white grid place-items-center py-0.5 opacity-0 group-hover:opacity-100 focus:opacity-100 transition-opacity">
+              <Camera className="w-4 h-4" />
+            </span>
+          </button>
 
           {/* Name + meta */}
           <div className={`flex-1 min-w-0 space-y-2 ${isRTL ? 'text-right' : 'text-left'}`}>
@@ -138,7 +158,7 @@ export default function ProfilePage() {
               </div>
             ) : (
               <div className={`flex items-center gap-2 flex-wrap ${isRTL ? 'flex-row-reverse' : ''}`}>
-                <h2 className="font-black text-2xl tracking-tight text-black" style={{ fontFamily: "'Syne', sans-serif" }}>
+                <h2 className="font-black text-2xl tracking-tight text-black" style={{ fontFamily: "'Silkscreen', cursive" }}>
                   {profile?.displayName ?? t('common.user')}
                 </h2>
                 <button onClick={() => setEditing(true)} className="bg-white text-black border-[2px] border-black p-1.5 hover:bg-black hover:text-white transition-colors">
@@ -212,7 +232,7 @@ export default function ProfilePage() {
                   <span className="w-10 h-10 bg-black border-[2px] border-black grid place-items-center mx-auto">
                     <Icon className="w-5 h-5 text-white" />
                   </span>
-                  <p className="font-black text-2xl leading-none tracking-tight text-black" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>{value}</p>
+                  <p className="font-black text-2xl leading-none tracking-tight text-black" style={{ fontFamily: "'Space Mono', monospace" }}>{value}</p>
                   <p className="font-mono text-[10px] font-black uppercase tracking-widest text-black/70">{label}</p>
                 </div>
               ))}
@@ -234,7 +254,7 @@ export default function ProfilePage() {
                       <Icon className="w-4 h-4 text-black" />
                     </span>
                     <div>
-                      <p className="font-black text-lg leading-none text-black" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>{value}</p>
+                      <p className="font-black text-lg leading-none text-black" style={{ fontFamily: "'Space Mono', monospace" }}>{value}</p>
                       <p className="font-mono text-[10px] font-black uppercase tracking-widest text-black/60">{label}</p>
                     </div>
                   </div>
@@ -266,7 +286,7 @@ export default function ProfilePage() {
                     onClick={() => navigate.push(`/app/profile/${friend.uid}`)}
                   >
                     <img 
-                      src={friend.photoURL || `https://api.dicebear.com/7.x/avataaars/svg?seed=${friend.displayName}`} 
+                      src={friend.photoURL || pixelAvatarFor(friend.displayName)} 
                       className="w-full h-full object-cover"
                       alt=""
                     />
@@ -292,5 +312,6 @@ export default function ProfilePage() {
         )}
       </AnimatePresence>
     </motion.div>
+    </>
   );
 }

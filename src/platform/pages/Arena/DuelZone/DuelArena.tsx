@@ -11,6 +11,7 @@ import { doc, getDoc } from 'firebase/firestore';
 import { db } from '../../../../core/firebase/config';
 import { useAuth } from '../../../../core/context/AuthContext';
 import { duelService, type DuelRoom } from './duelService';
+import { requestXpAward } from '../../../../core/services/xpClient';
 import { generateHint } from '../../../../core/services/ai';
 
 export default function DuelArena() {
@@ -84,9 +85,10 @@ export default function DuelArena() {
     setAnswered(true);
 
     if (key === challenge.correctAnswer) {
-      // Finished correctly!
+      // Finished correctly! The server flips this player to winner
+      // atomically (first finish wins) and awards XP / leaderboard stats.
       await duelService.updateStatus(roomId, isCreator, 'finished');
-      await duelService.finishDuel(roomId, user.uid);
+      await requestXpAward('duel-finish', { roomId });
       setShowResult(true);
     } else {
       // Wrong answer
@@ -391,7 +393,7 @@ export default function DuelArena() {
 
               <div className="flex flex-col gap-2">
                 <button onClick={() => navigate.push('/app/arena/duels')} className="big-btn green w-full justify-center">Back to Lobby</button>
-                <button onClick={() => navigate.push('/app/rankings')} className="big-btn w-full justify-center">View Leaderboard</button>
+                <button onClick={() => navigate.push('/app/arena/rankings')} className="big-btn w-full justify-center">View Leaderboard</button>
               </div>
             </motion.div>
           </motion.div>

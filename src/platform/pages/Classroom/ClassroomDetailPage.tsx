@@ -104,7 +104,7 @@ const AddAssignmentModal = ({
         className={`bg-white border-[3px] border-black shadow-[8px_8px_0_0_#000] p-6 w-full max-w-md space-y-4 ${isRTL ? 'text-right' : 'text-left'}`}
         onClick={e => e.stopPropagation()}
       >
-        <h2 className="font-black text-lg tracking-tight text-black" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+        <h2 className="font-black text-lg tracking-tight text-black" style={{ fontFamily: "'Space Mono', monospace" }}>
           {t('classroom.addAssignment')}
         </h2>
 
@@ -285,7 +285,7 @@ export default function ClassroomDetailPage() {
       <div className="bg-black text-white border-[3px] border-black shadow-[5px_5px_0_0_#000] p-6 space-y-4">
         <div className={`flex items-start justify-between gap-4 flex-wrap ${isRTL ? 'flex-row-reverse' : ''}`}>
           <div className={`${isRTL ? 'text-right' : 'text-left'}`}>
-            <h1 className="font-black text-2xl tracking-tight flex items-center gap-3" style={{ fontFamily: "'Syne', sans-serif" }}>
+            <h1 className="font-black text-2xl tracking-tight flex items-center gap-3" style={{ fontFamily: "'Silkscreen', cursive" }}>
               <span className="w-2 h-6 bg-[#FFD23F] border border-white hidden sm:inline-block" />
               {classroom.name}
             </h1>
@@ -386,7 +386,7 @@ export default function ClassroomDetailPage() {
                     <BookOpen className="w-4 h-4 text-black" />
                   </span>
                   <div className="flex-1 min-w-0">
-                    <h3 className="font-black text-sm tracking-tight text-black" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+                    <h3 className="font-black text-sm tracking-tight text-black" style={{ fontFamily: "'Space Mono', monospace" }}>
                       {a.title}
                     </h3>
                     {a.description && (

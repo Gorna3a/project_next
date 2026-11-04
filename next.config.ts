@@ -8,6 +8,9 @@ const nextConfig: NextConfig = {
   typescript: {
     ignoreBuildErrors: false,
   },
+  experimental: {
+    optimizePackageImports: ["lucide-react", "framer-motion", "clsx", "tailwind-merge"],
+  },
 };
 
 export default nextConfig;

@@ -420,7 +420,7 @@ export default function LessonPage() {
     if (nextLessonId) {
       navigate.push(`/app/lesson/${nextLessonId}`);
     } else {
-      navigate.push(`/app/courses/${lesson?.module.course.slug}`);
+      navigate.push(`/app/courses/${lesson?.module.course.slug}`, { scroll: false });
     }
   };
 
@@ -504,6 +504,7 @@ export default function LessonPage() {
       <div className={`flex items-center gap-2 text-sm ${isRTL ? "flex-row-reverse" : ""}`} style={{ color: 'var(--text-muted)' }}>
         <Link
           href={`/app/courses/${lesson.module.course.slug}`}
+          scroll={false}
           className={`btn-ghost inline-flex items-center gap-1.5 text-xs ${isRTL ? "-mr-2 flex-row-reverse" : "-ml-2"}`}
         >
           {isRTL ? <ArrowRight className="w-3.5 h-3.5" /> : <ArrowLeft className="w-3.5 h-3.5" />} {lesson.module.course.title}
@@ -716,6 +717,7 @@ export default function LessonPage() {
       <div className={`flex justify-between items-center py-4 ${isRTL ? "flex-row-reverse" : ""}`}>
         <Link
           href={`/app/courses/${lesson.module.course.slug}`}
+          scroll={false}
           className={`btn-secondary gap-2 ${isRTL ? "flex-row-reverse" : ""}`}
         >
           {isRTL ? <ArrowRight className="w-4 h-4" /> : <ArrowLeft className="w-4 h-4" />} {t('courses.courseOverview')}

@@ -1,12 +1,15 @@
-// ─── Course Progress Service (Firestore) ──────────────────────────────────────
-// All user progress data lives in Firestore.
-// Content (lessons, quizzes) lives in Sanity.
+// ─── Course Progress Service ──────────────────────────────────────────────────
+// Reads stay client-side (Firestore rules allow owner reads only).
+// ALL writes go through /api/xp/award, which is server-authoritative:
+// XP, level, streak, courseProgress and xpEvents are committed by the
+// server in a single transaction. Clients never write XP fields directly.
 
 import {
-  doc, getDoc, setDoc, updateDoc,
-  collection, getDocs, serverTimestamp,
+  doc, getDoc,
+  collection, getDocs,
 } from 'firebase/firestore';
 import { db } from '../firebase';
+import { requestXpAward, type XpAwardResponse } from './xpClient';
 
 export interface LessonProgress {
   lessonId:    string;
@@ -62,97 +65,29 @@ export const getAllCourseProgress = async (
   });
 };
 
-// ─── Write ────────────────────────────────────────────────────────────────────
+// ─── Write (via /api/xp/award) ───────────────────────────────────────────────
 
 /** Call when a user opens a course for the first time */
-export const startCourse = async (uid: string, courseId: string): Promise<void> => {
-  const ref  = doc(db, 'users', uid, 'courseProgress', courseId);
-  const snap = await getDoc(ref);
-  if (!snap.exists()) {
-    await setDoc(ref, {
-      courseId,
-      completedLessons: [],
-      quizResults:      {},
-      lastAccessed:     serverTimestamp(),
-      startedAt:        serverTimestamp(),
-      percentComplete:  0,
-    });
-  } else {
-    await updateDoc(ref, { lastAccessed: serverTimestamp() });
-  }
+export const startCourse = async (_uid: string, courseId: string): Promise<void> => {
+  await requestXpAward('start-course', { courseId });
 };
 
-/** Mark a lesson as complete and recalculate progress */
+/** Mark a lesson as complete. XP is awarded only on first completion. */
 export const completeLesson = async (
-  uid:          string,
+  _uid:         string,
   courseId:     string,
   lessonId:     string,
   totalLessons: number,
   lessonXp:     number = 10,
-): Promise<void> => {
-  const ref  = doc(db, 'users', uid, 'courseProgress', courseId);
-  const snap = await getDoc(ref);
+): Promise<XpAwardResponse | null> =>
+  requestXpAward('lesson-complete', { courseId, lessonId, totalLessons, lessonXp });
 
-  let completed: string[]                = [];
-  let quizResults: Record<string, boolean> = {};
-
-  if (snap.exists()) {
-    completed   = snap.data().completedLessons ?? [];
-    quizResults = snap.data().quizResults      ?? {};
-  }
-
-  if (!completed.includes(lessonId)) {
-    completed = [...completed, lessonId];
-  }
-
-  const percent = Math.round((completed.length / totalLessons) * 100);
-
-  await setDoc(ref, {
-    courseId,
-    completedLessons: completed,
-    quizResults,
-    lastAccessed: serverTimestamp(),
-    startedAt:    snap.exists() ? snap.data().startedAt : serverTimestamp(),
-    percentComplete: percent,
-  });
-
-  // Award XP to user
-  const userRef  = doc(db, 'users', uid);
-  const userSnap = await getDoc(userRef);
-  if (userSnap.exists()) {
-    const current  = userSnap.data().totalXP ?? 0;
-    const newXP    = current + lessonXp;
-    const newLevel = Math.floor(newXP / 1000) + 1;
-    await updateDoc(userRef, { totalXP: newXP, level: newLevel });
-  }
-};
-
-/** Record a quiz answer */
+/** Record a quiz answer. XP is awarded only for first-time correct answers. */
 export const recordQuizResult = async (
-  uid:      string,
-  courseId: string,
-  quizKey:  string,
-  correct:  boolean,
-  quizXp:   number = 5,
-): Promise<void> => {
-  const ref  = doc(db, 'users', uid, 'courseProgress', courseId);
-  const snap = await getDoc(ref);
-  const existing = snap.exists() ? snap.data().quizResults ?? {} : {};
-
-  await setDoc(ref, {
-    quizResults:  { ...existing, [quizKey]: correct },
-    lastAccessed: serverTimestamp(),
-  }, { merge: true });
-
-  // Award XP for correct answers
-  if (correct) {
-    const userRef  = doc(db, 'users', uid);
-    const userSnap = await getDoc(userRef);
-    if (userSnap.exists()) {
-      const current  = userSnap.data().totalXP ?? 0;
-      const newXP    = current + quizXp;
-      const newLevel = Math.floor(newXP / 1000) + 1;
-      await updateDoc(userRef, { totalXP: newXP, level: newLevel });
-    }
-  }
-};
+  _uid:      string,
+  courseId:  string,
+  quizKey:   string,
+  correct:   boolean,
+  quizXp:    number = 5,
+): Promise<XpAwardResponse | null> =>
+  requestXpAward('quiz-correct', { courseId, quizKey, correct, quizXp });
