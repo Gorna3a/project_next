@@ -394,6 +394,7 @@ All notable changes to the PixelCode product are documented here.
   `/app/training` instead. The old detail URL redirects automatically.
 
 ### Fixed
+- Deployed logo images 404'd in production (`/_next/image?url=…logo2.ac22bb5b.png`). The five robot-face sprites were imported from `src/assets/logo` (hashed `/_next/static/media/*` URLs), and those paths are evicted whenever a new deployment rolls out — so any client holding an older page hit 404 on every logo render (window title icon + sidebar/auth/about images). The sprites now live under `public/logo/` with **stable URLs** (`/logo/logo1..5.png`); `LogoContext` and the favicon sync reference the same stable paths, so the 404 class is gone for all clients.
 - Friend request accept crashed with `Function setDoc() called with invalid
   data. Unsupported field value: undefined (found in document
   friendships/…)`. Root cause: Firestore rejects `undefined` anywhere in a

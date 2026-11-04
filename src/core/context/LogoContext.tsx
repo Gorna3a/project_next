@@ -10,15 +10,19 @@ import {
 } from "react";
 import type { StaticImageData } from "next/image";
 import { usePathname } from "next/navigation";
-import logo1 from "../../assets/logo/logo1.png";
-import logo2 from "../../assets/logo/logo2.png";
-import logo3 from "../../assets/logo/logo3.png";
-import logo4 from "../../assets/logo/logo4.png";
-import logo5 from "../../assets/logo/logo5.png";
 
 // The logo pool — five pixel robot faces. A new face is drawn from the pool
 // on every page load (and on every login), so the brand mark keeps changing.
-export const LOGO_POOL: StaticImageData[] = [logo1, logo2, logo3, logo4, logo5];
+// Sprites live under /public/logo as STABLE URLs: hashed /_next/static URLs
+// got evicted when clients hit a newer deployment (see CHANGELOG), so the
+// pool never uses content-hashed asset URLs.
+export const LOGO_POOL: StaticImageData[] = [
+  { src: '/logo/logo1.png', width: 16, height: 11 },
+  { src: '/logo/logo2.png', width: 16, height: 11 },
+  { src: '/logo/logo3.png', width: 16, height: 11 },
+  { src: '/logo/logo4.png', width: 16, height: 11 },
+  { src: '/logo/logo5.png', width: 16, height: 11 },
+] as StaticImageData[];
 
 // Fired by AuthContext (pulseLogoPool) on every successful sign-in.
 export const LOGIN_POOL_EVENT = "pixelcode:login";

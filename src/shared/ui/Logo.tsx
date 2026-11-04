@@ -17,7 +17,7 @@ const SIZES = {
   lg: { face: 60, font: 16 },
 };
 
-// PixelCode brand: the pooled robot face from src/assets/logo plus the
+// PixelCode brand: the pooled robot face from public/logo plus the
 // Press Start 2P wordmark. The face changes whenever the user logs in.
 export const Logo = ({ size = 'md', linkTo, className = '', plain = false }: LogoProps) => {
   const { image } = usePoolLogo();
