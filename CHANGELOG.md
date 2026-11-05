@@ -394,6 +394,14 @@ All notable changes to the PixelCode product are documented here.
   `/app/training` instead. The old detail URL redirects automatically.
 
 ### Fixed
+- **XP route 500 (`firebase-admin` boot crash)**: `firebase-admin@14.5.0`
+  requires Node.js ≥ 22, but the project had no Node pin, so Vercel could run
+  an older runtime. `engines.node` is now `24.x` (this overrides Vercel project
+  settings) and the function trace explicitly includes firebase-admin's ESM
+  wrappers (`outputFileTracingIncludes`), because Next loads the package's
+  `import` condition while the default trace follows the CJS build.
+  `/api/health` was added as a temporary self-diagnosing endpoint (Node
+  version, env presence, module load, Firestore read).
 - `/api/xp/award` returned an empty **500** on production whenever the admin
   credentials were missing/invalid (the unguarded `adminDb()` call ran outside
   all try/catch, so Vercel surfaced a platform 500 with no info). The route now
