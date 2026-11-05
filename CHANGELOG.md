@@ -394,6 +394,17 @@ All notable changes to the PixelCode product are documented here.
   `/app/training` instead. The old detail URL redirects automatically.
 
 ### Fixed
+- **All `/_next/image` URLs returned 404 on production** (logos, hero art,
+  avatars — every icon). `next/image` optimization is unusable in this
+  deployment (platform/sharp environment issue; every `/_next/image` request
+  404s while the source files return 200). `images.unoptimized` is now set —
+  images serve their source files directly (all assets are ≤ 13 KB, nothing
+  lost). Public asset URLs were verified working (all 200).
+- **All API function calls died with an empty 500** (`/api/xp/award`, FUNCTION
+  INVOCATION ERROR) — Vercel mis-bundled `firebase-admin` at the function
+  layer. `serverExternalPackages: ["firebase-admin"]` now externalizes it
+  (the documented fix). Note: this build also needs `FIREBASE_SERVICE_ACCOUNT_B64`
+  set in Vercel env vars, otherwise the route 500s (or 401s) at runtime.
 - Landing hero image "old computer" 404'd in production (`/_next/image?url=…old%20computer.b22e5773.png` — same hashed-asset eviction as the logos). It now ships from `public/old-computer.png` (stable URL, referenced by both landing variants), eliminating the 404 for all clients.
 - Production build crashed during prerender: `Firebase: Error (auth/invalid-api-key)` on `/_not-found`. Root cause: `getAuth()` ran at module scope in `core/firebase/config.ts`, so static generation required a valid `NEXT_PUBLIC_FIREBASE_API_KEY` — missing/invalid keys on Vercel failed the whole deploy (and the last published deployment kept serving evicted assets, which is why the new `/logo` images didn't show). Firebase service instances are now browser-only real instances; server-side prerender never creates them (access there throws a clear error). Verified: build passes with a real key and with a dummy key. **Vercel still needs the real `NEXT_PUBLIC_FIREBASE_*` vars set (Production + Preview)** — the code change prevents the crash but the live app needs real credentials to authenticate anyone.
 - Follow-up: the first fix (lazy Proxy for both server and client) broke Firestore on the client — `doc()`/`collection()` rejected the Proxy ("Expected first argument to be a CollectionReference, a DocumentReference or FirebaseFirestore"). The instances are now **browser-only real Firestore/auth objects**; the server branch exports clear placeholders that throw plain errors if touched. Verified both build modes and full client compatibility.
