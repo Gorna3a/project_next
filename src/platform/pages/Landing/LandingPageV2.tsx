@@ -5,9 +5,8 @@ import { useEffect, useRef, useState } from 'react';
 import type { CSSProperties } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import oldComputer from '@/assets/old computer.png';
-import { useAuth } from '../../../core/hooks/useAuth';
 import { useTheme } from '../../../core/context/ThemeContext';
+import { useAuth } from '../../../core/hooks/useAuth';
 
 const FEATURES = [
   { n: '01 / 08', badge: 'CORE', bg: 'var(--phosphor)', fg: '#161616', iconBg: 'var(--yellow)', icon: '📚', title: 'Structured Courses', desc: '13+ languages, leveled paths from scratch. Bite-sized lessons, checks, and projects.', points: ['Python, JS, Go, Rust & more', 'Projects that ship'] },
@@ -341,7 +340,7 @@ export default function LandingPageV2() {
           </div>
           <div className="computer-wrap">
             <div className="computer-card">
-              <Image src={oldComputer} alt="Old computer" className="computer-img" width={460} height={340} style={{ imageRendering: 'pixelated' }} priority />
+              <Image src="/old-computer.png" alt="Old computer" className="computer-img" width={460} height={340} style={{ imageRendering: 'pixelated' }} priority />
               <div className="level-sticker"><b>LVL 04</b><span className="mono">1,240 XP ✦</span></div>
             </div>
           </div>

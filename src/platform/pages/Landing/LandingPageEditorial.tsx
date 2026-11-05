@@ -4,7 +4,6 @@ import './landing-editorial.css';
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import oldComputer from '@/assets/old computer.png';
 import { useAuth } from '../../../core/hooks/useAuth';
 import { useTheme } from '../../../core/context/ThemeContext';
 
@@ -114,7 +113,7 @@ export default function LandingPageEditorial() {
             <div className="edi-cover-meta"><span>★ No credit card</span><span>·</span><span>Bite-sized lessons</span><span>·</span><span>Actually runs your code</span></div>
           </div>
           <div className="edi-cover-art">
-            <Image src={oldComputer} alt="The PixelCode machine — an old beige computer" width={460} height={340} priority style={{ imageRendering: 'pixelated' }} />
+            <Image src="/old-computer.png" alt="The PixelCode machine — an old beige computer" width={460} height={340} priority style={{ imageRendering: 'pixelated' }} />
             <p className="edi-caption">STILL THE BEST LEARNING MACHINE EVER MADE</p>
           </div>
         </div>
