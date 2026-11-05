@@ -63,7 +63,18 @@ export async function POST(req: NextRequest) {
 
   const action = body.action;
   const todayKey = sanitizeClientDate(body.clientDate) ?? utcDayKey();
-  const db = adminDb();
+
+  let db: ReturnType<typeof adminDb>;
+  try {
+    db = adminDb();
+  } catch (e) {
+    const msg = e instanceof Error ? e.message : String(e);
+    console.error('[xp/award] admin init failed:', msg);
+    return NextResponse.json(
+      { error: 'XP service unavailable: server credentials missing/invalid', detail: msg },
+      { status: 503 },
+    );
+  }
 
   try {
     const result = await db.runTransaction<AwardResult>(async (tx) => {
@@ -328,7 +339,8 @@ export async function POST(req: NextRequest) {
     if (e instanceof HttpError) {
       return NextResponse.json({ error: e.message }, { status: e.status });
     }
-    console.error('[xp/award] unexpected error', e);
-    return NextResponse.json({ error: 'Internal error' }, { status: 500 });
+    const detail = e instanceof Error ? e.message : String(e);
+    console.error('[xp/award] unexpected error:', detail);
+    return NextResponse.json({ error: 'Internal error', detail }, { status: 500 });
   }
 }

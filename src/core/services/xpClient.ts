@@ -44,7 +44,8 @@ export const requestXpAward = async (
       body: JSON.stringify({ action, ...payload, clientDate: localDateKey() }),
     });
     if (!res.ok) {
-      console.error(`[xp] award request failed (${res.status})`);
+      const detail = await res.text().catch(() => '');
+      console.error(`[xp] award request failed (${res.status})`, detail);
       return null;
     }
     if (typeof window !== 'undefined') {

@@ -394,7 +394,14 @@ All notable changes to the PixelCode product are documented here.
   `/app/training` instead. The old detail URL redirects automatically.
 
 ### Fixed
-- **All `/_next/image` URLs returned 404 on production** (logos, hero art,
+- `/api/xp/award` returned an empty **500** on production whenever the admin
+  credentials were missing/invalid (the unguarded `adminDb()` call ran outside
+  all try/catch, so Vercel surfaced a platform 500 with no info). The route now
+  returns **503** (`XP service unavailable: server credentials missing/invalid`
+  + detail) for credential failures and **500 + detail** for anything else,
+  and the client prints the server's exact reason to the console. Local admin
+  credentials + Firestore were verified working (read-only sweep).
+- **All `/_next/image` URLs returned 404 on production** (logos, hero art and
   avatars — every icon). `next/image` optimization is unusable in this
   deployment (platform/sharp environment issue; every `/_next/image` request
   404s while the source files return 200). `images.unoptimized` is now set —
