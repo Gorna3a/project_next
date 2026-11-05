@@ -1,6 +1,6 @@
-import { initializeApp, getApps } from 'firebase/app';
-import { getAuth, GoogleAuthProvider, GithubAuthProvider } from 'firebase/auth';
-import { getFirestore } from 'firebase/firestore';
+import { initializeApp, getApps, type FirebaseApp } from 'firebase/app';
+import { getAuth, GoogleAuthProvider, GithubAuthProvider, type Auth } from 'firebase/auth';
+import { getFirestore, type Firestore } from 'firebase/firestore';
 import { getAnalytics, isSupported } from 'firebase/analytics';
 
 const firebaseConfig = {
@@ -14,32 +14,31 @@ const firebaseConfig = {
 };
 
 // Prevent duplicate app initialization (useful with HMR)
-const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0];
+const app: FirebaseApp = getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0];
 
-// Service instances are created LAZILY on first access (via Proxy), not at
-// module scope: during static prerendering (SSG) no env validation happens,
-// so a missing/invalid NEXT_PUBLIC_FIREBASE_API_KEY can't crash the build.
-// On the client the first real usage initializes everything as usual.
-let _auth: ReturnType<typeof getAuth> | null = null;
-const getFirebaseAuth = () => (_auth ??= getAuth(app));
+// During SSG / static prerendering (server), service instances are never
+// created — nothing calls them there, and creating them at module scope made
+// `next build` crash when the API key was missing/invalid on the host.
+// On the client we export the REAL instances so Firestore/auth pass their
+// internal instanceof checks. If server code ever touches them, it fails
+// loudly with a clear message instead of a cryptic FirebaseError.
+const serverOnly = <T extends object>(name: string): T =>
+  new Proxy({} as T, {
+    get: () => {
+      throw new Error(
+        `[firebase] ${name} was accessed during server-side prerendering. ` +
+          'Firebase service instances are only available in the browser.',
+      );
+    },
+  });
 
-let _db: ReturnType<typeof getFirestore> | null = null;
-const getFirebaseDb = () => (_db ??= getFirestore(app));
+const isClient = typeof window !== 'undefined';
 
-export const auth = new Proxy({} as ReturnType<typeof getAuth>, {
-  get: (_t, prop) => Reflect.get(getFirebaseAuth() as object, prop),
-  set: (_t, prop, value) => (Reflect.set(getFirebaseAuth() as object, prop, value), true),
-  has: (_t, prop) => Reflect.has(getFirebaseAuth() as object, prop),
-});
-
-export const db = new Proxy({} as ReturnType<typeof getFirestore>, {
-  get: (_t, prop) => Reflect.get(getFirebaseDb() as object, prop),
-  set: (_t, prop, value) => (Reflect.set(getFirebaseDb() as object, prop, value), true),
-  has: (_t, prop) => Reflect.has(getFirebaseDb() as object, prop),
-});
+export const auth: Auth = isClient ? getAuth(app) : serverOnly<Auth>('auth');
+export const db: Firestore = isClient ? getFirestore(app) : serverOnly<Firestore>('db');
 
 // Analytics only in browser environments that support it
-if (typeof window !== 'undefined') {
+if (isClient) {
   isSupported().then((yes) => {
     if (yes) getAnalytics(app);
   }).catch(() => {
