@@ -1,9 +1,10 @@
-// ─── rules v2 (2026-11-04) — XP is server-authoritative ─────────────
+// ─── rules v2 (2026-11-11) — XP is server-authoritative ─────────────
 // XP / level / streak / leaderboard are committed exclusively by
 // POST /api/xp/award via the Firebase Admin SDK, which bypasses these
 // rules. Clients can no longer write those fields at all.
 //
-// NOT DEPLOYED until `firebase deploy --only firestore:rules` is run.
+// Deploy with `firebase deploy --only firestore:rules`, or through the
+// Firebase Rules API with a service account.
 rules_version = '2';
 
 service cloud.firestore {
@@ -69,6 +70,12 @@ service cloud.firestore {
 
     // Server-only XP ledger — no client access whatsoever.
     match /xpEvents/{docId} {
+      allow read, write: if false;
+    }
+
+    // Server-only assignment attachments (uploaded/downloaded through
+    // /api/classroom/file; the Admin SDK bypasses these rules).
+    match /classroomFiles/{fileId} {
       allow read, write: if false;
     }
 
@@ -171,13 +178,24 @@ service cloud.firestore {
     match /classrooms/{classroomId} {
       allow read: if signedIn();
       allow create: if signedIn()
-        && request.resource.data.teacherId == request.auth.uid;
+        && request.resource.data.teacherId == request.auth.uid
+        && request.resource.data.students.size() == 0;
       allow update: if signedIn() && (
+        // Teacher may manage anything (join code, students, name, …)
         resource.data.teacherId == request.auth.uid
+        // A student may JOIN: add only themselves to students
         || (
           request.resource.data.diff(resource.data).affectedKeys().hasOnly(['students'])
           && request.resource.data.students.hasAll(resource.data.students)
           && request.auth.uid in request.resource.data.students
+        )
+        // A student may LEAVE: remove only themselves (students list shrinks by exactly one and stays a subset)
+        || (
+          request.resource.data.diff(resource.data).affectedKeys().hasOnly(['students'])
+          && request.auth.uid in resource.data.students
+          && !(request.auth.uid in request.resource.data.students)
+          && resource.data.students.hasAll(request.resource.data.students)
+          && request.resource.data.students.size() == resource.data.students.size() - 1
         )
       );
       allow delete: if signedIn()
@@ -190,6 +208,39 @@ service cloud.firestore {
         );
         allow write: if signedIn()
           && get(/databases/$(database)/documents/classrooms/$(classroomId)).data.teacherId == request.auth.uid;
+
+        match /submissions/{uid} {
+          // Teacher sees everyone; a student sees only their own submission.
+          allow read: if signedIn() && (
+            get(/databases/$(database)/documents/classrooms/$(classroomId)).data.teacherId == request.auth.uid
+            || request.auth.uid == uid
+          );
+          // Submissions are created SERVER-SIDE by /api/xp/award when a student
+          // completes an assignment (Admin SDK bypasses these rules). Teachers
+          // may grade points/note client-side; nobody else writes.
+          allow create, update: if signedIn()
+            && get(/databases/$(database)/documents/classrooms/$(classroomId)).data.teacherId == request.auth.uid;
+          allow delete: if signedIn()
+            && get(/databases/$(database)/documents/classrooms/$(classroomId)).data.teacherId == request.auth.uid;
+        }
+      }
+
+      match /feed/{postId} {
+        allow read: if signedIn() && (
+          get(/databases/$(database)/documents/classrooms/$(classroomId)).data.teacherId == request.auth.uid
+          || request.auth.uid in get(/databases/$(database)/documents/classrooms/$(classroomId)).data.students
+        );
+        allow create: if signedIn() && (
+          (
+            get(/databases/$(database)/documents/classrooms/$(classroomId)).data.teacherId == request.auth.uid
+            || request.auth.uid in get(/databases/$(database)/documents/classrooms/$(classroomId)).data.students
+          )
+          && request.resource.data.authorId == request.auth.uid
+        );
+        allow update, delete: if signedIn() && (
+          get(/databases/$(database)/documents/classrooms/$(classroomId)).data.teacherId == request.auth.uid
+          || resource.data.authorId == request.auth.uid
+        );
       }
     }
   }

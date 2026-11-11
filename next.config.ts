@@ -11,6 +11,9 @@ const nextConfig: NextConfig = {
   outputFileTracingIncludes: {
     "/api/xp/award": ["./node_modules/firebase-admin/lib/esm/**/*"],
     "/api/health": ["./node_modules/firebase-admin/lib/esm/**/*"],
+    "/api/classroom/file": ["./node_modules/firebase-admin/lib/esm/**/*"],
+    "/api/classroom/file/upload": ["./node_modules/firebase-admin/lib/esm/**/*"],
+    "/api/classroom/leaderboard": ["./node_modules/firebase-admin/lib/esm/**/*"],
   },
   images: {
     // The next/image optimizer is not functional in this deployment (all

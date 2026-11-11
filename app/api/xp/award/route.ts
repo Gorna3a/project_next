@@ -5,7 +5,7 @@
 // transaction. Firestore rules no longer let clients write XP fields at all.
 
 import { NextRequest, NextResponse } from 'next/server';
-import { FieldValue } from 'firebase-admin/firestore';
+import { FieldValue, type Firestore } from 'firebase-admin/firestore';
 import { adminDb, adminAuth } from '../../../../src/server/firebaseAdmin';
 import {
   clampInt,
@@ -40,6 +40,189 @@ interface AwardResult {
   level: number;
   streak: number;
   reason: string | null;
+}
+
+interface ClassroomSettlementOptions {
+  /** `false` records the completion without granting the assignment's XP. */
+  allowAward?: boolean;
+  /** Required when the assignment type is `upload`. */
+  fileId?: string;
+}
+
+/**
+ * Records a classroom assignment completion and awards its XP exactly once.
+ * Used by:
+ *  - the `classroom-assignment` action (task/challenge "Mark done", uploads), and
+ *  - `challenge-complete` auto-sync for assignments linked to a challenge.
+ *
+ * Submission points/XPs are preserved once they exist, so a teacher's grade is
+ * never overwritten by a later sync.
+ */
+async function settleClassroomAssignment(
+  db: Firestore,
+  uid: string,
+  todayKey: string,
+  classroomId: string,
+  assignmentId: string,
+  options: ClassroomSettlementOptions = {},
+): Promise<AwardResult> {
+  return db.runTransaction<AwardResult>(async tx => {
+    const userRef = db.collection('users').doc(uid);
+    const eventRef = db.collection('xpEvents').doc(`${uid}_classroom_${assignmentId}`);
+    const roomRef = db.collection('classrooms').doc(classroomId);
+    const assignmentRef = roomRef.collection('assignments').doc(assignmentId);
+    const submissionRef = assignmentRef.collection('submissions').doc(uid);
+
+    const roomSnap = await tx.get(roomRef);
+    if (!roomSnap.exists) throw new HttpError(404, 'Classroom not found');
+    const room = roomSnap.data() ?? {};
+    if (room.teacherId === uid) {
+      throw new HttpError(403, 'Only students can complete an assignment');
+    }
+    const students: string[] = Array.isArray(room.students) ? room.students : [];
+    if (!students.includes(uid)) {
+      throw new HttpError(403, 'Not a member of this classroom');
+    }
+
+    const assignmentSnap = await tx.get(assignmentRef);
+    if (!assignmentSnap.exists) throw new HttpError(404, 'Assignment not found');
+    const assignment = assignmentSnap.data() ?? {};
+    const award = clampInt(assignment.xp, 0, 25, 5);
+    const defaultPoints = clampInt(assignment.points, 0, 1000, 10);
+
+    const evSnap = await tx.get(eventRef);
+    const userSnap = await tx.get(userRef);
+    const subSnap = await tx.get(submissionRef);
+
+    const userData = (userSnap.exists ? userSnap.data() : {}) ?? {};
+    const totalXP = clampInt(userData.totalXP, 0, Number.MAX_SAFE_INTEGER, 0);
+    const streak = clampInt(userData.streak, 0, Number.MAX_SAFE_INTEGER, 0);
+    const level = clampInt(userData.level, 1, Number.MAX_SAFE_INTEGER, 1);
+    const lastStreakDate =
+      typeof userData.lastStreakDate === 'string' ? userData.lastStreakDate : null;
+
+    const existingSub = (subSnap.exists ? subSnap.data() : {}) ?? {};
+    const submission: Record<string, unknown> = {
+      uid,
+      status: 'completed',
+      points:
+        typeof existingSub.points === 'number' ? existingSub.points : defaultPoints,
+      xp: typeof existingSub.xp === 'number' ? existingSub.xp : award,
+      completedAt: existingSub.completedAt ?? serverTs(),
+    };
+
+    if (assignment.type === 'upload') {
+      const fileId = String(options.fileId ?? '');
+      if (!fileId) throw new HttpError(400, 'A file is required for this assignment');
+      const fileSnap = await tx.get(db.collection('classroomFiles').doc(fileId));
+      if (!fileSnap.exists) throw new HttpError(404, 'Uploaded file not found');
+      const file = fileSnap.data() ?? {};
+      if (
+        file.uid !== uid ||
+        file.classroomId !== classroomId ||
+        file.assignmentId !== assignmentId
+      ) {
+        throw new HttpError(403, 'Uploaded file does not belong to this submission');
+      }
+      submission.fileId = fileId;
+      submission.fileName = String(file.fileName ?? 'attachment');
+      submission.fileSize = Number(file.size ?? 0) || 0;
+      submission.contentType = String(file.contentType ?? 'application/octet-stream');
+    }
+
+    tx.set(submissionRef, submission, { merge: true });
+
+    if (evSnap.exists || options.allowAward === false) {
+      return {
+        awarded: 0,
+        totalXP,
+        level,
+        streak,
+        reason: evSnap.exists ? 'already-awarded' : 'not-awarded',
+      };
+    }
+
+    if (award > 0) {
+      const newXP = totalXP + award;
+      const newLevel = levelForXp(newXP);
+      const newStreak = nextStreak(streak, lastStreakDate, todayKey);
+      tx.set(
+        userRef,
+        {
+          totalXP: newXP,
+          level: newLevel,
+          streak: newStreak,
+          lastStreakDate: todayKey,
+          lastActive: serverTs(),
+        },
+        { merge: true },
+      );
+      tx.set(
+        eventRef,
+        {
+          uid,
+          action: 'classroom-assignment',
+          amount: award,
+          classroomId,
+          assignmentId,
+          awardedAt: serverTs(),
+          reason: 'classroom-assignment',
+        },
+        { merge: true },
+      );
+      return {
+        awarded: award,
+        totalXP: newXP,
+        level: newLevel,
+        streak: newStreak,
+        reason: 'classroom-assignment',
+      };
+    }
+
+    return { awarded: 0, totalXP, level, streak, reason: 'classroom-assignment' };
+  });
+}
+
+/**
+ * When a student finishes a challenge, mark every challenge-type assignment
+ * linked to it as complete in the classrooms they belong to. Runs after the
+ * challenge award commits so a sync failure can never break challenge XP.
+ */
+async function syncChallengeAssignments(
+  db: Firestore,
+  uid: string,
+  todayKey: string,
+  challengeId: string,
+  allowAward: boolean,
+): Promise<void> {
+  if (!challengeId) return;
+  const rooms = await db.collection('classrooms').get();
+  for (const room of rooms.docs) {
+    // Per-classroom single-field query — no collection-group index required.
+    const linked = await room.ref
+      .collection('assignments')
+      .where('challengeId', '==', challengeId)
+      .get();
+    for (const assignment of linked.docs) {
+      try {
+        await settleClassroomAssignment(
+          db,
+          uid,
+          todayKey,
+          room.id,
+          assignment.id,
+          { allowAward },
+        );
+      } catch (e) {
+        // Not a member / assignment deleted: expected, skip quietly.
+        if (e instanceof HttpError && (e.status === 403 || e.status === 404)) continue;
+        console.error(
+          `[xp/award] classroom sync failed (${room.id}/${assignment.id}):`,
+          e,
+        );
+      }
+    }
+  }
 }
 
 export async function POST(req: NextRequest) {
@@ -77,6 +260,31 @@ export async function POST(req: NextRequest) {
   }
 
   try {
+    // Classroom assignment completion is settled in its own transaction so it
+    // can also be reused by the challenge auto-sync below.
+    if (action === 'classroom-assignment') {
+      const classroomId = String(body.classroomId ?? '');
+      const assignmentId = String(body.assignmentId ?? '');
+      if (!classroomId || !assignmentId) {
+        return NextResponse.json(
+          { error: 'classroomId and assignmentId are required' },
+          { status: 400 },
+        );
+      }
+      const result = await settleClassroomAssignment(
+        db,
+        uid,
+        todayKey,
+        classroomId,
+        assignmentId,
+        {
+          allowAward: true,
+          fileId: typeof body.fileId === 'string' ? body.fileId : undefined,
+        },
+      );
+      return NextResponse.json(result);
+    }
+
     const result = await db.runTransaction<AwardResult>(async (tx) => {
       const eventRef = (id: string) => db.collection('xpEvents').doc(id);
       const userRef = db.collection('users').doc(uid);
@@ -141,8 +349,8 @@ export async function POST(req: NextRequest) {
       if (action === 'lesson-complete') {
         const courseId = String(body.courseId ?? '');
         const lessonId = String(body.lessonId ?? '');
-        const totalLessons = clampInt(body.totalLessons, 1, 100000, 1);
-        const lessonXp = clampInt(body.lessonXp, 1, 100, 10);
+        const requestedTotal = clampInt(body.totalLessons, 1, 100000, 1);
+        const lessonXp = clampInt(body.lessonXp, 1, 10, 10);
         if (!courseId || !lessonId) {
           throw new HttpError(400, 'courseId and lessonId are required');
         }
@@ -163,6 +371,9 @@ export async function POST(req: NextRequest) {
         if (completed.includes(lessonId)) return none('already-completed');
 
         const nextCompleted = [...completed, lessonId];
+        const storedTotal = clampInt(cp.totalLessons, 1, 100000, requestedTotal);
+        // Never let the client shrink the denominator to inflate progress.
+        const totalLessons = Math.max(requestedTotal, storedTotal, nextCompleted.length);
         const percent = Math.min(
           100,
           Math.round((nextCompleted.length / totalLessons) * 100),
@@ -179,6 +390,7 @@ export async function POST(req: NextRequest) {
             courseId,
             completedLessons: nextCompleted,
             percentComplete: percent,
+            totalLessons,
             lastAccessed: serverTs(),
             startedAt: cp.startedAt ?? serverTs(),
             quizResults: cp.quizResults ?? {},
@@ -197,7 +409,7 @@ export async function POST(req: NextRequest) {
       if (action === 'quiz-correct') {
         const courseId = String(body.courseId ?? '');
         const quizKey = String(body.quizKey ?? '');
-        const quizXp = clampInt(body.quizXp, 1, 50, 1);
+        const quizXp = clampInt(body.quizXp, 1, 10, 1);
         const correct = body.correct === true;
         if (!courseId || !quizKey) {
           throw new HttpError(400, 'courseId and quizKey are required');
@@ -246,17 +458,17 @@ export async function POST(req: NextRequest) {
         const challengeSnap = await tx.get(challengeRef);
         if (!challengeSnap.exists) throw new HttpError(404, 'Challenge not found');
         const challengeXp = clampInt(challengeSnap.data()?.xp, 0, 10000, 25);
-        const xpOverride =
-          body.xpOverride !== undefined
-            ? clampInt(body.xpOverride, 0, 10000, challengeXp)
-            : null;
-        const award = xpOverride ?? challengeXp;
+        // The award amount is decided SERVER-SIDE from the challenge doc.
+        // The client may only signal that the solution was *revealed*
+        // (forfeiting XP); it can never choose or inflate the XP value.
+        const revealed = body.revealed === true;
+        const award = revealed ? 0 : challengeXp;
         tx.set(
           db.collection('users').doc(uid).collection('completedChallenges').doc(challengeId),
           {
             challengeId,
             xp: Math.max(0, award),
-            revealed: xpOverride === 0,
+            revealed,
             completedAt: serverTs(),
           },
           { merge: true },
@@ -333,6 +545,26 @@ export async function POST(req: NextRequest) {
 
       throw new HttpError(400, `Unknown action: ${action}`);
     });
+
+    // Finishing a linked challenge also settles challenge-type classroom
+    // assignments. Best-effort: the challenge award above is already committed.
+    if (action === 'challenge-complete') {
+      const challengeId = String(body.challengeId ?? '');
+      // Only pay the classroom XP when the challenge XP was actually granted
+      // (or had been granted before). A revealed solution still marks linked
+      // assignments complete, but without the assignment XP.
+      try {
+        await syncChallengeAssignments(
+          db,
+          uid,
+          todayKey,
+          challengeId,
+          result.reason !== 'revealed',
+        );
+      } catch (e) {
+        console.error('[xp/award] challenge → classroom sync failed:', e);
+      }
+    }
 
     return NextResponse.json(result);
   } catch (e) {

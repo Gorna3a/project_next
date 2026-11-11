@@ -1,222 +1,81 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import { motion, AnimatePresence, type Variants } from 'framer-motion';
+import { motion } from 'framer-motion';
 import {
-  ArrowLeft, ArrowRight, Users, BookOpen, Plus, Loader2, Calendar,
-  Copy, Check, GraduationCap, ClipboardList,
+  ArrowLeft, ArrowRight, Users, GraduationCap, ClipboardList,
+  Copy, Check, RefreshCw, Loader2, MessageSquare, Trophy, Activity,
 } from 'lucide-react';
-import {
-  doc, getDoc, collection, getDocs, addDoc, serverTimestamp,
-  query, orderBy,
-} from 'firebase/firestore';
+import { doc, getDoc } from 'firebase/firestore';
+import { toast } from 'react-hot-toast';
 import { db } from '../../../core/firebase/config';
 import { useAuth } from '../../../core/context/AuthContext';
 import { useLanguage } from '../../../core/context/LanguageContext';
+import { regenerateJoinCode } from './classroomService';
+import { AssignmentsPanel } from './AssignmentsPanel';
+import { FeedPanel } from './FeedPanel';
+import { StudentsPanel } from './StudentsPanel';
+import { LeaderboardPanel } from './LeaderboardPanel';
+import { AnalyticsPanel } from './AnalyticsPanel';
+import { ConfirmDialog } from './ConfirmDialog';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
+import { Skeleton } from '@/components/ui/skeleton';
+import type { ClassroomData } from './classroomTypes';
 
 // ─── Variants ─────────────────────────────────────────────────────────────────
 
-const fadeUp: Variants = {
-  hidden: { opacity: 0, y: 12 },
-  show:   { opacity: 1, y: 0, transition: { duration: 0.3, ease: 'easeOut' as const } },
-};
+type Tab = 'assignments' | 'feed' | 'students' | 'leaderboard' | 'analytics';
 
-// ─── Types ────────────────────────────────────────────────────────────────────
-
-interface ClassroomData {
-  id: string;
-  name: string;
-  description: string;
-  joinCode: string;
-  teacherId: string;
-  teacherName: string;
-  students: string[];
-}
-
-interface Assignment {
-  id: string;
-  title: string;
-  description: string;
-  dueDate: Date | null;
-  createdAt: Date;
-}
-
-// ─── Add Assignment Modal ─────────────────────────────────────────────────────
-
-const AddAssignmentModal = ({
-  classroomId,
-  onClose,
-  onAdded,
-}: {
-  classroomId: string;
-  onClose: () => void;
-  onAdded: (a: Assignment) => void;
-}) => {
-  const { t, isRTL } = useLanguage();
-  const [title,  setTitle]  = useState('');
-  const [desc,   setDesc]   = useState('');
-  const [due,    setDue]    = useState('');
-  const [saving, setSaving] = useState(false);
-
-  const handleSave = async () => {
-    if (!title.trim()) return;
-    setSaving(true);
-    try {
-      const ref = await addDoc(
-        collection(db, 'classrooms', classroomId, 'assignments'),
-        {
-          title:       title.trim(),
-          description: desc.trim(),
-          dueDate:     due ? new Date(due) : null,
-          createdAt:   serverTimestamp(),
-        },
-      );
-      onAdded({
-        id:          ref.id,
-        title:       title.trim(),
-        description: desc.trim(),
-        dueDate:     due ? new Date(due) : null,
-        createdAt:   new Date(),
-      });
-      onClose();
-    } catch (e) {
-      console.error(e);
-    } finally {
-      setSaving(false);
-    }
-  };
-
-  return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      className="fixed inset-0 z-50 flex items-center justify-center p-4"
-      style={{ backgroundColor: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(4px)' }}
-      onClick={onClose}
-    >
-      <motion.div
-        initial={{ scale: 0.96, opacity: 0, y: 8 }}
-        animate={{ scale: 1, opacity: 1, y: 0 }}
-        exit={{ scale: 0.96, opacity: 0, y: 8 }}
-        className={`bg-white border-[3px] border-black shadow-[8px_8px_0_0_#000] p-6 w-full max-w-md space-y-4 ${isRTL ? 'text-right' : 'text-left'}`}
-        onClick={e => e.stopPropagation()}
-      >
-        <h2 className="font-black text-lg tracking-tight text-black" style={{ fontFamily: "'Space Mono', monospace" }}>
-          {t('classroom.addAssignment')}
-        </h2>
-
-        <div className="space-y-3">
-          <div>
-            <label className="font-mono text-[10px] font-black uppercase tracking-widest mb-1 block text-black">
-              {t('classroom.assignmentTitleLabel')}
-            </label>
-            <input
-              value={title}
-              onChange={e => setTitle(e.target.value)}
-              placeholder={t('classroom.assignmentTitlePlaceholder')}
-              className={`w-full bg-white border-[3px] border-black shadow-[3px_3px_0_0_#000] px-3 py-2.5 font-mono text-sm font-bold placeholder:text-black/40 focus:outline-none ${isRTL ? 'text-right' : 'text-left'}`}
-            />
-          </div>
-          <div>
-            <label className="font-mono text-[10px] font-black uppercase tracking-widest mb-1 block text-black">
-              {t('classroom.assignmentDescLabel')}
-            </label>
-            <textarea
-              value={desc}
-              onChange={e => setDesc(e.target.value)}
-              placeholder={t('classroom.assignmentDescPlaceholder')}
-              rows={3}
-              className={`w-full bg-white border-[3px] border-black shadow-[3px_3px_0_0_#000] px-3 py-2.5 font-mono text-sm font-bold placeholder:text-black/40 focus:outline-none resize-none ${isRTL ? 'text-right' : 'text-left'}`}
-            />
-          </div>
-          <div>
-            <label className="font-mono text-[10px] font-black uppercase tracking-widest mb-1 block text-black">
-              {t('classroom.dueDateLabel')}
-            </label>
-            <input
-              type="datetime-local"
-              value={due}
-              onChange={e => setDue(e.target.value)}
-              className={`w-full bg-white border-[3px] border-black shadow-[3px_3px_0_0_#000] px-3 py-2.5 font-mono text-sm font-bold focus:outline-none ${isRTL ? 'text-right' : 'text-left'}`}
-            />
-          </div>
-        </div>
-
-        <div className={`flex gap-3 ${isRTL ? 'flex-row-reverse' : ''}`}>
-          <button onClick={onClose} className="flex-1 bg-white text-black border-[3px] border-black shadow-[3px_3px_0_0_#000] font-mono text-xs font-black uppercase tracking-widest py-2.5 hover:bg-black hover:text-white active:translate-x-[2px] active:translate-y-[2px] active:shadow-none transition-all">
-            {t('common.cancel')}
-          </button>
-          <button
-            onClick={handleSave}
-            disabled={!title.trim() || saving}
-            className="flex-1 bg-[#FFD23F] text-black border-[3px] border-black shadow-[3px_3px_0_0_#000] font-mono text-xs font-black uppercase tracking-widest py-2.5 hover:translate-x-[-1px] hover:translate-y-[-1px] hover:shadow-[4px_4px_0_0_#000] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-          >
-            {saving ? (
-              <Loader2 className="w-4 h-4 animate-spin" />
-            ) : (
-              t('classroom.addAssignmentButton')
-            )}
-          </button>
-        </div>
-      </motion.div>
-    </motion.div>
-  );
-};
-
-// ─── ClassroomDetailPage ──────────────────────────────────────────────────────
+// ─── ClassroomDetailPage ───────────────────────────────────────────────────────
 
 export default function ClassroomDetailPage() {
   const params = useParams();
   const id = params.id as string;
-  const { profile }       = useAuth();
-  const { t, isRTL }      = useLanguage();
+  const { user }               = useAuth();
+  const { t, isRTL }            = useLanguage();
 
   const [classroom,     setClassroom]     = useState<ClassroomData | null>(null);
-  const [assignments,   setAssignments]   = useState<Assignment[]>([]);
   const [loading,       setLoading]       = useState(true);
-  const [showAddAssign, setShowAddAssign] = useState(false);
   const [copied,        setCopied]        = useState(false);
-  const [activeTab,     setActiveTab]     = useState<'assignments' | 'students'>('assignments');
+  const [regenerating,  setRegenerating]  = useState(false);
+  const [activeTab,     setActiveTab]     = useState<Tab>('assignments');
+  const [confirmRegen,  setConfirmRegen]  = useState(false);
 
-  const isTeacher = profile?.role === 'teacher' || profile?.role === 'admin';
+  const fetchData = useCallback(async () => {
+    try {
+      const classSnap = await getDoc(doc(db, 'classrooms', id));
+      if (classSnap.exists()) {
+        const data = classSnap.data();
+        setClassroom({
+          id: classSnap.id,
+          name: data.name ?? '',
+          description: data.description ?? '',
+          joinCode: data.joinCode ?? '',
+          teacherId: data.teacherId ?? '',
+          teacherName: data.teacherName ?? '',
+          students: Array.isArray(data.students) ? data.students : [],
+          createdAt: data.createdAt?.toDate?.() ?? new Date(),
+        });
+      } else {
+        setClassroom(null);
+      }
+    } catch (e) {
+      console.error('[Classroom] Fetch failed:', e);
+      setClassroom(null);
+    } finally {
+      setLoading(false);
+    }
+  }, [id]);
 
   useEffect(() => {
-    if (!id) return;
-    const fetchData = async () => {
-      try {
-        const [classSnap, assignSnap] = await Promise.all([
-          getDoc(doc(db, 'classrooms', id)),
-          getDocs(
-            query(
-              collection(db, 'classrooms', id, 'assignments'),
-              orderBy('createdAt', 'desc'),
-            ),
-          ),
-        ]);
-
-        if (classSnap.exists()) {
-          setClassroom({ id: classSnap.id, ...classSnap.data() } as ClassroomData);
-        }
-
-        setAssignments(
-          assignSnap.docs.map(d => ({
-            id:          d.id,
-            ...d.data(),
-            dueDate:     d.data().dueDate?.toDate?.() ?? null,
-            createdAt:   d.data().createdAt?.toDate?.() ?? new Date(),
-          } as Assignment)),
-        );
-      } catch (e) {
-        console.error(e);
-      } finally {
-        setLoading(false);
-      }
-    };
     fetchData();
-  }, [id]);
+  }, [fetchData]);
+
+  const isMember =
+    !!user &&
+    (user.uid === classroom?.teacherId || (classroom?.students.includes(user.uid) ?? false));
 
   const copyCode = async () => {
     if (!classroom) return;
@@ -225,22 +84,39 @@ export default function ClassroomDetailPage() {
     setTimeout(() => setCopied(false), 2000);
   };
 
+  const handleRegenerate = () => setConfirmRegen(true);
+
+  const confirmRegenerate = async () => {
+    if (!classroom || regenerating) return;
+    setRegenerating(true);
+    try {
+      const code = await regenerateJoinCode(classroom.id);
+      setClassroom(prev => prev ? { ...prev, joinCode: code } : prev);
+      setConfirmRegen(false);
+      toast.success(t('classroom.codeRegenerated'));
+    } catch {
+      toast.error(t('classroom.failedAddAssignment'));
+    } finally {
+      setRegenerating(false);
+    }
+  };
+
   // ── Loading skeleton ───────────────────────────────────────────────────────
 
   if (loading) {
     return (
       <div className="max-w-4xl mx-auto space-y-4">
-        <div className="h-40 bg-white border-[3px] border-black shadow-[5px_5px_0_0_#000] animate-pulse" />
+        <Skeleton className="h-40 shadow-[5px_5px_0_0_#000]" />
         {Array.from({ length: 3 }).map((_, i) => (
-          <div key={i} className="h-16 bg-white border-[3px] border-black shadow-[5px_5px_0_0_#000] animate-pulse" />
+          <Skeleton key={i} className="h-16 shadow-[4px_4px_0_0_#000]" />
         ))}
       </div>
     );
   }
 
-  // ── Not found ──────────────────────────────────────────────────────────────
+  // ── Not found / not a member ───────────────────────────────────────────────
 
-  if (!classroom) {
+  if (!classroom || !isMember) {
     return (
       <div className="text-center py-20 space-y-4 max-w-md mx-auto">
         <span className="w-14 h-14 bg-[#FFD23F] border-[3px] border-black grid place-items-center mx-auto shadow-[3px_3px_0_0_#000] rotate-[-1deg]">
@@ -254,7 +130,17 @@ export default function ClassroomDetailPage() {
     );
   }
 
-  // ── Main render ────────────────────────────────────────────────────────────
+  const teacherView = user?.uid === classroom.teacherId;
+  const handleStudentRemoved = (uid: string) =>
+    setClassroom(prev => prev ? { ...prev, students: prev.students.filter(s => s !== uid) } : prev);
+
+  const tabs: { key: Tab; label: string; icon: React.ReactNode }[] = [
+    { key: 'assignments', label: t('classroom.assignmentsTab'), icon: <ClipboardList className="w-4 h-4" /> },
+    { key: 'feed',        label: t('classroom.feedTab'),        icon: <MessageSquare className="w-4 h-4" /> },
+    { key: 'students',    label: t('classroom.studentsTab'),    icon: <Users className="w-4 h-4" /> },
+    { key: 'leaderboard', label: t('classroom.leaderboard'),    icon: <Trophy className="w-4 h-4" /> },
+    ...(teacherView ? [{ key: 'analytics' as Tab, label: t('classroom.analyticsTab'), icon: <Activity className="w-4 h-4" /> }] : []),
+  ];
 
   return (
     <motion.div
@@ -263,16 +149,6 @@ export default function ClassroomDetailPage() {
       transition={{ duration: 0.35, ease: 'easeOut' as const }}
       className={`max-w-4xl mx-auto space-y-6 pb-12 ${isRTL ? 'text-right' : 'text-left'}`}
     >
-      <AnimatePresence>
-        {showAddAssign && id && (
-          <AddAssignmentModal
-            classroomId={id}
-            onClose={() => setShowAddAssign(false)}
-            onAdded={a => setAssignments(prev => [a, ...prev])}
-          />
-        )}
-      </AnimatePresence>
-
       {/* ── Back link ── */}
       <Link
         href="/app/classroom"
@@ -281,7 +157,7 @@ export default function ClassroomDetailPage() {
         {isRTL ? <ArrowRight className="w-4 h-4" /> : <ArrowLeft className="w-4 h-4" />} {t('classroom.title')}
       </Link>
 
-      {/* ── Classroom header — brutalist masthead variant ── */}
+      {/* ── Classroom header ── */}
       <div className="bg-black text-white border-[3px] border-black shadow-[5px_5px_0_0_#000] p-6 space-y-4">
         <div className={`flex items-start justify-between gap-4 flex-wrap ${isRTL ? 'flex-row-reverse' : ''}`}>
           <div className={`${isRTL ? 'text-right' : 'text-left'}`}>
@@ -290,26 +166,30 @@ export default function ClassroomDetailPage() {
               {classroom.name}
             </h1>
             <p className="font-mono text-xs font-bold uppercase tracking-widest mt-1 text-white/60">
-              {isTeacher
+              {teacherView
                 ? t('classroom.studentsEnrolled').replace('{count}', classroom.students.length.toString())
                 : t('classroom.taughtBy').replace('{name}', classroom.teacherName)}
             </p>
           </div>
 
-          {isTeacher && (
-            <div className={`flex items-center gap-2 bg-white text-black border-[3px] border-black px-3 py-2 shadow-[3px_3px_0_0_#000] ${isRTL ? 'flex-row-reverse' : ''}`}>
+          {teacherView && (
+            <div className={`flex items-center gap-2 bg-white text-black border-[3px] border-black px-3 py-2 shadow-[3px_3px_0_0_#000] flex-wrap ${isRTL ? 'flex-row-reverse' : ''}`}>
               <span className="font-mono text-[10px] font-black uppercase tracking-widest text-black/60">
                 {t('classroom.joinCodeLabel')}
               </span>
               <code className="font-mono font-black text-sm tracking-widest text-black">
                 {classroom.joinCode}
               </code>
-              <button onClick={copyCode} className="bg-black text-white border-[2px] border-black p-1 hover:bg-[#FFD23F] hover:text-black transition-colors">
-                {copied ? (
-                  <Check className="w-3.5 h-3.5 text-[#88D498]" />
-                ) : (
-                  <Copy className="w-3.5 h-3.5" />
-                )}
+              <button onClick={copyCode} className="bg-black text-white border-[2px] border-black p-1 hover:bg-[#FFD23F] hover:text-black transition-colors" title={t('classroom.copyCode')}>
+                {copied ? <Check className="w-3.5 h-3.5 text-[#88D498]" /> : <Copy className="w-3.5 h-3.5" />}
+              </button>
+              <button
+                onClick={handleRegenerate}
+                disabled={regenerating}
+                className="bg-black text-white border-[2px] border-black p-1 hover:bg-[#FFD23F] hover:text-black transition-colors disabled:opacity-50"
+                title={t('classroom.regenerateCode')}
+              >
+                {regenerating ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <RefreshCw className="w-3.5 h-3.5" />}
               </button>
             </div>
           )}
@@ -327,129 +207,57 @@ export default function ClassroomDetailPage() {
             <Users className="w-4 h-4" />
             {t('classroom.studentsCount').replace('{count}', classroom.students.length.toString())}
           </span>
-          <span className={`inline-flex items-center gap-2 bg-[#FFD23F] text-black border-[2px] border-white px-3 py-1 font-mono text-xs font-black uppercase tracking-widest ${isRTL ? 'flex-row-reverse' : ''}`}>
-            <ClipboardList className="w-4 h-4" />
-            {t('classroom.assignmentsCount').replace('{count}', assignments.length.toString())}
-          </span>
         </div>
       </div>
 
-      {/* ── Tabs — hard brutalist ── */}
-      <div className={`flex gap-2 bg-white border-[3px] border-black shadow-[4px_4px_0_0_#000] p-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
-        {(['assignments', 'students'] as const).map(tab => (
-          <button
-            key={tab}
-            onClick={() => setActiveTab(tab)}
-            className={`flex-1 py-2.5 px-4 font-mono text-xs font-black uppercase tracking-widest border-[3px] transition-all ${activeTab === tab ? 'bg-black text-white border-black shadow-[3px_3px_0_0_#000]' : 'bg-white text-black border-black hover:bg-[#FFF4CC]'}`}
-          >
-            {tab === 'assignments' ? t('classroom.assignmentsTab') : t('classroom.studentsTab')}
-          </button>
-        ))}
-      </div>
+      {/* ── Regenerate join code confirmation (shadcn Dialog) ── */}
+      <ConfirmDialog
+        open={confirmRegen}
+        onOpenChange={setConfirmRegen}
+        title={t('classroom.regenerateTitle')}
+        description={t('classroom.regenerateConfirm')}
+        confirmLabel={t('classroom.regenerateButton')}
+        destructive={false}
+        busy={regenerating}
+        icon={<RefreshCw className="w-4 h-4" />}
+        onConfirm={confirmRegenerate}
+      />
 
-      {/* ── Assignments tab ── */}
-      {activeTab === 'assignments' && (
-        <div className="space-y-4">
-          {isTeacher && (
-            <button
-              onClick={() => setShowAddAssign(true)}
-              className={`bg-[#FFD23F] text-black border-[3px] border-black shadow-[3px_3px_0_0_#000] font-mono text-xs font-black uppercase tracking-widest px-4 py-2.5 hover:translate-x-[-1px] hover:translate-y-[-1px] hover:shadow-[4px_4px_0_0_#000] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none transition-all flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}
-            >
-              <Plus className="w-4 h-4" /> {t('classroom.addAssignment')}
-            </button>
-          )}
+      {/* ── Tabs ── */}
+      <Tabs value={activeTab} onValueChange={v => setActiveTab(v as Tab)} dir={isRTL ? 'rtl' : 'ltr'} className="space-y-6">
+        <TabsList className="w-full">
+          {tabs.map(tab => (
+            <TabsTrigger key={tab.key} value={tab.key}>
+              {tab.icon}
+              <span className="hidden xs:inline">{tab.label}</span>
+            </TabsTrigger>
+          ))}
+        </TabsList>
 
-          {assignments.length === 0 ? (
-            <div className="bg-white border-[3px] border-black shadow-[5px_5px_0_0_#000] p-10 text-center space-y-3">
-              <span className="w-12 h-12 bg-[#74B9FF] border-[3px] border-black grid place-items-center mx-auto shadow-[2px_2px_0_0_#000]">
-                <ClipboardList className="w-6 h-6 text-black" />
-              </span>
-              <p className="font-mono text-xs font-black uppercase tracking-widest text-black">{t('classroom.noAssignmentsYet')}</p>
-              {isTeacher && (
-                <p className="font-mono text-xs font-bold text-black/60">
-                  {t('classroom.addFirstAssignment')}
-                </p>
-              )}
-            </div>
-          ) : (
-            <motion.div className={`space-y-3 ${isRTL ? 'direction-rtl' : ''}`}>
-              {assignments.map((a, i) => (
-                <motion.div
-                  key={a.id}
-                  variants={fadeUp}
-                  initial="hidden"
-                  animate="show"
-                  transition={{ delay: i * 0.06 }}
-                  className={`bg-white border-[3px] border-black shadow-[4px_4px_0_0_#000] p-4 flex items-start gap-4 hover:translate-x-[-1px] hover:translate-y-[-1px] hover:shadow-[5px_5px_0_0_#000] transition-all ${isRTL ? 'flex-row-reverse text-right' : ''}`}
-                >
-                  <span className="w-9 h-9 bg-[#FFD23F] border-[3px] border-black grid place-items-center shrink-0 shadow-[2px_2px_0_0_#000]">
-                    <BookOpen className="w-4 h-4 text-black" />
-                  </span>
-                  <div className="flex-1 min-w-0">
-                    <h3 className="font-black text-sm tracking-tight text-black" style={{ fontFamily: "'Space Mono', monospace" }}>
-                      {a.title}
-                    </h3>
-                    {a.description && (
-                      <p className="font-mono text-xs mt-1 line-clamp-2 text-black/70">
-                        {a.description}
-                      </p>
-                    )}
-                    {a.dueDate && (
-                      <span className={`inline-flex items-center gap-1.5 mt-2 bg-black text-white border-[2px] border-black px-2 py-1 font-mono text-[10px] font-black uppercase tracking-widest ${isRTL ? 'flex-row-reverse' : ''}`}>
-                        <Calendar className="w-3 h-3" />
-                        {t('classroom.due')}{' '}
-                        {a.dueDate.toLocaleDateString(isRTL ? 'ar-EG' : undefined, {
-                          dateStyle: 'medium',
-                        })}
-                      </span>
-                    )}
-                  </div>
-                </motion.div>
-              ))}
-            </motion.div>
-          )}
-        </div>
-      )}
-
-      {/* ── Students tab ── */}
-      {activeTab === 'students' && (
-        <div className="space-y-3">
-          {classroom.students.length === 0 ? (
-            <div className="bg-white border-[3px] border-black shadow-[5px_5px_0_0_#000] p-10 text-center space-y-3">
-              <span className="w-12 h-12 bg-[#88D498] border-[3px] border-black grid place-items-center mx-auto shadow-[2px_2px_0_0_#000]">
-                <Users className="w-6 h-6 text-black" />
-              </span>
-              <p className="font-mono text-xs font-black uppercase tracking-widest text-black">{t('classroom.noStudentsYet')}</p>
-              <p className="font-mono text-xs font-bold text-black/60">
-                {t('classroom.shareJoinCode')}
-              </p>
-            </div>
-          ) : (
-            classroom.students.map((uid, i) => (
-              <motion.div
-                key={uid}
-                variants={fadeUp}
-                initial="hidden"
-                animate="show"
-                transition={{ delay: i * 0.05 }}
-                className={`bg-white border-[3px] border-black shadow-[4px_4px_0_0_#000] p-4 flex items-center gap-3 hover:bg-[#FFFDF5] transition-colors ${isRTL ? 'flex-row-reverse text-right' : ''}`}
-              >
-                <span className="w-8 h-8 bg-black text-white border-[2px] border-black grid place-items-center text-xs font-black shrink-0">
-                  {i + 1}
-                </span>
-                <div className="flex-1">
-                  <p className="font-mono text-xs font-black uppercase tracking-widest text-black">
-                    {t('classroom.studentLabel').replace('{index}', (i + 1).toString())}
-                  </p>
-                  <p className="font-mono text-[11px] font-bold text-black/60">
-                    {uid.slice(0, 12)}…
-                  </p>
-                </div>
-              </motion.div>
-            ))
-          )}
-        </div>
-      )}
+        {/* ── Panels ── */}
+        <TabsContent value="assignments">
+          <AssignmentsPanel classroomId={classroom.id} students={classroom.students} isTeacher={teacherView} />
+        </TabsContent>
+        <TabsContent value="feed">
+          <FeedPanel classroomId={classroom.id} isTeacher={teacherView} />
+        </TabsContent>
+        <TabsContent value="students">
+          <StudentsPanel
+            classroomId={classroom.id}
+            students={classroom.students}
+            teacherId={classroom.teacherId}
+            onStudentRemoved={handleStudentRemoved}
+          />
+        </TabsContent>
+        <TabsContent value="leaderboard">
+          <LeaderboardPanel classroomId={classroom.id} />
+        </TabsContent>
+        {teacherView && (
+          <TabsContent value="analytics">
+            <AnalyticsPanel classroomId={classroom.id} students={classroom.students} />
+          </TabsContent>
+        )}
+      </Tabs>
     </motion.div>
   );
 }

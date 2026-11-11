@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { motion, AnimatePresence, type Variants } from 'framer-motion';
+import { motion, type Variants } from 'framer-motion';
 import {
   Plus, Copy, Check, LogIn, Loader2, GraduationCap, Hash,
 } from 'lucide-react';
@@ -12,6 +12,10 @@ import {
 import { db } from '../../../core/firebase/config';
 import { useAuth } from '../../../core/context/AuthContext';
 import { useLanguage } from '../../../core/context/LanguageContext';
+import {
+  Dialog, DialogContent, DialogHeader, DialogTitle,
+} from '@/components/ui/dialog';
+import { Skeleton } from '@/components/ui/skeleton';
 import Link from "next/link";
 
 // ─── Variants ─────────────────────────────────────────────────────────────────
@@ -94,24 +98,11 @@ const CreateModal = ({
   };
 
   return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      className="fixed inset-0 z-50 flex items-center justify-center p-4"
-      style={{ backgroundColor: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(4px)' }}
-      onClick={onClose}
-    >
-      <motion.div
-        initial={{ scale: 0.96, opacity: 0, y: 8 }}
-        animate={{ scale: 1, opacity: 1, y: 0 }}
-        exit={{ scale: 0.96, opacity: 0, y: 8 }}
-        className={`bg-white border-[3px] border-black shadow-[8px_8px_0_0_#000] p-6 w-full max-w-md space-y-4 ${isRTL ? 'text-right' : 'text-left'}`}
-        onClick={e => e.stopPropagation()}
-      >
-        <h2 className="font-black text-lg tracking-tight text-black" style={{ fontFamily: "'Space Mono', monospace" }}>
-          {t('classroom.createModalTitle')}
-        </h2>
+    <Dialog open onOpenChange={open => { if (!open) onClose(); }}>
+      <DialogContent className={`max-w-md ${isRTL ? 'text-right' : 'text-left'}`}>
+        <DialogHeader>
+          <DialogTitle>{t('classroom.createModalTitle')}</DialogTitle>
+        </DialogHeader>
 
         {error && <p className="font-mono text-xs font-bold bg-[#FF6B6B] border-[2px] border-black px-3 py-2 text-black">{error}</p>}
 
@@ -157,8 +148,8 @@ const CreateModal = ({
             )}
           </button>
         </div>
-      </motion.div>
-    </motion.div>
+      </DialogContent>
+    </Dialog>
   );
 };
 
@@ -384,14 +375,12 @@ export default function ClassroomPage() {
 
   return (
     <div className={`max-w-5xl mx-auto space-y-6 pb-12 ${isRTL ? 'text-right' : 'text-left'}`}>
-      <AnimatePresence>
-        {showCreate && (
-          <CreateModal
-            onClose={() => setShowCreate(false)}
-            onCreated={handleCreated}
-          />
-        )}
-      </AnimatePresence>
+      {showCreate && (
+        <CreateModal
+          onClose={() => setShowCreate(false)}
+          onCreated={handleCreated}
+        />
+      )}
 
       {/* ── Header — black masthead ── */}
       <div className={`bg-black text-white border-[3px] border-black shadow-[5px_5px_0_0_#000] p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4 ${isRTL ? 'sm:flex-row-reverse' : ''}`}>
@@ -423,10 +412,10 @@ export default function ClassroomPage() {
       {loading ? (
         <div className={`grid md:grid-cols-2 lg:grid-cols-3 gap-4 ${isRTL ? 'direction-rtl' : ''}`}>
           {Array.from({ length: 3 }).map((_, i) => (
-            <div key={i} className="bg-white border-[3px] border-black shadow-[5px_5px_0_0_#000] p-5 space-y-3 animate-pulse">
-              <div className="h-4 bg-black/10 w-2/3 border border-black/10" />
-              <div className="h-3 bg-black/10 w-1/2 border border-black/10" />
-              <div className="h-8 bg-black border-[2px] border-black" />
+            <div key={i} className="bg-white border-[3px] border-black shadow-[5px_5px_0_0_#000] p-5 space-y-3">
+              <Skeleton className="h-4 w-2/3" />
+              <Skeleton className="h-3 w-1/2" />
+              <Skeleton className="h-8 w-full" />
             </div>
           ))}
         </div>

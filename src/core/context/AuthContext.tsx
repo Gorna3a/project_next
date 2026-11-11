@@ -25,10 +25,14 @@ import {
   type AuthError,
 } from "firebase/auth";
 import { doc, setDoc, getDoc, serverTimestamp } from "firebase/firestore";
-import { auth, db, googleProvider, githubProvider } from "../firebase";
+import { auth, db, googleProvider, githubProvider, isFirebaseConfigured } from "../firebase";
 import type { UserProfile, UserRole } from "../types";
 
 const GH_TOKEN_KEY = "pixelcode_gh_token";
+
+const MISSING_FIREBASE_MESSAGE =
+  "Firebase is not configured. Add your NEXT_PUBLIC_FIREBASE_* values to .env.local " +
+  "(see .env.example), then restart the dev server.";
 
 // ─── Context shape ────────────────────────────────────────────────────────────
 
@@ -201,6 +205,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     setTimeout(() => setError(null), 5000);
   };
 
+  const requireFirebase = () => {
+    if (!isFirebaseConfigured) {
+      showError(MISSING_FIREBASE_MESSAGE);
+      throw new Error(MISSING_FIREBASE_MESSAGE);
+    }
+  };
+
   const clearError = () => setError(null);
   const clearLink = () => {
     setLinkEmail(null);
@@ -285,7 +296,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   // Re-fetch the profile whenever an XP award lands (xpClient broadcasts),
   // so the XP chip / dashboard / profile update without a hard refresh.
   useEffect(() => {
-    if (typeof window === 'undefined') return;
+    if (typeof window === 'undefined' || !isFirebaseConfigured) return;
     const handler = () => {
       const current = auth.currentUser;
       if (!current) return;
@@ -295,8 +306,15 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     return () => window.removeEventListener(XP_UPDATED_EVENT, handler);
   }, []);
 
-  // Listen to auth state changes
+  // Listen to auth state changes. Without Firebase config there is no auth
+  // instance (and calling into the unconfigured proxy would throw), so we stop
+  // loading and surface a clear setup error instead of crashing the app.
   useEffect(() => {
+    if (!isFirebaseConfigured) {
+      setLoading(false);
+      setError(MISSING_FIREBASE_MESSAGE);
+      return;
+    }
     const unsub = onAuthStateChanged(auth, async (firebaseUser) => {
       setUser(firebaseUser);
       if (firebaseUser) {
@@ -314,6 +332,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   // Consume an OAuth redirect result (used when cross-origin isolated) and
   // surface any errors from the redirect flow.
   useEffect(() => {
+    if (!isFirebaseConfigured) return;
     getRedirectResult(auth)
       .then(async (result) => {
         if (result?.user) {
@@ -328,6 +347,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     password: string,
     displayName: string,
   ) => {
+    requireFirebase();
     setLoading(true);
     try {
       const cred = await createUserWithEmailAndPassword(auth, email, password);
@@ -345,6 +365,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const signIn = async (email: string, password: string) => {
+    requireFirebase();
     setLoading(true);
     try {
       const cred = await signInWithEmailAndPassword(auth, email, password);
@@ -361,6 +382,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const signInWithGoogle = async (password?: string) => {
+    requireFirebase();
     setLoading(true);
     try {
       const result = await oauthSignInAndLink(googleProvider, { password });
@@ -378,6 +400,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const signInWithGithub = async (password?: string) => {
+    requireFirebase();
     setLoading(true);
     try {
       const result = await oauthSignInAndLink(githubProvider, { password });
@@ -395,6 +418,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const refreshProfile = async () => {
+    if (!isFirebaseConfigured) return;
     const current = auth.currentUser;
     if (!current) return;
     const prof = await fetchProfile(current.uid);
@@ -402,7 +426,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const logOut = async () => {
-    await signOut(auth);
+    if (isFirebaseConfigured) {
+      await signOut(auth);
+    }
     setUser(null);
     setProfile(null);
     setGithubToken(null);

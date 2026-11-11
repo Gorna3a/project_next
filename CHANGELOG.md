@@ -5,6 +5,47 @@ All notable changes to the PixelCode product are documented here.
 ## [Unreleased]
 
 ### Added
+- **Classroom overhaul for teachers + students**.
+  - Assignments now support a type (`task` / `challenge`), optional linked
+    challenge, points, an XP reward (default 5, max 25) and a due date.
+    Students mark an assignment **done** and the server records the submission
+    and awards XP atomically (`POST /api/xp/award` action
+    `classroom-assignment`, per-student idempotent via `xpEvents`).
+    Teachers see per-assignment completion, expand a row to grade each
+    student's points and delete assignments.
+  - New **Feed** tab: classroom discussion for everyone; teachers can post
+    pinned-style **announcements**. Authors/teachers can delete posts.
+  - New **Leaderboard** tab: class ranking by assignment points earned
+    (XP as tiebreak), scoped to the classroom roster.
+  - **Analytics** tab (teachers): completion rate, per-assignment progress
+    bars, points/XP distributed, and a recent-activity timeline.
+  - **Students** tab rebuilt: shows display names/avatars/level/XP, teachers
+    can remove a student, students can **leave** the classroom.
+  - Teachers can **regenerate the join code** at any time.
+  - Firestore rules: submissions are server-created (Admin SDK bypasses the
+    client), teachers may grade; feed is readable/postable by classroom
+    participants only; students may leave (remove only themselves).
+  - **Upload assignments**: a third assignment type where students attach a
+    file (max **10 MB**), submit it, and the completion + XP are recorded
+    atomically. Files upload **directly from the browser to a private Vercel
+    Blob store** (scoped client token from `/api/classroom/file/upload`), so
+    the 4.5 MB serverless request-body limit does not apply. Only metadata is
+    stored in `classroomFiles`; `/api/classroom/file` verifies membership and
+    streams private blobs back. Students can re-download their own file; the
+    classroom teacher can download every submitted file. Legacy base64
+    attachments from the earlier Firestore-backed version remain readable.
+    Requires `BLOB_READ_WRITE_TOKEN` from a private Blob store.
+  - **Challenge-linked assignments auto-complete**: when a student finishes
+    the linked challenge, `challenge-complete` now marks every matching
+    classroom assignment complete in the background and awards the
+    assignment XP exactly once (the student still sees it without pressing
+    "Mark done"). Revealed solutions mark the assignment complete without XP.
+  - **Server-side leaderboard** (`/api/classroom/leaderboard`): aggregates
+    assignment points, completions, level and XP for the classroom roster.
+    Needed because Firestore rules intentionally prevent students from
+    listing classmates' submissions; membership is verified server-side.
+  - New i18n keys (EN + AR) for uploads, downloads, grading states, refresh,
+    and challenge auto-sync hints.
 - Pixelact UI (shadcn registry) compatibility — nothing installed yet, but
   the plumbing is in place so components drop in cleanly. OpenCode
   `opencode.json` registers the shadcn MCP server (`npx shadcn@latest mcp`,
@@ -394,6 +435,27 @@ All notable changes to the PixelCode product are documented here.
   `/app/training` instead. The old detail URL redirects automatically.
 
 ### Fixed
+- **Classroom announcements/feed failed live with `permission-denied`**:
+  the deployed Firestore ruleset was still from **2026-10-11** and predated
+  the classroom overhaul (no `feed`, `submissions`, or student-leave blocks).
+  The current `firestore.rules` was republished through the Firebase Rules
+  API and verified live: teacher announcement create + read, student feed
+  read + discussion post, teacher feed read, student join, assignment read,
+  and own-submission read all return 200.
+- **Student assignments/leaderboard broke on submission queries**: rules allow
+  a student to read *their own* submission but not list the collection, so any
+  list query returned `permission-denied`. The client now reads only the
+  student's own submission doc (treating `permission-denied` on a missing doc
+  as "not submitted yet"), and class-wide aggregates come from the server
+  leaderboard route.
+- **Completing a challenge did not update challenge-type classroom
+  assignments**: completion is now synced server-side after
+  `challenge-complete`, reusing the same idempotent settlement helper as
+  manual completion; a sync failure can never roll back the challenge XP.
+- **Upload assignments could not be completed**: students can now submit a
+  file and completion/XP are recorded together; oversized files are rejected
+  with 413, non-members get 403, and the file is only downloadable by its
+  owner or the classroom teacher.
 - **XP route 500 — `firebase-admin` boot crash (root cause found)**: Vercel
   runs functions with `require(ESM)` disabled. `firebase-admin/auth` pulls in
   `jwks-rsa`, which does `require("jose")`, and `jose@6` is ESM-only — so the

@@ -45,3 +45,6 @@ __pycache__/
 .next-dev.log
 *.log
 
+
+# nested dependency dirs (e.g. pixelcode-studio/node_modules)
+node_modules/

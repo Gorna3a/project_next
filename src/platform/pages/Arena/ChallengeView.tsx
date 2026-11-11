@@ -21,6 +21,11 @@ import { useLanguage } from '../../../core/context/LanguageContext';
 import { useTheme } from '../../../core/context/ThemeContext';
 import { Markdown } from '../../../shared/ui/Markdown';
 import {
+  Dialog,
+  DialogContent,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import {
   PIXELCODE_MONACO_THEME,
   MONACO_FONT_FAMILY,
   buildPixelcodeTheme,
@@ -92,9 +97,33 @@ const LoadingSkeleton = () => (
 
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
-export default function ChallengeView() {
+interface ChallengeViewProps {
+  /** Override the `useParams().id` lookup — used when embedded in a drawer. */
+  challengeId?: string;
+  /**
+   * Embedded (drawer) mode: hides the page chrome (back link, "more training"
+   * navigation) and never routes away. Pair with `onSolved` / `onRequestClose`.
+   */
+  embedded?: boolean;
+  /**
+   * Called once per solve with the server outcome. `recorded` is false when
+   * the award request failed or was rejected; `revealed` marks a solve after
+   * the student unlocked the solution (0 XP). Hosts should refresh their
+   * data and can rely on `recorded` for an honest toast/settle.
+   */
+  onSolved?: (info: { recorded: boolean; revealed: boolean }) => void;
+  /** Embedded mode: invoked by the drawer-close affordances. */
+  onRequestClose?: () => void;
+}
+
+export default function ChallengeView({
+  challengeId,
+  embedded = false,
+  onSolved,
+  onRequestClose,
+}: ChallengeViewProps = {}) {
   const params = useParams();
-  const id = params.id as string;
+  const id = (challengeId ?? (params?.id as string)) ?? '';
   const { user } = useAuth();
   const { t, isRTL } = useLanguage();
   const navigate = useRouter();
@@ -161,8 +190,10 @@ export default function ChallengeView() {
           setChallenge(data);
           setWritten(data.starterCode ?? '');
           setRunCodeText(data.starterCode ?? '');
-        } else {
+        } else if (!embedded) {
           navigate.replace('/app/challenges');
+        } else {
+          setChallenge(null);
         }
       } catch (e) {
         console.error('[ChallengePage] Firestore fetch failed:', e);
@@ -171,22 +202,28 @@ export default function ChallengeView() {
       }
     };
     load();
-  }, [id, navigate]);
+  }, [id, navigate, embedded]);
 
   // ── Answer handler (options-based types) ───────────────────────────────────
 
   const MAX_ATTEMPTS = 3;
 
-  const awardCompletion = async (xpOverride?: number) => {
+  const awardCompletion = async (revealed = false) => {
     if (!user || !challenge) return;
+    let recorded = false;
     try {
-      await requestXpAward('challenge-complete', {
+      const res = await requestXpAward('challenge-complete', {
         challengeId: id,
-        xpOverride: xpOverride ?? challenge.xp,
+        revealed,
       });
+      // requestXpAward swallows HTTP/network failures and returns null —
+      // branch on the result instead of assuming it worked. The server
+      // settles linked classroom assignments inside the same request.
+      recorded = res !== null;
     } catch (e) {
       console.error('[ChallengePage] Failed to record completion:', e);
     }
+    onSolved?.({ recorded, revealed });
   };
 
   const handleSelect = async (key: string) => {
@@ -240,7 +277,7 @@ export default function ChallengeView() {
       if (verdict.correct) {
         setWriteCorrect(true);
         setAnswered(true);
-        await awardCompletion(revealed ? 0 : undefined);
+        await awardCompletion(revealed);
         setTimeout(() => setShowResult(true), 400);
       } else {
         setWriteCorrect(false);
@@ -274,7 +311,7 @@ export default function ChallengeView() {
       setAiSolution(verdict.solution || null);
       if (verdict.correct) {
         setAnswered(true);
-        await awardCompletion(revealed ? 0 : undefined);
+        await awardCompletion(revealed);
         setTimeout(() => setShowResult(true), 400);
       } else {
         setAttempts(a => a + 1);
@@ -306,7 +343,26 @@ export default function ChallengeView() {
 
   // ── Render ───────────────────────────────────────────────────────────────────
   if (loading) return <LoadingSkeleton />;
-  if (!challenge) return null;
+  if (!challenge) {
+    if (embedded) {
+      return (
+        <div className="p-8 text-center space-y-4">
+          <p className="font-mono text-xs font-black uppercase tracking-widest text-black">
+            {t('classroom.challengeNotFound')}
+          </p>
+          {onRequestClose && (
+            <button
+              onClick={onRequestClose}
+              className="bg-black text-white border-[2px] border-black font-mono text-[11px] font-black uppercase tracking-widest px-4 py-2 hover:bg-[#FFD23F] hover:text-black transition-all"
+            >
+              {t('classroom.done')}
+            </button>
+          )}
+        </div>
+      );
+    }
+    return null;
+  }
 
   const optionsArray = Object.entries(challenge.options).sort(([a], [b]) => Number(a) - Number(b));
   const challengeType = challenge.type ?? 'quiz';
@@ -321,38 +377,30 @@ export default function ChallengeView() {
   const diff         = DIFFICULTY_CONFIG[challenge.difficulty] ?? DIFFICULTY_CONFIG.easy;
 
   return (
-    <motion.div variants={fadeUp} initial="hidden" animate="show" className={`max-w-3xl mx-auto space-y-6 ${isRTL ? 'text-right' : 'text-left'}`}>
+    <motion.div variants={fadeUp} initial="hidden" animate="show" className={`${embedded ? '' : 'max-w-3xl mx-auto '}space-y-6 ${isRTL ? 'text-right' : 'text-left'}`}>
 
-      {/* ── Result overlay ───────────────────────────────────────────────────── */}
-      <AnimatePresence>
-        {showResult && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 flex items-center justify-center p-4"
-            style={{ backgroundColor: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(4px)' }}
-            onClick={() => setShowResult(false)}
-          >
-            <motion.div
-              initial={{ scale: 0.8, opacity: 0 }}
-              animate={{ scale: 1,   opacity: 1 }}
-              exit={{   scale: 0.8, opacity: 0 }}
-              transition={{ duration: 0.25, ease: 'easeOut' as const }}
-              className="panel p-8 max-w-sm w-full text-center space-y-4"
-              onClick={e => e.stopPropagation()}
+      {/* ── Result dialog (shadcn Dialog) ─────────────────────────────────────── */}
+      <Dialog open={showResult} onOpenChange={setShowResult}>
+        <DialogContent
+          hideCloseButton
+          className="max-w-sm w-full gap-0 space-y-4 p-8 text-center"
+          style={{
+            backgroundColor: 'var(--surface)',
+            border: '4px solid var(--border)',
+            boxShadow: 'var(--shadow)',
+          }}
+        >
+          {/* Emoji */}
+          <div className="text-6xl">{isCorrect ? '🎉' : '😅'}</div>
+
+          {/* Headline */}
+          <div>
+            <DialogTitle
+              className="mb-2"
+              style={{ fontFamily: "'Press Start 2P', monospace", fontSize: 18, color: 'var(--fg)' }}
             >
-              {/* Emoji */}
-              <div className="text-6xl">{isCorrect ? '🎉' : '😅'}</div>
-
-              {/* Headline */}
-              <div>
-                <h2
-                  className="mb-2"
-                  style={{ fontFamily: "'Press Start 2P', monospace", fontSize: 18, color: 'var(--fg)' }}
-                >
-                  {isCorrect ? t('arena.correct') : t('arena.notQuite')}
-                </h2>
+              {isCorrect ? t('arena.correct') : t('arena.notQuite')}
+            </DialogTitle>
 
                 {isCorrect ? (
                   <div className={`flex items-center justify-center gap-2 text-yellow-500 font-bold ${isRTL ? 'flex-row-reverse' : ''}`}>
@@ -391,23 +439,35 @@ export default function ChallengeView() {
                 >
                   {t('arena.review')}
                 </button>
-                <Link
-                  href="/app/training"
-                  className={`big-btn yellow flex-1 justify-center ${isRTL ? 'flex-row-reverse' : ''}`}
-                >
-                  {t('arena.more')} {isRTL ? <ArrowLeft className="w-4 h-4" /> : <ArrowRight className="w-4 h-4" />}
-                </Link>
+                {embedded ? (
+                  <button
+                    onClick={() => {
+                      setShowResult(false);
+                      onRequestClose?.();
+                    }}
+                    className="big-btn yellow flex-1 justify-center"
+                  >
+                    {t('classroom.done')}
+                  </button>
+                ) : (
+                  <Link
+                    href="/app/training"
+                    className={`big-btn yellow flex-1 justify-center ${isRTL ? 'flex-row-reverse' : ''}`}
+                  >
+                    {t('arena.more')} {isRTL ? <ArrowLeft className="w-4 h-4" /> : <ArrowRight className="w-4 h-4" />}
+                  </Link>
+                )}
               </div>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+        </DialogContent>
+      </Dialog>
 
-      {/* ── Back link ────────────────────────────────────────────────────────── */}
-      <Link href="/app/training" className={`btn-ghost inline-flex gap-2 -ml-2 text-sm ${isRTL ? 'flex-row-reverse -mr-2 -ml-0' : ''}`}>
-        {isRTL ? <ArrowRight className="w-4 h-4" /> : <ArrowLeft className="w-4 h-4" />}
-        {t('arena.training')}
-      </Link>
+      {/* ── Back link (hidden when embedded in the classroom drawer) ─────────── */}
+      {!embedded && (
+        <Link href="/app/training" className={`btn-ghost inline-flex gap-2 -ml-2 text-sm ${isRTL ? 'flex-row-reverse -mr-2 -ml-0' : ''}`}>
+          {isRTL ? <ArrowRight className="w-4 h-4" /> : <ArrowLeft className="w-4 h-4" />}
+          {t('arena.training')}
+        </Link>
+      )}
 
       {/* ── Challenge header ──────────────────────────────────────────────────── */}
       <div className="panel">
@@ -794,9 +854,18 @@ export default function ChallengeView() {
               ? <><CheckCircle2 className="w-4 h-4" /> {t('arena.viewResult')}</>
               : <><XCircle className="w-4 h-4" /> {t('arena.viewResult')}</>}
           </button>
-          <Link href="/app/training" className={`big-btn !w-auto px-6 gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
-            {t('arena.moreTraining')} {isRTL ? <ArrowLeft className="w-4 h-4" /> : <ArrowRight className="w-4 h-4" />}
-          </Link>
+          {embedded ? (
+            <button
+              onClick={() => onRequestClose?.()}
+              className={`big-btn !w-auto px-6 gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}
+            >
+              {t('classroom.done')}
+            </button>
+          ) : (
+            <Link href="/app/training" className={`big-btn !w-auto px-6 gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
+              {t('arena.moreTraining')} {isRTL ? <ArrowLeft className="w-4 h-4" /> : <ArrowRight className="w-4 h-4" />}
+            </Link>
+          )}
         </motion.div>
       )}
     </motion.div>

@@ -13,6 +13,13 @@ const firebaseConfig = {
   measurementId:     process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID,
 };
 
+// A Firebase web app is unusable without these. When they are missing we skip
+// creating the Auth/Firestore instances entirely — otherwise `getAuth()` throws
+// `auth/invalid-api-key` at module scope and takes the whole app down.
+export const isFirebaseConfigured = Boolean(
+  firebaseConfig.apiKey && firebaseConfig.projectId && firebaseConfig.appId,
+);
+
 // Prevent duplicate app initialization (useful with HMR)
 const app: FirebaseApp = getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0];
 
@@ -34,8 +41,27 @@ const serverOnly = <T extends object>(name: string): T =>
 
 const isClient = typeof window !== 'undefined';
 
-export const auth: Auth = isClient ? getAuth(app) : serverOnly<Auth>('auth');
-export const db: Firestore = isClient ? getFirestore(app) : serverOnly<Firestore>('db');
+const unconfigured = <T extends object>(name: string): T =>
+  new Proxy({} as T, {
+    get: () => {
+      throw new Error(
+        `[firebase] ${name} is unavailable because NEXT_PUBLIC_FIREBASE_API_KEY / ` +
+          'NEXT_PUBLIC_FIREBASE_PROJECT_ID / NEXT_PUBLIC_FIREBASE_APP_ID are not set. ' +
+          'Create .env.local from .env.example with your Firebase web-app config.',
+      );
+    },
+  });
+
+export const auth: Auth = isClient
+  ? isFirebaseConfigured
+    ? getAuth(app)
+    : unconfigured<Auth>('auth')
+  : serverOnly<Auth>('auth');
+export const db: Firestore = isClient
+  ? isFirebaseConfigured
+    ? getFirestore(app)
+    : unconfigured<Firestore>('db')
+  : serverOnly<Firestore>('db');
 
 // Analytics only in browser environments that support it
 if (isClient) {

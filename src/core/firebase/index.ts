@@ -1,1 +1,1 @@
-export { auth, db, googleProvider, githubProvider, default as app } from './config';
+export { auth, db, googleProvider, githubProvider, isFirebaseConfigured, default as app } from './config';
