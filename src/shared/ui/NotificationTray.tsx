@@ -41,7 +41,9 @@ export const NotificationTray = ({ isOpen, onClose }: NotificationTrayProps) => 
   }, [isOpen, onClose]);
 
   const handleAcceptFriend = async (notif: Notification) => {
-    if (!notif.requestId || !profile) return;
+    // Profile must be fully hydrated (with uid) before accepting —
+    // requireUid throws on a missing/partial uid otherwise.
+    if (!notif.requestId || !profile?.uid) return;
     const otherUid = (notif as Notification & { from?: { uid?: string } }).from?.uid;
     if (!otherUid) {
       // Legacy/corrupt entry: sender uid missing — clean it up instead of crashing.

@@ -513,10 +513,14 @@ export async function POST(req: NextRequest) {
         if (!room.winnerId) {
           // First caller to finish wins the duel. The transaction makes this
           // atomic, so concurrent calls can never both take the win branch.
+          // IMPORTANT: Firestore requires all READS to happen before any
+          // WRITES inside a transaction, so the challenge doc must be read
+          // before the room is updated.
+          const challengeRef = db
+            .collection('challenges')
+            .doc(String(room.challengeId ?? ''));
+          const challengeSnap = await tx.get(challengeRef);
           tx.update(roomRef, { winnerId: uid, status: 'finished' });
-          const challengeSnap = await tx.get(
-            db.collection('challenges').doc(String(room.challengeId ?? '')),
-          );
           const challengeXp = clampInt(challengeSnap.data()?.xp, 10, 10000, 50);
           const evId = `${uid}_duel_win_${roomId}`;
           tx.set(
